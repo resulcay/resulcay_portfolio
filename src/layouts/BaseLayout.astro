@@ -1,0 +1,67 @@
+---
+import '@/styles/global.css';
+import type { Locale } from '@/domain/schemas';
+import { localizePath } from '@/i18n/ui';
+import TopBar from '@/components/TopBar.astro';
+import Footer from '@/components/Footer.astro';
+import { content } from '@/lib/content';
+
+interface Props {
+  lang: Locale;
+  title: string;
+  description: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  noindex?: boolean;
+  ogType?: 'website' | 'profile' | 'article';
+}
+
+const { lang, title, description, jsonLd, noindex = false, ogType = 'website' } = Astro.props;
+const profile = await content.getProfile();
+const site = Astro.site ?? new URL('https://resulcay.com');
+// After a rewrite (e.g. to the 404 page) keep the address the visitor asked
+// for, so an admin URL and any other missing URL render byte for byte alike.
+const path = Astro.originPathname;
+const canonical = new URL(path, site).href;
+const alternates = (['en', 'tr'] as const).map((l) => ({ lang: l, href: new URL(localizePath(path, l), site).href }));
+const fullTitle = path === '/' || path === '/tr' ? `${profile.name} · ${profile.title[lang]}` : `${title} · ${profile.name}`;
+// JSON-LD is data, not script. Escape "<" so content can never close the tag.
+const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : undefined;
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {
+      noindex ? (
+        <meta name="robots" content="noindex, nofollow" />
+      ) : (
+        <>
+          <link rel="canonical" href={canonical} />
+          {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
+          <link rel="alternate" hreflang="x-default" href={alternates[0]?.href} />
+        </>
+      )
+    }
+    <meta name="theme-color" content="#f4ebdd" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1e1b24" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={profile.name} />
+    <meta property="og:locale" content={lang === 'en' ? 'en_US' : 'tr_TR'} />
+    <meta name="twitter:card" content="summary" />
+    {ld && <script type="application/ld+json" set:html={ld} />}
+  </head>
+  <body>
+    <TopBar lang={lang} path={path} cvPath={profile.cvPath} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer lang={lang} profile={profile} />
+  </body>
+</html>

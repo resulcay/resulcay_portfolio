@@ -1,0 +1,185 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import TagChips from '@/components/TagChips.astro';
+import type { Locale, Project } from '@/domain/schemas';
+import { breadcrumbLd, projectLd } from '@/lib/structured-data';
+import { formatPeriod, localizePath, t, type UiKey } from '@/i18n/ui';
+
+interface Props {
+  lang: Locale;
+  project: Project;
+}
+const { lang, project } = Astro.props;
+const period = formatPeriod(project.start, project.end, lang);
+const groups: { key: UiKey; tags: readonly string[] }[] = [
+  { key: 'group.appTypes', tags: project.appTypes },
+  { key: 'group.platforms', tags: project.platforms },
+  { key: 'group.pricing', tags: [project.pricing] },
+  { key: 'group.workType', tags: [project.workType] },
+  { key: 'group.languages', tags: project.languages },
+  { key: 'group.tech', tags: project.tech },
+  { key: 'group.status', tags: [project.status] },
+  { key: 'group.category', tags: [project.category] },
+];
+const linkEntries: [UiKey, string | undefined][] = [
+  ['link.appStore', project.links.appStore],
+  ['link.googlePlay', project.links.googlePlay],
+  ['link.website', project.links.website],
+  ['link.repository', project.links.repository],
+];
+const links = linkEntries.filter((entry): entry is [UiKey, string] => Boolean(entry[1]));
+---
+<BaseLayout
+  lang={lang}
+  title={project.title}
+  description={project.hook[lang]}
+  ogType="article"
+  jsonLd={[
+    projectLd(project, lang),
+    breadcrumbLd([
+      { name: 'Resul Çay', path: localizePath('/', lang) },
+      { name: t(lang, 'projects.title'), path: localizePath('/projects', lang) },
+      { name: project.title, path: localizePath(`/projects/${project.slug}`, lang) },
+    ]),
+  ]}
+>
+  <article class="wrap project">
+    <a class="back" href={localizePath('/projects', lang)}>← {t(lang, 'project.back')}</a>
+    <header>
+      <h1>{project.title}</h1>
+      <p class="hook">{project.hook[lang]}</p>
+      <TagChips tags={[...project.appTypes, ...project.platforms]} lang={lang} tone="strong" />
+    </header>
+    <div class="layout">
+      <div class="story">
+        <p>{project.story[lang]}</p>
+        {
+          project.highlights.length > 0 && (
+            <ul class="highlights">
+              {project.highlights.map((h) => (
+                <li class="hand">{h[lang]}</li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+      <aside aria-labelledby="details-title">
+        <h2 id="details-title" class="eyebrow">{t(lang, 'project.details')}</h2>
+        <dl>
+          <div><dt>{t(lang, 'project.role')}</dt><dd>{project.role[lang]}</dd></div>
+          {period && <div><dt>{t(lang, 'project.period')}</dt><dd>{period}</dd></div>}
+          {
+            groups
+              .filter((g) => g.tags.length > 0)
+              .map((g) => (
+                <div>
+                  <dt>{t(lang, g.key)}</dt>
+                  <dd><TagChips tags={g.tags} lang={lang} /></dd>
+                </div>
+              ))
+          }
+          {
+            links.length > 0 && (
+              <div>
+                <dt>{t(lang, 'project.links')}</dt>
+                <dd>
+                  <ul class="links">
+                    {links.map(([key, href]) => (
+                      <li><a href={href} rel="noopener">{t(lang, key)}</a></li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            )
+          }
+        </dl>
+      </aside>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .project {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding-top: 32px;
+  }
+  .back {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-weight: 700;
+  }
+  header {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  h1 {
+    font-size: clamp(2.75rem, 7vw, 4.5rem);
+  }
+  .hook {
+    font-size: 1.25rem;
+    color: var(--ink-quiet);
+    max-width: var(--measure);
+  }
+  .layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px 56px;
+    align-items: flex-start;
+  }
+  .story {
+    flex: 999 1 480px;
+    min-width: 0;
+    max-width: var(--measure);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    font-size: 1.125rem;
+  }
+  .highlights {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .highlights li {
+    font-size: 1.75rem;
+  }
+  aside {
+    flex: 1 1 280px;
+    padding: 24px;
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+  }
+  dl {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 16px 0 0;
+  }
+  dt {
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  dd {
+    margin: 0;
+  }
+  .links {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+  }
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+</style>

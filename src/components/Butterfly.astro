@@ -1,0 +1,24 @@
+---
+interface Props {
+  size?: number;
+  label?: string;
+  class?: string;
+}
+const { size = 32, label, class: className } = Astro.props;
+---
+<svg
+  class={className}
+  width={size}
+  height={Math.round(size * 0.8)}
+  viewBox="-22 -18 44 36"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+>
+  <g transform="rotate(-12)" fill="var(--butterfly)">
+    <path d="M0 0 C-8 -15 -23 -14 -20 -3 C-18 4 -8 5 0 0Z"></path>
+    <path d="M0 0 C8 -15 23 -14 20 -3 C18 4 8 5 0 0Z"></path>
+    <path d="M0 0 C-5 9 -15 13 -13 5 C-12 1 -5 0 0 0Z"></path>
+    <path d="M0 0 C5 9 15 13 13 5 C12 1 5 0 0 0Z"></path>
+  </g>
+</svg>

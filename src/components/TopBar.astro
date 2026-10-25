@@ -1,0 +1,98 @@
+---
+import type { Locale } from '@/domain/schemas';
+import { localizePath, t } from '@/i18n/ui';
+import LogoMark from './LogoMark.astro';
+
+interface Props {
+  lang: Locale;
+  path: string;
+  cvPath: string;
+}
+const { lang, path, cvPath } = Astro.props;
+const other: Locale = lang === 'en' ? 'tr' : 'en';
+const home = localizePath('/', lang);
+---
+<a class="skip" href="#main">{t(lang, 'nav.skip')}</a>
+<header class="topbar">
+  <nav class="wrap topbar__inner" aria-label={lang === 'en' ? 'Main' : 'Ana menü'}>
+    <a class="brand" href={home}>
+      <LogoMark />
+      <span>Resul Çay</span>
+    </a>
+    <ul class="links">
+      <li><a href={localizePath('/projects', lang)}>{t(lang, 'nav.projects')}</a></li>
+      <li><a href={localizePath('/about', lang)}>{t(lang, 'nav.about')}</a></li>
+      <li><a href={`${home}#contact`}>{t(lang, 'nav.contact')}</a></li>
+      <li><a class="cv" href={cvPath} download>{t(lang, 'nav.cv')}</a></li>
+      <li>
+        <a class="lang" href={localizePath(path, other)} hreflang={other} lang={other}>{t(lang, 'nav.switchLang')}</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .skip {
+    position: absolute;
+    left: 16px;
+    top: -60px;
+    padding: 10px 16px;
+    background: var(--golden);
+    color: var(--on-golden);
+    font-weight: 700;
+    border-radius: 8px;
+    z-index: 10;
+  }
+  .skip:focus {
+    top: 12px;
+  }
+  .topbar {
+    border-bottom: 1px solid var(--rule);
+  }
+  .topbar__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 24px;
+    padding-block: 14px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+    min-height: 44px;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-weight: 700;
+    font-size: 0.9375rem;
+  }
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .links a:hover {
+    text-decoration: underline;
+  }
+  .lang {
+    padding-inline: 12px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    min-height: 36px !important;
+    margin-block: 4px;
+  }
+</style>

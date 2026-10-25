@@ -1,0 +1,157 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import type { Locale } from '@/domain/schemas';
+import { content } from '@/lib/content';
+import { breadcrumbLd } from '@/lib/structured-data';
+import { localizePath, t } from '@/i18n/ui';
+
+interface Props {
+  lang: Locale;
+}
+const { lang } = Astro.props;
+const profile = await content.getProfile();
+const elsewhere = [
+  ['GitHub', profile.links.github],
+  ['LinkedIn', profile.links.linkedin],
+  ['Medium', profile.links.medium],
+  ['HackerRank', profile.links.hackerrank],
+  ['Bionluk', profile.links.bionluk],
+  ['PureBlog', profile.links.blog],
+] as const;
+---
+<BaseLayout
+  lang={lang}
+  title={t(lang, 'about.title')}
+  description={profile.summary[lang]}
+  jsonLd={breadcrumbLd([
+    { name: 'Resul Çay', path: localizePath('/', lang) },
+    { name: t(lang, 'about.title'), path: localizePath('/about', lang) },
+  ])}
+>
+  <article class="wrap about">
+    <p class="hand">{lang === 'en' ? 'from the journal' : 'günlükten'}</p>
+    <h1>{t(lang, 'about.title')}</h1>
+    <p class="summary">{profile.summary[lang]}</p>
+
+    <section aria-labelledby="skills-title">
+      <h2 id="skills-title">{t(lang, 'about.skills')}</h2>
+      <dl class="skills">
+        {
+          profile.skills.map((group) => (
+            <div>
+              <dt>{group.group[lang]}</dt>
+              <dd>{group.items.join(', ')}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+
+    <section aria-labelledby="education-title">
+      <h2 id="education-title">{t(lang, 'about.education')}</h2>
+      <ul class="plain">
+        {
+          profile.education.map((item) => (
+            <li>
+              <strong>{item.program[lang]}</strong>, {item.school}, {item.start}–{item.end}
+              {!item.completed && <span class="badge">{t(lang, 'about.notCompleted')}</span>}
+              {item.note && <p class="note">{item.note[lang]}</p>}
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section aria-labelledby="certs-title">
+      <h2 id="certs-title">{t(lang, 'about.certifications')}</h2>
+      <ul class="plain">
+        {profile.certifications.map((c) => <li>{c.name} · {c.issuer}</li>)}
+      </ul>
+    </section>
+
+    <section aria-labelledby="elsewhere-title">
+      <h2 id="elsewhere-title">{t(lang, 'about.elsewhere')}</h2>
+      <ul class="links">
+        {
+          elsewhere.map(([name, href]) => (
+            <li><a href={href} rel="me">{name}</a></li>
+          ))
+        }
+      </ul>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .about {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-top: clamp(40px, 7vw, 88px);
+  }
+  .about > .hand {
+    font-size: 1.75rem;
+  }
+  h1 {
+    font-size: clamp(2.75rem, 7vw, 4.5rem);
+  }
+  .summary {
+    max-width: var(--measure);
+    font-size: 1.1875rem;
+  }
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 40px;
+  }
+  h2 {
+    font-size: 2rem;
+  }
+  .skills {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px 32px;
+    margin: 0;
+  }
+  dt {
+    font-weight: 700;
+  }
+  dd {
+    margin: 0;
+    color: var(--ink-quiet);
+  }
+  .plain {
+    margin: 0;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: var(--measure);
+  }
+  .badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--rule);
+    font-size: 0.8125rem;
+  }
+  .note {
+    color: var(--ink-quiet);
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-weight: 700;
+  }
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+</style>

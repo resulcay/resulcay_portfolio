@@ -1,0 +1,11 @@
+---
+import ProjectView from '@/views/ProjectView.astro';
+import { findProject } from '@/application/content';
+import { content } from '@/lib/content';
+
+const project = await findProject(content, Astro.params.slug ?? '');
+if (!project) {
+  return Astro.rewrite('/404');
+}
+---
+<ProjectView lang="tr" project={project} />

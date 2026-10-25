@@ -1,0 +1,106 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Butterfly from '@/components/Butterfly.astro';
+import type { Locale } from '@/domain/schemas';
+import { localizePath, t } from '@/i18n/ui';
+
+interface Props {
+  lang: Locale;
+}
+const { lang } = Astro.props;
+---
+<BaseLayout lang={lang} title="404" description={t(lang, 'notFound.body')} noindex>
+  <section class="wrap lost" aria-labelledby="lost-title">
+    <figure class="polaroid">
+      <svg viewBox="0 0 340 340" role="img" aria-label={lang === 'en' ? 'Polaroid of an empty cliff at dusk' : 'Alacakaranlıkta boş bir uçurumun Polaroid fotoğrafı'}>
+        <rect width="340" height="120" fill="#3b3060"></rect>
+        <rect y="120" width="340" height="60" fill="#5b4b8a"></rect>
+        <rect y="180" width="340" height="40" fill="#d98a62"></rect>
+        <circle cx="250" cy="226" r="34" fill="#f6c47e"></circle>
+        <rect y="226" width="340" height="114" fill="#2f6f73"></rect>
+        <path d="M0 250 C60 240 120 236 170 250 C200 258 220 290 236 340 L0 340Z" fill="#1e1b24"></path>
+        <rect x="70" y="226" width="44" height="6" fill="#1e1b24"></rect>
+        <rect x="74" y="232" width="4" height="14" fill="#1e1b24"></rect>
+        <rect x="106" y="232" width="4" height="14" fill="#1e1b24"></rect>
+      </svg>
+      <figcaption>{t(lang, 'notFound.caption')}</figcaption>
+    </figure>
+    <div class="copy">
+      <Butterfly size={40} class="lost__butterfly" />
+      <p class="code" aria-hidden="true">404</p>
+      <h1 id="lost-title">{t(lang, 'notFound.title')}</h1>
+      <p>{t(lang, 'notFound.body')}</p>
+      <div class="actions">
+        <a class="button button--primary" href={localizePath('/', lang)}>
+          <svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true"><path d="M11 1 L1 8 L11 15Z M21 1 L11 8 L21 15Z" fill="currentColor"></path></svg>
+          {t(lang, 'notFound.rewind')}
+        </a>
+        <a class="button" href={localizePath('/about', lang)}>{t(lang, 'notFound.journal')}</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .lost {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 48px 72px;
+    padding-top: clamp(40px, 8vw, 96px);
+  }
+  .polaroid {
+    flex: 0 1 360px;
+    margin: 0 auto;
+    padding: 18px 18px 56px;
+    background: #fbf6ee;
+    border-radius: 4px;
+    transform: rotate(-4deg);
+    box-shadow: 0 10px 30px rgb(30 27 36 / 0.18);
+  }
+  .polaroid svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  figcaption {
+    margin-top: 14px;
+    font-family: var(--font-hand);
+    font-size: 1.75rem;
+    color: #1e1b24;
+    text-align: center;
+  }
+  .copy {
+    position: relative;
+    flex: 1 1 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .copy :global(.lost__butterfly) {
+    position: absolute;
+    right: 0;
+    top: -8px;
+  }
+  .code {
+    font-family: var(--font-display);
+    font-size: clamp(5rem, 14vw, 8rem);
+    font-weight: 600;
+    line-height: 1;
+    color: var(--accent-text);
+  }
+  h1 {
+    font-size: clamp(2rem, 4.5vw, 2.75rem);
+  }
+  .copy > p:not(.code) {
+    max-width: 46ch;
+    color: var(--ink-quiet);
+    font-size: 1.125rem;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+  }
+</style>

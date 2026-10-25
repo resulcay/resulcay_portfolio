@@ -1,0 +1,276 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PolaroidCard from '@/components/PolaroidCard.astro';
+import Butterfly from '@/components/Butterfly.astro';
+import type { Locale } from '@/domain/schemas';
+import { featuredProjects } from '@/application/content';
+import { content } from '@/lib/content';
+import { personLd } from '@/lib/structured-data';
+import { formatPeriod, localizePath, t } from '@/i18n/ui';
+
+interface Props {
+  lang: Locale;
+}
+const { lang } = Astro.props;
+const [profile, projects, experience, testimonials] = await Promise.all([
+  content.getProfile(),
+  content.listProjects(),
+  content.listExperience(),
+  content.listTestimonials(),
+]);
+const featured = featuredProjects(projects);
+const school = profile.education.find((e) => !e.completed);
+const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/, '+90 $1 $2 $3 $4');
+---
+<BaseLayout
+  lang={lang}
+  title={profile.name}
+  description={`${profile.name}, ${profile.title[lang]}, ${profile.location[lang]}. ${profile.availability[lang]}`}
+  jsonLd={personLd(profile, lang)}
+  ogType="profile"
+>
+  <section class="hero wrap" aria-labelledby="hero-title">
+    <p class="hand hero__kicker">{t(lang, 'home.kicker')}: {t(lang, 'home.title')}</p>
+    <h1 id="hero-title">{profile.name}</h1>
+    <p class="hero__role">{profile.title[lang]} · {profile.location[lang]}</p>
+    <p class="hero__summary">{profile.summary[lang]}</p>
+    <div class="hero__actions">
+      <a class="button button--primary" href={profile.cvPath} download>{t(lang, 'nav.cv')}</a>
+      <a class="button" href="#contact">{t(lang, 'nav.contact')}</a>
+    </div>
+    <Butterfly size={44} class="hero__butterfly" />
+  </section>
+
+  <section class="wrap facts" aria-labelledby="facts-title">
+    <h2 id="facts-title" class="eyebrow">{t(lang, 'home.facts')}</h2>
+    <dl>
+      <div><dt>{t(lang, 'facts.role')}</dt><dd>{profile.title[lang]}</dd></div>
+      <div><dt>{t(lang, 'facts.location')}</dt><dd>{profile.location[lang]}</dd></div>
+      <div><dt>{t(lang, 'facts.experience')}</dt><dd>{t(lang, 'facts.experienceValue')}</dd></div>
+      {
+        school && (
+          <div>
+            <dt>{t(lang, 'facts.education')}</dt>
+            <dd>
+              {school.program[lang]}, {school.school}, {school.start}–{school.end}. {school.note?.[lang]}
+            </dd>
+          </div>
+        )
+      }
+      <div><dt>{t(lang, 'facts.availability')}</dt><dd>{profile.availability[lang]}</dd></div>
+    </dl>
+  </section>
+
+  <section class="wrap section" aria-labelledby="featured-title">
+    <div class="section__head">
+      <h2 id="featured-title">{t(lang, 'home.featured')}</h2>
+      <a href={localizePath('/projects', lang)}>{t(lang, 'home.allProjects')}</a>
+    </div>
+    <div class="grid">
+      {featured.map((project, i) => <PolaroidCard project={project} lang={lang} index={i} />)}
+    </div>
+  </section>
+
+  <section class="wrap section" aria-labelledby="experience-title">
+    <h2 id="experience-title">{t(lang, 'home.experience')}</h2>
+    <ol class="timeline">
+      {
+        experience.map((job) => (
+          <li>
+            <p class="timeline__when">{formatPeriod(job.start, job.end, lang)}</p>
+            <div class="timeline__body">
+              <h3>{job.title[lang]}</h3>
+              <p class="timeline__org">{job.organization} · {job.location}</p>
+              {job.points.length > 0 && (
+                <ul>
+                  {job.points.map((point) => (
+                    <li>{point[lang]}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class="wrap section" aria-labelledby="testimonials-title">
+    <h2 id="testimonials-title">{t(lang, 'home.testimonials')}</h2>
+    <div class="quotes">
+      {
+        testimonials.map((item) => (
+          <figure>
+            <blockquote>{item.quote[lang]}</blockquote>
+            <figcaption class="hand">{item.name}</figcaption>
+          </figure>
+        ))
+      }
+    </div>
+  </section>
+
+  <section id="contact" class="wrap section contact" aria-labelledby="contact-title">
+    <h2 id="contact-title">{t(lang, 'contact.title')}</h2>
+    <p>{t(lang, 'contact.intro')} {profile.availability[lang]}</p>
+    <dl>
+      <div><dt>{t(lang, 'contact.email')}</dt><dd><a href={`mailto:${profile.email}`}>{profile.email}</a></dd></div>
+      <div><dt>{t(lang, 'contact.phone')}</dt><dd><a href={`tel:${profile.phone}`}>{phoneDisplay}</a></dd></div>
+      <div><dt>LinkedIn</dt><dd><a href={profile.links.linkedin} rel="me">linkedin.com/in/resulcay</a></dd></div>
+    </dl>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-block: clamp(48px, 9vw, 112px) 40px;
+  }
+  .hero__kicker {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+  }
+  .hero h1 {
+    font-size: clamp(3rem, 9vw, 6.5rem);
+    letter-spacing: -0.01em;
+  }
+  .hero__role {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+  .hero__summary {
+    max-width: var(--measure);
+    font-size: 1.125rem;
+    color: var(--ink-quiet);
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 10px;
+  }
+  .hero :global(.hero__butterfly) {
+    position: absolute;
+    right: 4%;
+    top: 22%;
+    animation: drift 7s ease-in-out infinite alternate;
+  }
+  @media (max-width: 640px) {
+    .hero :global(.hero__butterfly) {
+      top: 40px;
+      right: 0;
+    }
+  }
+  @keyframes drift {
+    from {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    to {
+      transform: translate(-18px, 14px) rotate(-8deg);
+    }
+  }
+  .facts {
+    padding: 24px 0;
+    border-block: 1px solid var(--rule);
+  }
+  .facts dl,
+  .contact dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px 32px;
+    margin: 12px 0 0;
+  }
+  dt {
+    font-weight: 700;
+  }
+  dd {
+    margin: 0;
+    color: var(--ink-quiet);
+  }
+  .section {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin-top: 88px;
+  }
+  .section h2 {
+    font-size: clamp(2rem, 4vw, 2.75rem);
+  }
+  .section__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .section__head a {
+    font-weight: 700;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 40px 32px;
+  }
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .timeline > li {
+    display: grid;
+    grid-template-columns: minmax(0, 180px) minmax(0, 1fr);
+    gap: 8px 32px;
+  }
+  .timeline__when {
+    font-weight: 700;
+    color: var(--accent-text);
+  }
+  .timeline__body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .timeline h3 {
+    font-size: 1.5rem;
+  }
+  .timeline__org {
+    color: var(--ink-quiet);
+  }
+  .timeline ul {
+    margin: 6px 0 0;
+    padding-left: 20px;
+    max-width: var(--measure);
+  }
+  @media (max-width: 640px) {
+    .timeline > li {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .quotes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+  }
+  figure {
+    margin: 0;
+    padding: 24px;
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  blockquote {
+    margin: 0;
+  }
+  figcaption {
+    font-size: 1.5rem;
+  }
+  .contact p {
+    max-width: var(--measure);
+  }
+</style>

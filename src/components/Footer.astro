@@ -1,0 +1,59 @@
+---
+import type { Locale, Profile } from '@/domain/schemas';
+import { t } from '@/i18n/ui';
+import Butterfly from './Butterfly.astro';
+
+interface Props {
+  lang: Locale;
+  profile: Profile;
+}
+const { lang, profile } = Astro.props;
+const year = new Date().getFullYear();
+---
+<footer class="footer">
+  <div class="wrap footer__inner">
+    <p class="footer__name"><Butterfly size={24} /> {profile.name} · {profile.title[lang]} · {profile.location[lang]}</p>
+    <ul class="footer__links">
+      <li><a href={profile.links.github} rel="me">GitHub</a></li>
+      <li><a href={profile.links.linkedin} rel="me">LinkedIn</a></li>
+      <li><a href={profile.links.medium} rel="me">Medium</a></li>
+      <li><a href={profile.links.blog} rel="me">PureBlog</a></li>
+    </ul>
+    <p class="footer__note">© {year} {profile.name}. {t(lang, 'footer.inspired')}</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    margin-top: 96px;
+    border-top: 1px solid var(--rule);
+    padding-block: 32px 40px;
+    color: var(--ink-quiet);
+    font-size: 0.9375rem;
+  }
+  .footer__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .footer__name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .footer__links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+</style>

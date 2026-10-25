@@ -1,0 +1,44 @@
+---
+import type { Locale } from '@/domain/schemas';
+import { tagLabel } from '@/domain/tags';
+
+interface Props {
+  tags: readonly string[];
+  lang: Locale;
+  tone?: 'plain' | 'strong';
+}
+const { tags, lang, tone = 'plain' } = Astro.props;
+---
+{
+  tags.length > 0 && (
+    <ul class:list={['chips', `chips--${tone}`]}>
+      {tags.map((tag) => (
+        <li>{tagLabel(tag, lang)}</li>
+      ))}
+    </ul>
+  )
+}
+
+<style>
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .chips li {
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--rule);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .chips--strong li {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+</style>

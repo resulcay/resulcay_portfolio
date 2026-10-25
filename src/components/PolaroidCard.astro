@@ -1,0 +1,97 @@
+---
+import type { Locale, Project } from '@/domain/schemas';
+import { localizePath } from '@/i18n/ui';
+import TagChips from './TagChips.astro';
+
+interface Props {
+  project: Project;
+  lang: Locale;
+  index: number;
+}
+const { project, lang, index } = Astro.props;
+// Tilt comes from a fixed set of classes, not an inline style, so the strict
+// Content Security Policy never has to allow style attributes.
+const tiltClass = `tilt-${index % 6}`;
+const palettes = [
+  ['#5b4b8a', '#e8a657', '#2f6f73'],
+  ['#2f6f73', '#f6c47e', '#1e1b24'],
+  ['#d98a62', '#5b4b8a', '#2f6f73'],
+  ['#3b3060', '#e8a657', '#4fa3d9'],
+] as const;
+const [sky, sun, sea] = palettes[index % palettes.length] ?? palettes[0];
+const chips = [project.appTypes[0], ...project.platforms.slice(0, 2), project.pricing].filter(
+  (tag): tag is NonNullable<typeof tag> => Boolean(tag),
+);
+const href = localizePath(`/projects/${project.slug}`, lang);
+---
+<article class:list={['polaroid', tiltClass]}>
+  <div class="polaroid__photo" aria-hidden="true">
+    <svg viewBox="0 0 320 240" preserveAspectRatio="xMidYMid slice">
+      <rect width="320" height="240" fill={sky}></rect>
+      <circle cx={120 + (index * 47) % 120} cy="150" r="38" fill={sun}></circle>
+      <rect y="156" width="320" height="84" fill={sea}></rect>
+      <text x="20" y="64" font-family="Fraunces Variable, Georgia, serif" font-size="30" font-weight="600" fill="#fbf6ee">{project.title.slice(0, 18)}</text>
+    </svg>
+  </div>
+  <div class="polaroid__body">
+    <h3><a href={href}>{project.title}</a></h3>
+    <p class="polaroid__hook">{project.hook[lang]}</p>
+    <TagChips tags={chips} lang={lang} />
+  </div>
+</article>
+
+<style>
+  .polaroid {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 14px 14px 20px;
+    background: var(--paper-raised);
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgb(30 27 36 / 0.12), 0 8px 24px rgb(30 27 36 / 0.08);
+    transform: rotate(var(--tilt));
+    transition: transform 0.25s ease;
+  }
+  .tilt-0 { --tilt: -2.2deg; }
+  .tilt-1 { --tilt: 1.6deg; }
+  .tilt-2 { --tilt: -1.1deg; }
+  .tilt-3 { --tilt: 2.4deg; }
+  .tilt-4 { --tilt: -1.8deg; }
+  .tilt-5 { --tilt: 1.2deg; }
+  .polaroid:hover,
+  .polaroid:focus-within {
+    transform: rotate(0deg) translateY(-4px);
+  }
+  .polaroid__photo {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+  .polaroid__photo svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .polaroid__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  h3 {
+    font-size: 1.375rem;
+  }
+  h3 a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  /* The whole card is clickable through the title link. */
+  h3 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .polaroid__hook {
+    color: var(--ink-quiet);
+    font-size: 0.9875rem;
+  }
+</style>

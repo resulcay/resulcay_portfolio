@@ -1,0 +1,5 @@
+---
+import NotFoundView from '@/views/NotFoundView.astro';
+import { langFromUrl } from '@/i18n/ui';
+---
+<NotFoundView lang={langFromUrl(new URL(Astro.originPathname, Astro.url))} />
