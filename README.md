@@ -58,5 +58,17 @@ Copy `.dev.vars.example` to `.dev.vars`. Without the `FIREBASE_*` lines, content
 4. **Web API key:** Project settings → General. If you restrict it, don't use an HTTP referrer restriction (the Worker calls it from the server).
 5. **Turnstile:** add a widget for `resulcay.com` in the Cloudflare dashboard (Managed mode).
 6. **R2:** `npx wrangler r2 bucket create resulcay-media`.
-7. **Secrets:** run `npx wrangler secret put NAME` for each of `FIREBASE_PROJECT_ID`, `FIREBASE_API_KEY`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `ADMIN_UID`, `SESSION_SECRET` (a long random string), `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`.
+7. **Secrets:** run each of these. Each command asks for the value. Use a new long random string for `SESSION_SECRET` (not the one in `.dev.vars`), and paste `private_key` exactly as it appears in the JSON file, `\n` sequences included.
+
+   ```
+   npx wrangler secret put FIREBASE_PROJECT_ID
+   npx wrangler secret put FIREBASE_API_KEY
+   npx wrangler secret put FIREBASE_CLIENT_EMAIL
+   npx wrangler secret put FIREBASE_PRIVATE_KEY
+   npx wrangler secret put ADMIN_UID
+   npx wrangler secret put SESSION_SECRET
+   npx wrangler secret put TURNSTILE_SITE_KEY
+   npx wrangler secret put TURNSTILE_SECRET_KEY
+   ```
+
 8. `npm run deploy`, then add `resulcay.com` as a custom domain of the Worker.
