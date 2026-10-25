@@ -1,0 +1,48 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import { content } from '@/lib/content';
+import { settings } from '@/lib/env';
+
+const [projects, messages] = await Promise.all([content.listProjects(), content.listMessages()]);
+const checks = [
+  { name: 'Firebase (content and sign-in)', ok: Boolean(settings.firebase && settings.adminUid) },
+  { name: 'R2 (uploads)', ok: Boolean(settings.media) },
+  { name: 'Turnstile (human check)', ok: Boolean(settings.turnstile) },
+  { name: 'Session secret', ok: Boolean(settings.sessionSecret) },
+];
+---
+<AdminLayout title="Overview">
+  <div class="cards">
+    <a class="panel" href="/admin/projects"><span class="stat">{projects.length}</span> projects</a>
+    <a class="panel" href="/admin/messages"><span class="stat">{messages.length}</span> messages</a>
+  </div>
+  <section class="panel" aria-labelledby="setup-title">
+    <h2 id="setup-title">Setup</h2>
+    <ul>
+      {checks.map((c) => <li>{c.ok ? '✓' : '✗'} {c.name}{c.ok ? '' : ': not configured'}</li>)}
+    </ul>
+  </section>
+  <section class="panel" aria-labelledby="import-title">
+    <h2 id="import-title">Starter content</h2>
+    <p>
+      Until something is saved, the site shows the starter content written in the code. Save it to storage once so
+      every part of it can be edited here. Running it again changes nothing.
+    </p>
+    <div class="row">
+      <button type="button" class="button" data-import disabled={!content.writable}>Save starter content to storage</button>
+      <p role="status" aria-live="polite"></p>
+    </div>
+  </section>
+</AdminLayout>
+
+<script>
+  import { postJson } from '@/scripts/forms';
+  const button = document.querySelector<HTMLButtonElement>('[data-import]');
+  const status = button?.parentElement?.querySelector<HTMLElement>('[role="status"]');
+  button?.addEventListener('click', async () => {
+    button.disabled = true;
+    const result = await postJson('/api/admin/seed', {});
+    if (status) status.textContent = result.ok ? `Saved ${String(result.data['projects'])} projects and the site pages.` : (result.data.error ?? 'Failed.');
+    button.disabled = false;
+  });
+</script>

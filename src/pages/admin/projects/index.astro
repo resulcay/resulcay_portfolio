@@ -1,0 +1,30 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import { content } from '@/lib/content';
+
+const projects = (await content.listProjects()).sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
+---
+<AdminLayout title="Projects">
+  <div class="row"><a class="button button--primary" href="/admin/projects/new">New project</a></div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr><th>Title</th><th>Visibility</th><th>Featured</th><th>Order</th><th>Status</th><th>Images</th></tr>
+      </thead>
+      <tbody>
+        {
+          projects.map((p) => (
+            <tr>
+              <td><a href={`/admin/projects/${p.slug}`}>{p.title}</a></td>
+              <td>{p.visibility}</td>
+              <td>{p.featured ? 'Yes' : ''}</td>
+              <td>{p.order}</td>
+              <td>{p.status}</td>
+              <td>{p.images?.length ?? 0}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</AdminLayout>

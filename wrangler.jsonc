@@ -4,5 +4,11 @@
   "main": "@astrojs/cloudflare/entrypoints/server",
   "compatibility_date": "2026-10-20",
   "compatibility_flags": ["nodejs_compat"],
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  // Uploaded images and the CV. Local development uses a simulated bucket.
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "resulcay-media" }]
+  // Secrets are set with `wrangler secret put` (see README):
+  // FIREBASE_PROJECT_ID, FIREBASE_API_KEY, FIREBASE_CLIENT_EMAIL,
+  // FIREBASE_PRIVATE_KEY, ADMIN_UID, SESSION_SECRET,
+  // TURNSTILE_SITE_KEY, TURNSTILE_SECRET_KEY
 }

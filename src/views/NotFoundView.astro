@@ -3,11 +3,17 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Butterfly from '@/components/Butterfly.astro';
 import type { Locale } from '@/domain/schemas';
 import { localizePath, t } from '@/i18n/ui';
+import { turnstileSiteKey } from '@/lib/auth';
+import { allowTurnstile } from '@/lib/csp';
 
 interface Props {
   lang: Locale;
 }
 const { lang } = Astro.props;
+// The butterfly opens the admin sign-in after five quick clicks. The dialog
+// is the same on every missing page, so it says nothing about any URL.
+const siteKey = turnstileSiteKey();
+if (siteKey) allowTurnstile(Astro);
 ---
 <BaseLayout lang={lang} title="404" description={t(lang, 'notFound.body')} noindex>
   <section class="wrap lost" aria-labelledby="lost-title">
@@ -26,7 +32,9 @@ const { lang } = Astro.props;
       <figcaption>{t(lang, 'notFound.caption')}</figcaption>
     </figure>
     <div class="copy">
-      <Butterfly size={40} class="lost__butterfly" />
+      <button type="button" class="lost__butterfly" data-butterfly aria-label={lang === 'en' ? 'Butterfly' : 'Kelebek'}>
+        <Butterfly size={40} />
+      </button>
       <p class="code" aria-hidden="true">404</p>
       <h1 id="lost-title">{t(lang, 'notFound.title')}</h1>
       <p>{t(lang, 'notFound.body')}</p>
@@ -39,7 +47,49 @@ const { lang } = Astro.props;
       </div>
     </div>
   </section>
+  {
+    siteKey && (
+      <dialog class="rewind" data-rewind aria-labelledby="rewind-title">
+        <form novalidate>
+          <h2 id="rewind-title">Rewind</h2>
+          <label>
+            <span>Email</span>
+            <input name="email" type="email" autocomplete="username" required maxlength="120" />
+            <small data-error-for="email" />
+          </label>
+          <label>
+            <span>Password</span>
+            <input name="password" type="password" autocomplete="current-password" required maxlength="200" />
+            <small data-error-for="password" />
+          </label>
+          <div data-turnstile data-sitekey={siteKey} />
+          <p role="status" aria-live="polite" />
+          <div class="rewind__actions">
+            <button type="submit" class="button button--primary">Go</button>
+            <button type="button" class="button" data-close>Close</button>
+          </div>
+        </form>
+      </dialog>
+    )
+  }
 </BaseLayout>
+
+<script>
+  const butterfly = document.querySelector<HTMLButtonElement>('[data-butterfly]');
+  const dialog = document.querySelector<HTMLDialogElement>('[data-rewind]');
+  let clicks: number[] = [];
+  butterfly?.addEventListener('click', () => {
+    butterfly.classList.remove('is-fluttering');
+    void butterfly.offsetWidth;
+    butterfly.classList.add('is-fluttering');
+    const now = Date.now();
+    clicks = [...clicks.filter((at) => now - at < 3000), now];
+    if (clicks.length >= 5 && dialog) {
+      clicks = [];
+      void import('@/scripts/rewind-login').then(({ openLogin }) => openLogin(dialog));
+    }
+  });
+</script>
 
 <style>
   .lost {
@@ -77,10 +127,81 @@ const { lang } = Astro.props;
     flex-direction: column;
     gap: 16px;
   }
-  .copy :global(.lost__butterfly) {
+  .lost__butterfly {
     position: absolute;
     right: 0;
     top: -8px;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+  }
+  .lost__butterfly.is-fluttering :global(svg) {
+    animation: flutter 0.5s ease-out;
+  }
+  @keyframes flutter {
+    30% {
+      transform: translateY(-6px) scaleX(0.7) rotate(-6deg);
+    }
+    60% {
+      transform: translateY(-2px) scaleX(1.05);
+    }
+  }
+  .rewind {
+    width: min(100% - 32px, 400px);
+    padding: 28px;
+    border: 0;
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+    color: var(--ink);
+    box-shadow: 0 20px 60px rgb(30 27 36 / 0.35);
+  }
+  .rewind::backdrop {
+    background: rgb(30 27 36 / 0.6);
+  }
+  .rewind form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .rewind h2 {
+    font-size: 1.75rem;
+  }
+  .rewind label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-weight: 700;
+  }
+  .rewind input {
+    min-height: 48px;
+    padding: 10px 12px;
+    border: 1.5px solid var(--rule);
+    border-radius: 8px;
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    font-weight: 400;
+  }
+  .rewind input[aria-invalid='true'] {
+    border-color: #b3261e;
+  }
+  .rewind small {
+    color: var(--accent-text);
+    font-weight: 400;
+  }
+  .rewind [role='status']:empty,
+  .rewind small:empty {
+    display: none;
+  }
+  .rewind__actions {
+    display: flex;
+    gap: 12px;
   }
   .code {
     font-family: var(--font-display);

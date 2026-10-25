@@ -7,6 +7,8 @@ import { featuredProjects } from '@/application/content';
 import { content } from '@/lib/content';
 import { personLd } from '@/lib/structured-data';
 import { formatPeriod, localizePath, t } from '@/i18n/ui';
+import { turnstileSiteKey } from '@/lib/auth';
+import { allowTurnstile } from '@/lib/csp';
 
 interface Props {
   lang: Locale;
@@ -20,6 +22,8 @@ const [profile, projects, experience, testimonials] = await Promise.all([
 ]);
 const featured = featuredProjects(projects);
 const school = profile.education.find((e) => !e.completed);
+const siteKey = turnstileSiteKey();
+if (siteKey) allowTurnstile(Astro);
 const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/, '+90 $1 $2 $3 $4');
 ---
 <BaseLayout
@@ -117,8 +121,62 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
       <div><dt>{t(lang, 'contact.phone')}</dt><dd><a href={`tel:${profile.phone}`}>{phoneDisplay}</a></dd></div>
       <div><dt>LinkedIn</dt><dd><a href={profile.links.linkedin} rel="me">linkedin.com/in/resulcay</a></dd></div>
     </dl>
+    {
+      siteKey && (
+        <form class="contact-form" data-contact novalidate>
+          <h3>{t(lang, 'contact.formTitle')}</h3>
+          <div class="contact-form__row">
+            <label>
+              <span>{t(lang, 'contact.name')}</span>
+              <input name="name" autocomplete="name" required maxlength="80" />
+              <small data-error-for="name" />
+            </label>
+            <label>
+              <span>{t(lang, 'contact.yourEmail')}</span>
+              <input name="email" type="email" autocomplete="email" required maxlength="120" />
+              <small data-error-for="email" />
+            </label>
+          </div>
+          <label>
+            <span>{t(lang, 'contact.message')}</span>
+            <textarea name="message" rows="6" required minlength="10" maxlength="4000" />
+            <small data-error-for="message" />
+          </label>
+          <label class="visually-hidden" aria-hidden="true">
+            Website
+            <input name="website" tabindex="-1" autocomplete="off" />
+          </label>
+          <input type="hidden" name="lang" value={lang} />
+          <div data-turnstile data-sitekey={siteKey} />
+          <p class="contact-form__note">{t(lang, 'contact.privacy')}</p>
+          <p role="status" aria-live="polite" />
+          <div>
+            <button type="submit" class="button button--primary">{t(lang, 'contact.send')}</button>
+          </div>
+          <template data-messages>
+            <span data-key="sending">{t(lang, 'contact.sending')}</span>
+            <span data-key="sent">{t(lang, 'contact.sent')}</span>
+            <span data-key="human">{t(lang, 'contact.humanWait')}</span>
+            <span data-key="failed">{t(lang, 'contact.failed')}</span>
+            <span data-key="field-name">{t(lang, 'contact.errName')}</span>
+            <span data-key="field-email">{t(lang, 'contact.errEmail')}</span>
+            <span data-key="field-message">{t(lang, 'contact.errMessage')}</span>
+          </template>
+        </form>
+      )
+    }
   </section>
 </BaseLayout>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-contact]');
+  if (form) {
+    // The human check and validation load the first time someone starts
+    // typing, so the page itself stays light.
+    const start = () => void import('@/scripts/contact-form').then(({ setUpContactForm }) => setUpContactForm(form));
+    form.addEventListener('focusin', start, { once: true });
+  }
+</script>
 
 <style>
   .hero {
@@ -272,5 +330,58 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
   }
   .contact p {
     max-width: var(--measure);
+  }
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 720px;
+    margin-top: 16px;
+    padding: clamp(20px, 4vw, 32px);
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+  }
+  .contact-form h3 {
+    font-size: 1.5rem;
+  }
+  .contact-form__row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .contact-form label:not(.visually-hidden) {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-weight: 700;
+  }
+  .contact-form input,
+  .contact-form textarea {
+    min-height: 48px;
+    padding: 10px 12px;
+    border: 1.5px solid var(--rule);
+    border-radius: 8px;
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    font-weight: 400;
+  }
+  .contact-form textarea {
+    resize: vertical;
+  }
+  .contact-form [aria-invalid='true'] {
+    border-color: #b3261e;
+  }
+  .contact-form small {
+    color: var(--accent-text);
+    font-weight: 400;
+  }
+  .contact-form small:empty,
+  .contact-form [role='status']:empty {
+    display: none;
+  }
+  .contact-form__note {
+    color: var(--ink-quiet);
+    font-size: 0.9375rem;
   }
 </style>

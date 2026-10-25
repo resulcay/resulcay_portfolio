@@ -1,0 +1,14 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import JsonEditor from '@/components/admin/JsonEditor.astro';
+import { content } from '@/lib/content';
+
+const experience = await content.listExperience();
+---
+<AdminLayout title="Experience">
+  <JsonEditor
+    doc="experience"
+    value={experience}
+    help="The timeline on the home page, in the order shown. Dates are YYYY-MM; leave out end for a current job."
+  />
+</AdminLayout>

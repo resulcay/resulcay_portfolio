@@ -1,0 +1,10 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import JsonEditor from '@/components/admin/JsonEditor.astro';
+import { content } from '@/lib/content';
+
+const testimonials = await content.listTestimonials();
+---
+<AdminLayout title="Testimonials">
+  <JsonEditor doc="testimonials" value={testimonials} help="Quotes shown on the home page, in this order." />
+</AdminLayout>

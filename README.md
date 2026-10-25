@@ -15,12 +15,13 @@ Resul Çay's portfolio. A fast, server-rendered "Journal" that recruiters, searc
 src/
   domain/          types, Zod schemas, tag vocabulary (no framework code)
   application/     use cases and the ContentRepository port
-  infrastructure/  adapters: seed content today, Firestore next
+  infrastructure/  adapters: Firestore, in-memory/seed fallback, Turnstile, Firebase Auth
   lib/             composition root, SEO helpers, middleware helpers
   i18n/            UI strings and locale helpers
   components/      small Astro components
   views/           one view per page, shared by both languages
-  pages/           thin routes, plus robots, sitemap and llms.txt
+  pages/           thin routes, admin pages, JSON API, robots, sitemap and llms.txt
+  scripts/         browser code: forms, Turnstile loader, admin editors
 tests/             Vitest unit tests
 ```
 
@@ -39,4 +40,23 @@ Node 24 (see `.nvmrc`).
 
 ## Admin
 
-Every `/admin` URL answers with the same 404 as any missing page unless the request carries a verified admin session. Login arrives in a later change.
+Every `/admin` and `/api/admin` URL answers with the same 404 as any missing page unless the request carries a verified admin session. To sign in, open any missing page and click the butterfly five times quickly. The sign-in checks Turnstile, then the email and password with Firebase Authentication, and only accepts the one user id in `ADMIN_UID`. The session is an HMAC-signed, HttpOnly, `SameSite=Strict` cookie that lasts 8 hours.
+
+Content lives in Firestore (`projects/{slug}`, `site/profile`, `site/experience`, `site/testimonials`, `messages/{id}`). The Worker talks to Firestore with a service account, so `firestore.rules` refuses every browser request. Until content is saved, the site shows the starter content in `src/infrastructure/content/seed.ts`; the admin overview has a button that copies it into Firestore.
+
+Uploads go to the R2 bucket `resulcay-media` and are served from `/media/...`. Rules (`src/domain/media.ts`), checked in the browser and again on the server from the file's bytes: 10 MB at most; project and site images must be PNG, JPEG, WebP or AVIF, 64 to 4096 px; the CV must be a PDF. The admin resizes photos to 2400 px and converts them to WebP before upload.
+
+### Local development
+
+Copy `.dev.vars.example` to `.dev.vars`. Without the `FIREBASE_*` lines, content is edited in memory and you sign in with any email and `DEV_ADMIN_PASSWORD`. Turnstile test keys work offline in dev.
+
+### Production setup
+
+1. **Firebase Authentication:** enable Email/Password, add your user, and copy its User UID.
+2. **Firestore:** create the database (production mode) and publish `firestore.rules`.
+3. **Service account:** Project settings → Service accounts → Generate new private key. Use `client_email` and `private_key` from the JSON file. Don't commit the file.
+4. **Web API key:** Project settings → General. If you restrict it, don't use an HTTP referrer restriction (the Worker calls it from the server).
+5. **Turnstile:** add a widget for `resulcay.com` in the Cloudflare dashboard (Managed mode).
+6. **R2:** `npx wrangler r2 bucket create resulcay-media`.
+7. **Secrets:** run `npx wrangler secret put NAME` for each of `FIREBASE_PROJECT_ID`, `FIREBASE_API_KEY`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `ADMIN_UID`, `SESSION_SECRET` (a long random string), `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`.
+8. `npm run deploy`, then add `resulcay.com` as a custom domain of the Worker.

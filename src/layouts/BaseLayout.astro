@@ -13,9 +13,11 @@ interface Props {
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   noindex?: boolean;
   ogType?: 'website' | 'profile' | 'article';
+  /** Site-relative path of the link preview image. */
+  ogImage?: string | undefined;
 }
 
-const { lang, title, description, jsonLd, noindex = false, ogType = 'website' } = Astro.props;
+const { lang, title, description, jsonLd, noindex = false, ogType = 'website', ogImage } = Astro.props;
 const profile = await content.getProfile();
 const site = Astro.site ?? new URL('https://resulcay.com');
 // After a rewrite (e.g. to the 404 page) keep the address the visitor asked
@@ -54,7 +56,8 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : undefined;
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content={profile.name} />
     <meta property="og:locale" content={lang === 'en' ? 'en_US' : 'tr_TR'} />
-    <meta name="twitter:card" content="summary" />
+    {ogImage && <meta property="og:image" content={new URL(ogImage, site).href} />}
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
     {ld && <script type="application/ld+json" set:html={ld} />}
   </head>
   <body>

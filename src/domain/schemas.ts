@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MEDIA_KEY } from './media';
 import {
   APP_TYPES,
   CATEGORIES,
@@ -41,6 +42,17 @@ export const projectLinksSchema = z
   })
   .partial();
 
+export const mediaKey = z.string().regex(MEDIA_KEY, 'Not a media file key');
+
+export const projectImageSchema = z.object({
+  key: mediaKey,
+  alt: localized(200),
+  width: z.number().int().min(1).max(8192),
+  height: z.number().int().min(1).max(8192),
+});
+
+export type ProjectImage = z.infer<typeof projectImageSchema>;
+
 export const projectSchema = z.object({
   slug,
   title: text(80),
@@ -59,6 +71,8 @@ export const projectSchema = z.object({
   end: yearMonth.optional(),
   highlights: z.array(localized(160)).max(6),
   links: projectLinksSchema,
+  /** The first image is the cover on cards and in link previews. */
+  images: z.array(projectImageSchema).max(12).optional(),
   featured: z.boolean(),
   order: z.number().int().min(0).max(999),
   visibility: z.enum(['public', 'unlisted', 'private']),
@@ -121,3 +135,35 @@ export const profileSchema = z.object({
 });
 
 export type Profile = z.infer<typeof profileSchema>;
+
+export const experienceListSchema = z.array(experienceSchema).max(30);
+export const testimonialListSchema = z.array(testimonialSchema).max(20);
+
+// Public forms. The Turnstile token travels with the form and is checked on
+// the server before anything else happens.
+
+const turnstileToken = z.string().min(1).max(2048);
+
+export const contactSchema = z.object({
+  name: text(80),
+  email: z.email().max(120),
+  message: z.string().trim().min(10).max(4000),
+  lang: z.enum(LOCALES),
+  /** Hidden field people never see; bots fill it in. */
+  website: z.string().max(0).optional(),
+  token: turnstileToken,
+});
+
+export type ContactInput = z.infer<typeof contactSchema>;
+
+export const contactMessageSchema = contactSchema
+  .omit({ token: true, website: true })
+  .extend({ id: z.string().regex(/^[a-z0-9-]{8,64}$/), receivedAt: z.iso.datetime(), read: z.boolean() });
+
+export type ContactMessage = z.infer<typeof contactMessageSchema>;
+
+export const loginSchema = z.object({
+  email: z.email().max(120),
+  password: z.string().min(6).max(200),
+  token: turnstileToken,
+});

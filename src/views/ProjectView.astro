@@ -27,6 +27,7 @@ const linkEntries: [UiKey, string | undefined][] = [
   ['link.website', project.links.website],
   ['link.repository', project.links.repository],
 ];
+const images = project.images ?? [];
 const links = linkEntries.filter((entry): entry is [UiKey, string] => Boolean(entry[1]));
 ---
 <BaseLayout
@@ -34,6 +35,7 @@ const links = linkEntries.filter((entry): entry is [UiKey, string] => Boolean(en
   title={project.title}
   description={project.hook[lang]}
   ogType="article"
+  ogImage={images[0] && `/media/${images[0].key}`}
   jsonLd={[
     projectLd(project, lang),
     breadcrumbLd([
@@ -50,6 +52,25 @@ const links = linkEntries.filter((entry): entry is [UiKey, string] => Boolean(en
       <p class="hook">{project.hook[lang]}</p>
       <TagChips tags={[...project.appTypes, ...project.platforms]} lang={lang} tone="strong" />
     </header>
+    {
+      images.length > 0 && (
+        <div class="gallery">
+          {images.map((img, i) => (
+            <figure>
+              <img
+                src={`/media/${img.key}`}
+                alt={img.alt[lang]}
+                width={img.width}
+                height={img.height}
+                loading={i === 0 ? 'eager' : 'lazy'}
+                fetchpriority={i === 0 ? 'high' : undefined}
+                decoding="async"
+              />
+            </figure>
+          ))}
+        </div>
+      )
+    }
     <div class="layout">
       <div class="story">
         <p>{project.story[lang]}</p>
@@ -123,6 +144,27 @@ const links = linkEntries.filter((entry): entry is [UiKey, string] => Boolean(en
     font-size: 1.25rem;
     color: var(--ink-quiet);
     max-width: var(--measure);
+  }
+  .gallery {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px;
+  }
+  .gallery figure {
+    flex: 0 0 auto;
+    margin: 0;
+    scroll-snap-align: start;
+  }
+  .gallery img {
+    display: block;
+    width: auto;
+    max-width: min(86vw, 720px);
+    height: auto;
+    max-height: 60vh;
+    border-radius: 6px;
+    background: var(--paper-raised);
   }
   .layout {
     display: flex;

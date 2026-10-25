@@ -1,0 +1,77 @@
+---
+// Edits a whole site document as JSON. The same schema checks it in the
+// browser before saving and on the server before storing.
+interface Props {
+  doc: 'profile' | 'experience' | 'testimonials';
+  value: unknown;
+  help: string;
+}
+const { doc, value, help } = Astro.props;
+---
+<form class="panel" data-json-editor data-doc={doc} novalidate>
+  <p>{help}</p>
+  <label class="field">
+    <span>Content (JSON)</span>
+    <textarea class="code" name="json" rows="28" spellcheck="false">{JSON.stringify(value, null, 2)}</textarea>
+  </label>
+  <ul class="errors" data-errors></ul>
+  <div class="form-actions">
+    <button type="submit" class="button button--primary">Save</button>
+    <button type="button" class="button" data-format>Tidy JSON</button>
+    <p role="status" aria-live="polite"></p>
+  </div>
+</form>
+
+<script>
+  import { experienceListSchema, profileSchema, testimonialListSchema } from '@/domain/schemas';
+  import { issuesOf, postJson } from '@/scripts/forms';
+
+  const schemas = { profile: profileSchema, experience: experienceListSchema, testimonials: testimonialListSchema };
+
+  for (const form of document.querySelectorAll<HTMLFormElement>('[data-json-editor]')) {
+    const doc = form.dataset['doc'] as keyof typeof schemas;
+    const area = form.querySelector('textarea');
+    const status = form.querySelector<HTMLElement>('[role="status"]');
+    const errors = form.querySelector<HTMLElement>('[data-errors]');
+    if (!area || !status || !errors) continue;
+
+    const show = (items: { path: string; message: string }[]) =>
+      errors.replaceChildren(
+        ...items.map((i) => Object.assign(document.createElement('li'), { textContent: `${i.path || '(root)'}: ${i.message}` })),
+      );
+
+    const read = (): unknown => {
+      try {
+        return JSON.parse(area.value);
+      } catch (error) {
+        show([{ path: '', message: `Not valid JSON: ${(error as Error).message}` }]);
+        return undefined;
+      }
+    };
+
+    form.querySelector('[data-format]')?.addEventListener('click', () => {
+      const value = read();
+      if (value !== undefined) area.value = JSON.stringify(value, null, 2);
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const value = read();
+      if (value === undefined) return;
+      const parsed = schemas[doc].safeParse(value);
+      if (!parsed.success) {
+        show(issuesOf(parsed.error));
+        status.textContent = 'Fix the problems listed above.';
+        return;
+      }
+      show([]);
+      status.textContent = 'Saving…';
+      const result = await postJson(`/api/admin/site/${doc}`, parsed.data, 'PUT');
+      if (result.ok) status.textContent = `Saved at ${new Date().toLocaleTimeString()}.`;
+      else {
+        show(result.data.fields ?? []);
+        status.textContent = result.data.error ?? 'Saving failed.';
+      }
+    });
+  }
+</script>

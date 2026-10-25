@@ -1,0 +1,43 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import { content } from '@/lib/content';
+
+const messages = await content.listMessages();
+const when = (iso: string) =>
+  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Istanbul' }).format(new Date(iso));
+---
+<AdminLayout title="Messages">
+  {messages.length === 0 && <p>No messages yet. They arrive here from the contact form.</p>}
+  {
+    messages.map((m) => (
+      <article class="panel" data-message={m.id}>
+        <div class="row">
+          <strong>{m.name}</strong>
+          <a href={`mailto:${m.email}?subject=${encodeURIComponent('Re: your message on resulcay.com')}`}>{m.email}</a>
+          <span>· {when(m.receivedAt)} · {m.lang.toUpperCase()}</span>
+        </div>
+        <p class="message-body">{m.message}</p>
+        <div class="row">
+          <button type="button" class="button button--small button--danger" data-delete-message={m.id}>Delete</button>
+        </div>
+      </article>
+    ))
+  }
+</AdminLayout>
+
+<style>
+  .message-body {
+    white-space: pre-wrap;
+  }
+</style>
+
+<script>
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-delete-message]')) {
+    button.addEventListener('click', async () => {
+      if (!window.confirm('Delete this message?')) return;
+      const id = button.dataset['deleteMessage'] ?? '';
+      const response = await fetch(`/api/admin/messages/${encodeURIComponent(id)}`, { method: 'DELETE', credentials: 'same-origin' });
+      if (response.ok) button.closest('article')?.remove();
+    });
+  }
+</script>

@@ -1,0 +1,144 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import { content } from '@/lib/content';
+import { settings } from '@/lib/env';
+
+const profile = await content.getProfile();
+---
+<AdminLayout title="Files">
+  {
+    settings.media ? (
+      <>
+        <section class="panel" aria-labelledby="cv-title">
+          <h2 id="cv-title">CV</h2>
+          <p>
+            The site links to <a href={profile.cvPath}>{profile.cvPath}</a>. Upload a new PDF (up to 10 MB) to replace
+            it; the link updates once the upload is done.
+          </p>
+          <label class="field">
+            <span>New CV (PDF)</span>
+            <input type="file" accept="application/pdf" data-cv-upload />
+          </label>
+          <p role="status" aria-live="polite" data-cv-status />
+        </section>
+        <section class="panel" aria-labelledby="site-title">
+          <h2 id="site-title">Site images</h2>
+          <p>Images for anything other than a project, such as a profile photo. Photos are resized to 2400 px and sent as WebP.</p>
+          <label class="field">
+            <span>Upload images</span>
+            <input type="file" accept="image/png,image/jpeg,image/webp,image/avif" multiple data-site-upload />
+          </label>
+          <p role="status" aria-live="polite" data-site-status />
+        </section>
+        <section class="panel" aria-labelledby="all-title">
+          <h2 id="all-title">All files</h2>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr><th>File</th><th>Type</th><th>Size</th><th>Uploaded</th><th></th></tr>
+              </thead>
+              <tbody data-file-list />
+            </table>
+          </div>
+        </section>
+      </>
+    ) : (
+      <p class="notice notice--warn">R2 isn't configured, so files can't be uploaded yet.</p>
+    )
+  }
+</AdminLayout>
+
+<script>
+  import { postJson } from '@/scripts/forms';
+  import { prepareImage, upload } from '@/scripts/admin/upload';
+
+  interface FileRow {
+    key: string;
+    url: string;
+    size: number;
+    type?: string;
+    width?: number;
+    height?: number;
+    uploaded: string;
+  }
+
+  const body = document.querySelector<HTMLElement>('[data-file-list]');
+
+  const cell = (content: string | Node) => {
+    const td = document.createElement('td');
+    td.replaceChildren(content);
+    return td;
+  };
+
+  async function refresh() {
+    if (!body) return;
+    const response = await fetch('/api/admin/media', { credentials: 'same-origin' });
+    const data = (await response.json()) as { files: FileRow[] };
+    body.replaceChildren(
+      ...data.files
+        .sort((a, b) => b.uploaded.localeCompare(a.uploaded))
+        .map((file) => {
+          const row = document.createElement('tr');
+          const link = Object.assign(document.createElement('a'), { href: file.url, textContent: file.key, target: '_blank' });
+          const remove = Object.assign(document.createElement('button'), {
+            type: 'button',
+            className: 'button button--small button--danger',
+            textContent: 'Delete',
+          });
+          remove.addEventListener('click', async () => {
+            if (!window.confirm(`Delete ${file.key}? Pages that use it will show a broken image.`)) return;
+            const result = await fetch(`/api/admin/media?key=${encodeURIComponent(file.key)}`, { method: 'DELETE', credentials: 'same-origin' });
+            if (result.ok) row.remove();
+          });
+          const dims = file.width ? ` · ${file.width}×${file.height}` : '';
+          row.replaceChildren(
+            cell(link),
+            cell(`${file.type ?? ''}${dims}`),
+            cell(`${(file.size / 1024).toFixed(0)} KB`),
+            cell(new Date(file.uploaded).toLocaleString()),
+            cell(remove),
+          );
+          return row;
+        }),
+    );
+  }
+
+  const cvInput = document.querySelector<HTMLInputElement>('[data-cv-upload]');
+  const cvStatus = document.querySelector<HTMLElement>('[data-cv-status]');
+  cvInput?.addEventListener('change', async () => {
+    const file = cvInput.files?.[0];
+    if (!file || !cvStatus) return;
+    cvStatus.textContent = 'Uploading…';
+    try {
+      const done = await upload(file, 'cv', 'resul-cay');
+      const profile = (await (await fetch('/admin/profile.json', { credentials: 'same-origin' })).json()) as Record<string, unknown>;
+      const saved = await postJson('/api/admin/site/profile', { ...profile, cvPath: done.url }, 'PUT');
+      cvStatus.textContent = saved.ok ? `The CV link now points to ${done.url}.` : (saved.data.error ?? 'Uploaded, but the link was not updated.');
+      await refresh();
+    } catch (error) {
+      cvStatus.textContent = (error as Error).message;
+    }
+    cvInput.value = '';
+  });
+
+  const siteInput = document.querySelector<HTMLInputElement>('[data-site-upload]');
+  const siteStatus = document.querySelector<HTMLElement>('[data-site-status]');
+  siteInput?.addEventListener('change', async () => {
+    const files = [...(siteInput.files ?? [])];
+    for (const file of files) {
+      if (siteStatus) siteStatus.textContent = `Uploading ${file.name}…`;
+      try {
+        await upload(await prepareImage(file), 'site', 'images');
+      } catch (error) {
+        if (siteStatus) siteStatus.textContent = `${file.name}: ${(error as Error).message}`;
+        siteInput.value = '';
+        return;
+      }
+    }
+    if (siteStatus) siteStatus.textContent = `Uploaded ${files.length}.`;
+    siteInput.value = '';
+    await refresh();
+  });
+
+  void refresh();
+</script>

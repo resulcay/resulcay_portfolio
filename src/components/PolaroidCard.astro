@@ -23,15 +23,22 @@ const chips = [project.appTypes[0], ...project.platforms.slice(0, 2), project.pr
   (tag): tag is NonNullable<typeof tag> => Boolean(tag),
 );
 const href = localizePath(`/projects/${project.slug}`, lang);
+const cover = project.images?.[0];
 ---
 <article class:list={['polaroid', tiltClass]}>
   <div class="polaroid__photo" aria-hidden="true">
+    {
+      cover ? (
+        <img src={`/media/${cover.key}`} alt="" width={cover.width} height={cover.height} loading="lazy" decoding="async" />
+      ) : (
     <svg viewBox="0 0 320 240" preserveAspectRatio="xMidYMid slice">
       <rect width="320" height="240" fill={sky}></rect>
       <circle cx={120 + (index * 47) % 120} cy="150" r="38" fill={sun}></circle>
       <rect y="156" width="320" height="84" fill={sea}></rect>
       <text x="20" y="64" font-family="Fraunces Variable, Georgia, serif" font-size="30" font-weight="600" fill="#fbf6ee">{project.title.slice(0, 18)}</text>
     </svg>
+      )
+    }
   </div>
   <div class="polaroid__body">
     <h3><a href={href}>{project.title}</a></h3>
@@ -67,8 +74,10 @@ const href = localizePath(`/projects/${project.slug}`, lang);
     aspect-ratio: 4 / 3;
     overflow: hidden;
   }
-  .polaroid__photo svg {
+  .polaroid__photo svg,
+  .polaroid__photo img {
     display: block;
+    object-fit: cover;
     width: 100%;
     height: 100%;
   }

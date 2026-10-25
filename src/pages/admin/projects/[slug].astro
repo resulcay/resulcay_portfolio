@@ -1,0 +1,214 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import { content } from '@/lib/content';
+import { settings } from '@/lib/env';
+import type { Project } from '@/domain/schemas';
+import { APP_TYPES, CATEGORIES, LANGUAGES, PLATFORMS, PRICING, STATUSES, TECH, WORK_TYPES, tagLabel } from '@/domain/tags';
+
+const slug = Astro.params['slug'] ?? '';
+const isNew = slug === 'new';
+const existing = isNew ? undefined : (await content.listProjects()).find((p) => p.slug === slug);
+if (!isNew && !existing) return Astro.rewrite('/404');
+
+const blank: Project = {
+  slug: '',
+  title: '',
+  hook: { en: '', tr: '' },
+  story: { en: '', tr: '' },
+  role: { en: '', tr: '' },
+  pricing: 'free',
+  workType: 'personal',
+  appTypes: ['mobile-app'],
+  platforms: [],
+  languages: [],
+  tech: [],
+  status: 'live',
+  category: 'productivity',
+  highlights: [],
+  links: {},
+  images: [],
+  featured: false,
+  order: 100,
+  visibility: 'private',
+};
+const p: Project = existing ?? blank;
+const selects = [
+  { name: 'pricing', label: 'Pricing', options: PRICING, value: p.pricing },
+  { name: 'workType', label: 'Work type', options: WORK_TYPES, value: p.workType },
+  { name: 'status', label: 'Status', options: STATUSES, value: p.status },
+  { name: 'category', label: 'Category', options: CATEGORIES, value: p.category },
+] as const;
+const checks = [
+  { name: 'appTypes', label: 'App type (1 to 4)', options: APP_TYPES, value: p.appTypes as readonly string[] },
+  { name: 'platforms', label: 'Platforms', options: PLATFORMS, value: p.platforms as readonly string[] },
+  { name: 'languages', label: 'Languages', options: LANGUAGES, value: p.languages as readonly string[] },
+  { name: 'tech', label: 'Tech', options: TECH, value: p.tech as readonly string[] },
+] as const;
+const localizedFields = [
+  { name: 'hook', label: 'Hook (one line, up to 140)', rows: 2, max: 140 },
+  { name: 'role', label: 'My role (up to 200)', rows: 2, max: 200 },
+  { name: 'story', label: 'Story (up to 8000)', rows: 10, max: 8000 },
+] as const;
+const links = [
+  { name: 'appStore', label: 'App Store' },
+  { name: 'googlePlay', label: 'Google Play' },
+  { name: 'website', label: 'Website' },
+  { name: 'repository', label: 'Source code' },
+] as const;
+---
+<AdminLayout title={isNew ? 'New project' : p.title}>
+  <form class="panel" data-project-form data-new={isNew ? 'true' : undefined} novalidate>
+    <div class="grid-2">
+      <label class="field">
+        <span>Title</span>
+        <input name="title" value={p.title} required maxlength="80" />
+        <small data-error-for="title"></small>
+      </label>
+      <label class="field">
+        <span>Slug (the URL: /projects/slug)</span>
+        <input name="slug" value={p.slug} required maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" readonly={!isNew} />
+        <small>{isNew ? 'Lowercase letters, numbers and hyphens. It cannot change later.' : 'The slug cannot change.'}</small>
+        <small data-error-for="slug"></small>
+      </label>
+    </div>
+
+    {
+      localizedFields.map((f) => (
+        <div class="grid-2">
+          {(['en', 'tr'] as const).map((lang) => (
+            <label class="field">
+              <span>{f.label}, {lang === 'en' ? 'English' : 'Turkish'}</span>
+              <textarea name={`${f.name}.${lang}`} rows={f.rows} maxlength={f.max}>{p[f.name][lang]}</textarea>
+              <small data-error-for={`${f.name}.${lang}`} />
+            </label>
+          ))}
+        </div>
+      ))
+    }
+
+    <div class="grid-2">
+      {(['en', 'tr'] as const).map((lang) => (
+        <label class="field">
+          <span>Highlights, {lang === 'en' ? 'English' : 'Turkish'} (one per line, up to 6)</span>
+          <textarea name={`highlights.${lang}`} rows="4">{p.highlights.map((h) => h[lang]).join('\n')}</textarea>
+          <small data-error-for={`highlights.${lang}`} />
+        </label>
+      ))}
+    </div>
+
+    <div class="grid-4">
+      {
+        selects.map((s) => (
+          <label class="field">
+            <span>{s.label}</span>
+            <select name={s.name}>
+              {s.options.map((o) => <option value={o} selected={o === s.value}>{tagLabel(o, 'en')}</option>)}
+            </select>
+          </label>
+        ))
+      }
+    </div>
+
+    {
+      checks.map((c) => (
+        <fieldset class="field">
+          <legend>{c.label}</legend>
+          <div class="checks">
+            {c.options.map((o) => (
+              <label>
+                <input type="checkbox" name={c.name} value={o} checked={c.value.includes(o)} />
+                {tagLabel(o, 'en')}
+              </label>
+            ))}
+          </div>
+          <small data-error-for={c.name} />
+        </fieldset>
+      ))
+    }
+
+    <div class="grid-4">
+      <label class="field">
+        <span>Start (YYYY or YYYY-MM)</span>
+        <input name="start" value={p.start ?? ''} maxlength="7" inputmode="numeric" />
+        <small data-error-for="start"></small>
+      </label>
+      <label class="field">
+        <span>End (empty if ongoing)</span>
+        <input name="end" value={p.end ?? ''} maxlength="7" inputmode="numeric" />
+        <small data-error-for="end"></small>
+      </label>
+      <label class="field">
+        <span>Order (lower comes first)</span>
+        <input name="order" type="number" min="0" max="999" value={p.order} />
+        <small data-error-for="order"></small>
+      </label>
+      <label class="field">
+        <span>Visibility</span>
+        <select name="visibility">
+          <option value="public" selected={p.visibility === 'public'}>Public</option>
+          <option value="unlisted" selected={p.visibility === 'unlisted'}>Unlisted (link only)</option>
+          <option value="private" selected={p.visibility === 'private'}>Private (hidden)</option>
+        </select>
+      </label>
+    </div>
+    <div class="checks"><label><input type="checkbox" name="featured" checked={p.featured} /> Featured on the home page</label></div>
+
+    <div class="grid-2">
+      {
+        links.map((l) => (
+          <label class="field">
+            <span>{l.label} (https)</span>
+            <input name={`links.${l.name}`} type="url" value={p.links[l.name] ?? ''} maxlength="500" />
+            <small data-error-for={`links.${l.name}`} />
+          </label>
+        ))
+      }
+    </div>
+
+    <fieldset class="field">
+      <legend>Images (the first one is the cover, up to 12)</legend>
+      {
+        settings.media ? (
+          <>
+            <ul class="images" data-images>
+              {(p.images ?? []).map((img) => (
+                <li data-key={img.key} data-width={img.width} data-height={img.height}>
+                  <img src={`/media/${img.key}`} alt="" width={img.width} height={img.height} loading="lazy" />
+                  <input name="alt.en" value={img.alt.en} placeholder="Alt text, English" maxlength="200" aria-label="Alt text, English" />
+                  <input name="alt.tr" value={img.alt.tr} placeholder="Alt text, Turkish" maxlength="200" aria-label="Alt text, Turkish" />
+                  <div class="row">
+                    <button type="button" class="button button--small" data-move="-1">Move left</button>
+                    <button type="button" class="button button--small button--danger" data-remove>Remove</button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <label class="field">
+              <span>Add images</span>
+              <input type="file" accept="image/png,image/jpeg,image/webp,image/avif" multiple data-upload />
+              <small>PNG, JPEG, WebP or AVIF, up to 10 MB. Photos are resized to 2400 px and converted to WebP before upload.</small>
+            </label>
+            <p role="status" aria-live="polite" data-upload-status></p>
+            <small data-error-for="images" />
+          </>
+        ) : (
+          <p class="notice notice--warn">R2 isn't configured, so images can't be uploaded yet.</p>
+        )
+      }
+    </fieldset>
+
+    <ul class="errors" data-errors></ul>
+    <div class="form-actions">
+      <button type="submit" class="button button--primary">Save</button>
+      <a class="button" href={`/projects/${p.slug}`} target="_blank" rel="noopener" hidden={isNew}>View</a>
+      <p role="status" aria-live="polite" data-save-status></p>
+      {!isNew && <button type="button" class="button button--danger" data-delete>Delete</button>}
+    </div>
+  </form>
+</AdminLayout>
+
+<script>
+  import { setUpProjectForm } from '@/scripts/admin/project-form';
+  const form = document.querySelector<HTMLFormElement>('[data-project-form]');
+  if (form) setUpProjectForm(form);
+</script>

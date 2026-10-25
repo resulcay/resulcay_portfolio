@@ -1,0 +1,14 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import JsonEditor from '@/components/admin/JsonEditor.astro';
+import { content } from '@/lib/content';
+
+const profile = await content.getProfile();
+---
+<AdminLayout title="Profile">
+  <JsonEditor
+    doc="profile"
+    value={profile}
+    help="Name, title, summary, contact details, links, skills, certifications and education. Every text has an English (en) and a Turkish (tr) version. Keep education marked as not completed. To change the CV, upload it in Files and use the button there."
+  />
+</AdminLayout>

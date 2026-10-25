@@ -1,0 +1,12 @@
+# Copy to .dev.vars for local development. Turnstile test keys always pass.
+# Leave the FIREBASE_* lines out to edit the starter content in memory and sign
+# in at the 404 butterfly with DEV_ADMIN_PASSWORD (any email).
+TURNSTILE_SITE_KEY=1x00000000000000000000AA
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+SESSION_SECRET=replace-with-a-long-random-string
+DEV_ADMIN_PASSWORD=rewind-local
+# FIREBASE_PROJECT_ID=
+# FIREBASE_API_KEY=
+# FIREBASE_CLIENT_EMAIL=
+# FIREBASE_PRIVATE_KEY=
+# ADMIN_UID=

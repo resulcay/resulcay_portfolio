@@ -30,10 +30,10 @@ describe('formatPeriod', () => {
 });
 
 describe('isAdminPath', () => {
-  it.each(['/admin', '/admin/', '/admin/projects', '/tr/admin', '/ADMIN'])('%s is admin', (p) => {
+  it.each(['/admin', '/admin/', '/admin/projects', '/tr/admin', '/ADMIN', '/api/admin/media', '/api/admin'])('%s is admin', (p) => {
     expect(isAdminPath(p)).toBe(true);
   });
-  it.each(['/', '/administrator', '/projects/admin', '/about'])('%s is not admin', (p) => {
+  it.each(['/', '/administrator', '/projects/admin', '/about', '/api/contact', '/api/rewind', '/api/administrator'])('%s is not admin', (p) => {
     expect(isAdminPath(p)).toBe(false);
   });
 });

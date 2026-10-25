@@ -25,3 +25,32 @@ describe('validation rules', () => {
     expect(projectSchema.safeParse(bad).success).toBe(false);
   });
 });
+
+describe('public form rules', () => {
+  const message = { name: 'Ada', email: 'ada@example.com', message: 'Hello there, nice work!', lang: 'en', token: 't' };
+
+  it('accepts a normal contact message', async () => {
+    const { contactSchema } = await import('@/domain/schemas');
+    expect(contactSchema.safeParse(message).success).toBe(true);
+  });
+
+  it('refuses short messages, bad emails, a filled honeypot and a missing check', async () => {
+    const { contactSchema } = await import('@/domain/schemas');
+    expect(contactSchema.safeParse({ ...message, message: 'hi' }).success).toBe(false);
+    expect(contactSchema.safeParse({ ...message, email: 'nope' }).success).toBe(false);
+    expect(contactSchema.safeParse({ ...message, website: 'spam.example' }).success).toBe(false);
+    expect(contactSchema.safeParse({ ...message, token: '' }).success).toBe(false);
+  });
+
+  it('requires a human check token to sign in', async () => {
+    const { loginSchema } = await import('@/domain/schemas');
+    expect(loginSchema.safeParse({ email: 'a@b.co', password: 'secret1', token: 'x' }).success).toBe(true);
+    expect(loginSchema.safeParse({ email: 'a@b.co', password: 'secret1' }).success).toBe(false);
+  });
+
+  it('only accepts project images stored under a server-made key', () => {
+    const image = { key: 'projects/macyap/0b6f4b5e-1c2d-4e5f.webp', alt: { en: 'Screen', tr: 'Ekran' }, width: 800, height: 600 };
+    expect(projectSchema.safeParse({ ...projects[0], images: [image] }).success).toBe(true);
+    expect(projectSchema.safeParse({ ...projects[0], images: [{ ...image, key: 'https://evil.example/x.webp' }] }).success).toBe(false);
+  });
+});
