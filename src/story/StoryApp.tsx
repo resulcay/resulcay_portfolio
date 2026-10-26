@@ -141,7 +141,8 @@ export function StoryApp({ data, lang, siteKey, hour, onRewind, ...stage }: Stor
     const sync = () => engine.setHidden(document.hidden);
     const mute = (event: KeyboardEvent) => {
       const typing = event.target instanceof HTMLElement && event.target.closest('input, textarea, select, [contenteditable]');
-      if (event.key.toLowerCase() === 'm' && !typing && !event.ctrlKey && !event.metaKey && !event.altKey) engine.setMuted(!engine.snapshot().muted);
+      // Autofill and password managers send keydown events with no key at all.
+      if (typeof event.key === 'string' && event.key.toLowerCase() === 'm' && !typing && !event.ctrlKey && !event.metaKey && !event.altKey) engine.setMuted(!engine.snapshot().muted);
     };
     document.addEventListener('visibilitychange', sync);
     addEventListener('keydown', mute);

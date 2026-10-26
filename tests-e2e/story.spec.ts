@@ -133,6 +133,8 @@ test('pages with a Turnstile form allow it in the CSP', async ({ page, request }
   });
   await page.goto('/');
   await page.getByLabel('Your name').focus();
+  // Autofill sends keydown events without a key; nothing may trip over that.
+  await page.evaluate(() => dispatchEvent(new Event('keydown')));
   await expect.poll(() => loaded).toBe(true);
   await page.waitForTimeout(300);
   expect(problems).toEqual([]);
@@ -145,6 +147,8 @@ test('the record player and sound controls', async ({ page }) => {
   await page.getByRole('button', { name: 'Start story' }).click();
   await expect(page.locator('[data-canvas]')).toHaveAttribute('data-ready', 'true', { timeout: 60_000 });
   const stored = () => page.evaluate(() => JSON.parse(localStorage.getItem('story-volumes') ?? '{}') as Record<string, unknown>);
+  // Autofill sends keydown events without a key; the story's shortcuts must ignore them.
+  await page.evaluate(() => dispatchEvent(new Event('keydown')));
 
   await page.getByRole('button', { name: 'Record player' }).focus();
   await page.keyboard.press('Enter');
