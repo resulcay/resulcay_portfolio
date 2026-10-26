@@ -18,6 +18,9 @@ export default defineConfig({
     },
   },
   security: {
-    csp: true,
+    csp: {
+      // Cloudflare Web Analytics injects its beacon script at the edge.
+      scriptDirective: { resources: ["'self'", 'https://static.cloudflareinsights.com'] },
+    },
   },
 });
