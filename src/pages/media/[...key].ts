@@ -23,12 +23,13 @@ export const GET: APIRoute = async ({ params, request, rewrite }) => {
   if (key.endsWith('.pdf')) headers.set('Content-Disposition', 'inline; filename="resul-cay-cv.pdf"');
 
   if (!('body' in object)) return new Response(null, { status: 304, headers });
-  const range = object.range;
-  if (range && request.headers.has('Range')) {
-    const start = 'suffix' in range ? object.size - range.suffix : (range.offset ?? 0);
-    const length = 'suffix' in range ? range.suffix : (range.length ?? object.size - start);
-    headers.set('Content-Range', `bytes ${start}-${start + length - 1}/${object.size}`);
-    headers.set('Content-Length', String(length));
+  if (object.range && request.headers.has('Range')) {
+    // R2 fills in every field, leaving the unused ones undefined, so test values rather than keys.
+    const { offset, length, suffix } = object.range as { offset?: number; length?: number; suffix?: number };
+    const start = suffix !== undefined ? object.size - suffix : (offset ?? 0);
+    const size = suffix ?? length ?? object.size - start;
+    headers.set('Content-Range', `bytes ${start}-${start + size - 1}/${object.size}`);
+    headers.set('Content-Length', String(size));
     return new Response(object.body, { status: 206, headers });
   }
   return new Response(object.body, { headers });

@@ -4,7 +4,6 @@ import Butterfly from '@/components/Butterfly.astro';
 import type { Locale } from '@/domain/schemas';
 import { localizePath, t } from '@/i18n/ui';
 import { turnstileSiteKey } from '@/lib/auth';
-import { allowTurnstile } from '@/lib/csp';
 
 interface Props {
   lang: Locale;
@@ -13,7 +12,6 @@ const { lang } = Astro.props;
 // The butterfly opens the admin sign-in after five quick clicks. The dialog
 // is the same on every missing page, so it says nothing about any URL.
 const siteKey = turnstileSiteKey();
-if (siteKey) allowTurnstile(Astro);
 ---
 <BaseLayout lang={lang} title="404" description={t(lang, 'notFound.body')} noindex>
   <section class="wrap lost" aria-labelledby="lost-title">

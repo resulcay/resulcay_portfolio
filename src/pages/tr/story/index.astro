@@ -1,4 +1,8 @@
 ---
 import StoryView from '@/views/StoryView.astro';
+import { allowTurnstile } from '@/lib/csp';
+
+// Here in the page, before anything is awaited, so it reaches the CSP header.
+allowTurnstile(Astro);
 ---
 <StoryView lang="tr" />

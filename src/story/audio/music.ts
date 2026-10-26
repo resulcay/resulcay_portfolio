@@ -37,6 +37,8 @@ export class MusicPlayer {
       ctx.createMediaElementSource(element).connect(gain).connect(out);
       element.addEventListener('timeupdate', () => this.#nearEnd(element));
       element.addEventListener('ended', () => element === this.#current.element && this.next());
+      // A file that won't load or decode shows as stopped, so the play button comes back.
+      element.addEventListener('error', () => element === this.#current.element && this.#stopped());
       return { element, gain };
     };
     this.#decks = [deck(), deck()];

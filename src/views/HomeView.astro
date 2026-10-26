@@ -8,7 +8,6 @@ import { content } from '@/lib/content';
 import { personLd } from '@/lib/structured-data';
 import { formatPeriod, localizePath, t } from '@/i18n/ui';
 import { turnstileSiteKey } from '@/lib/auth';
-import { allowTurnstile } from '@/lib/csp';
 
 interface Props {
   lang: Locale;
@@ -23,7 +22,6 @@ const [profile, projects, experience, testimonials] = await Promise.all([
 const featured = featuredProjects(projects);
 const school = profile.education.find((e) => !e.completed);
 const siteKey = turnstileSiteKey();
-if (siteKey) allowTurnstile(Astro);
 const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/, '+90 $1 $2 $3 $4');
 ---
 <BaseLayout

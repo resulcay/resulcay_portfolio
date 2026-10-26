@@ -117,6 +117,27 @@ test('a deep link opens its panel, and Back closes it', async ({ page }) => {
   expect(problems).toEqual([]);
 });
 
+test('pages with a Turnstile form allow it in the CSP', async ({ page, request }) => {
+  for (const path of ['/', '/tr', '/story']) {
+    const csp = (await request.get(path)).headers()['content-security-policy'] ?? '';
+    expect(csp, path).toMatch(/script-src [^;]*https:\/\/challenges\.cloudflare\.com/);
+    expect(csp, path).toMatch(/frame-src [^;]*https:\/\/challenges\.cloudflare\.com/);
+  }
+
+  // The home contact form loads Turnstile when it's first used; a stub stands in for Cloudflare.
+  const problems = watchConsole(page);
+  let loaded = false;
+  await page.route('https://challenges.cloudflare.com/**', (route) => {
+    loaded = true;
+    return route.fulfill({ contentType: 'text/javascript', body: 'window.turnstile = { render: () => "w", reset() {}, remove() {} };' });
+  });
+  await page.goto('/');
+  await page.getByLabel('Your name').focus();
+  await expect.poll(() => loaded).toBe(true);
+  await page.waitForTimeout(300);
+  expect(problems).toEqual([]);
+});
+
 test('the record player and sound controls', async ({ page }) => {
   await returning(page);
   const problems = watchConsole(page);

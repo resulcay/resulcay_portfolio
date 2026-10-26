@@ -1,5 +1,9 @@
 import { z } from 'zod';
 import { MEDIA_KEY } from './media';
+
+// Zod's fast path compiles validators with new Function. The strict CSP (and
+// the Workers runtime) forbid that, and even the probe logs a CSP violation.
+z.config({ jitless: true });
 import {
   APP_TYPES,
   CATEGORIES,

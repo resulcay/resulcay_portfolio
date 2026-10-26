@@ -1,5 +1,9 @@
 ---
 import NotFoundView from '@/views/NotFoundView.astro';
 import { langFromUrl } from '@/i18n/ui';
+import { allowTurnstile } from '@/lib/csp';
+
+// Here in the page, before anything is awaited, so it reaches the CSP header.
+allowTurnstile(Astro);
 ---
 <NotFoundView lang={langFromUrl(new URL(Astro.originPathname, Astro.url))} />

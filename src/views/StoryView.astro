@@ -5,7 +5,6 @@ import type { Locale } from '@/domain/schemas';
 import { content } from '@/lib/content';
 import { localizePath, t } from '@/i18n/ui';
 import { turnstileSiteKey } from '@/lib/auth';
-import { allowTurnstile } from '@/lib/csp';
 
 interface Props {
   lang: Locale;
@@ -14,7 +13,6 @@ const { lang } = Astro.props;
 const [profile, music] = await Promise.all([content.getProfile(), content.listMusic()]);
 // The phone in the room holds the contact form.
 const siteKey = turnstileSiteKey();
-if (siteKey) allowTurnstile(Astro);
 ---
 <BaseLayout lang={lang} title={t(lang, 'nav.story')} description={t(lang, 'story.description')}>
   <section class="title wrap" aria-labelledby="story-title">
