@@ -56,7 +56,8 @@ const profile = await content.getProfile();
   </section>
 
   <div class="stage" data-stage data-url={localizePath('/story/data.json', lang)} hidden>
-    <div class="stage__canvas" data-canvas></div>
+    <div class="stage__canvas" data-canvas role="img" aria-label={t(lang, 'story.sceneLabel')}></div>
+    <div class="stage__vignette" aria-hidden="true"></div>
     <div class="stage__loader" data-loader role="status">
       <Butterfly size={56} class="stage__butterfly" />
       <p>{t(lang, 'story.loading')}</p>
@@ -204,6 +205,12 @@ const profile = await content.getProfile();
   .stage__canvas {
     position: absolute;
     inset: 0;
+  }
+  .stage__vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgb(30 27 36 / 0.55));
   }
   .stage__loader:not([hidden]) {
     position: absolute;

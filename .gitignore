@@ -9,3 +9,5 @@ dist/
 worker-configuration.d.ts
 coverage/
 .DS_Store
+test-results/
+playwright-report/

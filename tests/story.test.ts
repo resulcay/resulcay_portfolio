@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { storyData } from '@/application/story';
 import { storyFits } from '@/scripts/story-capability';
+import { phaseAt } from '@/story/scene/time';
+import { createQualityGovernor, parseQuality } from '@/story/scene/quality';
 import { experience, profile, projects, testimonials } from '@/infrastructure/content/seed';
 
 const str = z.string().min(1);
@@ -65,6 +67,49 @@ describe('story data', () => {
     const hidden = { ...projects[0]!, slug: 'hidden', visibility: 'unlisted' as const };
     const data = storyData('en', profile, [...projects, hidden], experience, testimonials);
     expect(data.projects.map((p) => p.slug)).not.toContain('hidden');
+  });
+});
+
+describe('time of day', () => {
+  it.each([
+    [4, 'night'],
+    [5, 'dawn'],
+    [7, 'dawn'],
+    [8, 'day'],
+    [16, 'day'],
+    [17, 'golden'],
+    [19, 'golden'],
+    [20, 'night'],
+    [0, 'night'],
+  ] as const)('%i:00 is %s', (hour, phase) => {
+    expect(phaseAt(hour)).toBe(phase);
+  });
+});
+
+describe('quality governor', () => {
+  it('steps down one level per slow window', () => {
+    const g = createQualityGovernor('high');
+    expect(g.window(40)).toBe('medium');
+    expect(g.window(25)).toBe('low');
+    expect(g.window(10)).toBe('low');
+  });
+
+  it('steps up only after two smooth windows, and never after a step down', () => {
+    const g = createQualityGovernor('medium');
+    expect(g.window(60)).toBe('medium');
+    expect(g.window(60)).toBe('high');
+    expect(g.window(45)).toBe('medium');
+    for (let i = 0; i < 5; i++) expect(g.window(60)).toBe('medium');
+  });
+
+  it('keeps medium between the thresholds', () => {
+    const g = createQualityGovernor('medium');
+    expect(g.window(40)).toBe('medium');
+  });
+
+  it('reads a pinned level from the URL', () => {
+    expect(parseQuality('low')).toBe('low');
+    expect(parseQuality('ultra')).toBeUndefined();
   });
 });
 
