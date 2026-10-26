@@ -378,7 +378,7 @@ function Contact({ data, lang, siteKey }: { data: StoryData; lang: Locale; siteK
     return () => clearTimeout(timer);
   }, [toast]);
 
-  // The form logic and Turnstile load only now that the phone is open.
+  // The form logic loads now that the phone is open; Turnstile only on Send.
   useEffect(() => {
     const element = form.current;
     if (element) void import('@/scripts/contact-form').then(({ setUpContactForm }) => setUpContactForm(element));
@@ -444,6 +444,7 @@ function Contact({ data, lang, siteKey }: { data: StoryData; lang: Locale; siteK
             <span data-key="sending">{t(lang, 'contact.sending')}</span>
             <span data-key="sent">{t(lang, 'contact.sent')}</span>
             <span data-key="human">{t(lang, 'contact.humanWait')}</span>
+            <span data-key="human-failed">{t(lang, 'contact.humanFailed')}</span>
             <span data-key="failed">{t(lang, 'contact.failed')}</span>
             <span data-key="field-name">{t(lang, 'contact.errName')}</span>
             <span data-key="field-email">{t(lang, 'contact.errEmail')}</span>

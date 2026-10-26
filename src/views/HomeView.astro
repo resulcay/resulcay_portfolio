@@ -155,6 +155,7 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
             <span data-key="sending">{t(lang, 'contact.sending')}</span>
             <span data-key="sent">{t(lang, 'contact.sent')}</span>
             <span data-key="human">{t(lang, 'contact.humanWait')}</span>
+            <span data-key="human-failed">{t(lang, 'contact.humanFailed')}</span>
             <span data-key="failed">{t(lang, 'contact.failed')}</span>
             <span data-key="field-name">{t(lang, 'contact.errName')}</span>
             <span data-key="field-email">{t(lang, 'contact.errEmail')}</span>
@@ -169,8 +170,8 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
 <script>
   const form = document.querySelector<HTMLFormElement>('[data-contact]');
   if (form) {
-    // The human check and validation load the first time someone starts
-    // typing, so the page itself stays light.
+    // Validation loads the first time someone starts typing, and the human
+    // check only when they press Send, so the page itself stays light.
     const start = () => void import('@/scripts/contact-form').then(({ setUpContactForm }) => setUpContactForm(form));
     form.addEventListener('focusin', start, { once: true });
   }

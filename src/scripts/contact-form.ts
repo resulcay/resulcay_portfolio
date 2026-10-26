@@ -1,6 +1,8 @@
 import { contactSchema } from '@/domain/schemas';
 import { issuesOf, postJson, showFieldErrors } from './forms';
-import { mountHumanCheck, type HumanCheck } from './turnstile';
+import { humanToken } from './turnstile';
+
+const fieldsSchema = contactSchema.omit({ token: true });
 
 export function setUpContactForm(form: HTMLFormElement): void {
   const status = form.querySelector<HTMLElement>('[role="status"]');
@@ -19,34 +21,37 @@ export function setUpContactForm(form: HTMLFormElement): void {
     issues.map((issue) => ({ path: issue.path, message: text(`field-${issue.path}`) || issue.message }));
   const lang = document.documentElement.lang;
 
-  let human: HumanCheck | undefined;
-  mountHumanCheck(widget, widget.dataset['sitekey'] ?? '', 'contact', lang).then(
-    (check) => (human = check),
-    () => say('failed'),
-  );
-
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const data = new FormData(form);
-    const parsed = contactSchema.safeParse({
+    const parsed = fieldsSchema.safeParse({
       name: data.get('name'),
       email: data.get('email'),
       message: data.get('message'),
       lang: data.get('lang'),
       website: data.get('website') || undefined,
-      token: human?.token() ?? '',
     });
+    // Fields first: Turnstile loads only for a message that's ready to send.
     if (!parsed.success) {
-      const issues = issuesOf(parsed.error);
-      showFieldErrors(form, localize(issues.filter((i) => i.path !== 'token')));
-      if (issues.every((i) => i.path === 'token')) say('human');
-      else status.textContent = '';
+      showFieldErrors(form, localize(issuesOf(parsed.error)));
+      status.textContent = '';
       return;
     }
     showFieldErrors(form, []);
     submit.disabled = true;
+    say('human');
+    let check: { token: string; done: () => void };
+    try {
+      check = await humanToken(widget, widget.dataset['sitekey'] ?? '', 'contact', lang);
+    } catch {
+      say('human-failed');
+      submit.disabled = false;
+      return;
+    }
     say('sending');
-    const result = await postJson('/api/contact', parsed.data);
+    const result = await postJson('/api/contact', { ...parsed.data, token: check.token });
+    // Tokens are single use; the next send renders a fresh widget.
+    check.done();
     if (result.ok) {
       form.reset();
       say('sent');
@@ -54,7 +59,6 @@ export function setUpContactForm(form: HTMLFormElement): void {
       if (result.data.fields) showFieldErrors(form, localize(result.data.fields));
       say('failed');
     }
-    human?.reset();
     submit.disabled = false;
   });
 }

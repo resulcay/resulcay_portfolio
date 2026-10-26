@@ -3,6 +3,7 @@
 
 interface TurnstileApi {
   render(container: HTMLElement, options: Record<string, unknown>): string;
+  execute(widgetId: string): void;
   reset(widgetId: string): void;
   remove(widgetId: string): void;
 }
@@ -71,4 +72,40 @@ export async function mountHumanCheck(
       api.reset(id);
     },
   };
+}
+
+/**
+ * Loads Turnstile, runs one check and resolves with its token, then the
+ * caller removes the widget with done(). The widget stays invisible unless
+ * Cloudflare needs the visitor to interact. Used by the contact form on Send.
+ */
+export async function humanToken(
+  container: HTMLElement,
+  siteKey: string,
+  action: string,
+  lang: string,
+): Promise<{ token: string; done: () => void }> {
+  const api = await load();
+  return new Promise((resolve, reject) => {
+    let id = '';
+    const done = () => api.remove(id);
+    const fail = (why: string) => {
+      done();
+      reject(new Error(why));
+      // Tells Turnstile the error is handled, so it doesn't throw it.
+      return true;
+    };
+    id = api.render(container, {
+      sitekey: siteKey,
+      action,
+      language: lang,
+      appearance: 'interaction-only',
+      execution: 'execute',
+      callback: (token: string) => resolve({ token, done }),
+      'error-callback': () => fail('error'),
+      'expired-callback': () => fail('expired'),
+      'timeout-callback': () => fail('timeout'),
+    });
+    api.execute(id);
+  });
 }

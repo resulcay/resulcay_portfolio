@@ -117,26 +117,51 @@ test('a deep link opens its panel, and Back closes it', async ({ page }) => {
   expect(problems).toEqual([]);
 });
 
-test('pages with a Turnstile form allow it in the CSP', async ({ page, request }) => {
+test('the contact form allows Turnstile in the CSP and loads it only on Send', async ({ page, request }) => {
   for (const path of ['/', '/tr', '/story']) {
     const csp = (await request.get(path)).headers()['content-security-policy'] ?? '';
     expect(csp, path).toMatch(/script-src [^;]*https:\/\/challenges\.cloudflare\.com/);
     expect(csp, path).toMatch(/frame-src [^;]*https:\/\/challenges\.cloudflare\.com/);
   }
 
-  // The home contact form loads Turnstile when it's first used; a stub stands in for Cloudflare.
+  // Turnstile loads only on a valid Send. A stub stands in for Cloudflare and for the API.
   const problems = watchConsole(page);
-  let loaded = false;
+  let turnstileRequests = 0;
+  let sent: Record<string, unknown> | undefined;
   await page.route('https://challenges.cloudflare.com/**', (route) => {
-    loaded = true;
-    return route.fulfill({ contentType: 'text/javascript', body: 'window.turnstile = { render: () => "w", reset() {}, remove() {} };' });
+    turnstileRequests++;
+    return route.fulfill({
+      contentType: 'text/javascript',
+      body: `window.turnstile = {
+        render: (el, options) => { window.__turnstile = options; return 'w'; },
+        execute: () => setTimeout(() => window.__turnstile.callback('stub-token'), 50),
+        remove: () => {}, reset: () => {},
+      };`,
+    });
+  });
+  await page.route('**/api/contact', (route) => {
+    sent = route.request().postDataJSON() as Record<string, unknown>;
+    return route.fulfill({ json: { ok: true } });
   });
   await page.goto('/');
   await page.getByLabel('Your name').focus();
   // Autofill sends keydown events without a key; nothing may trip over that.
   await page.evaluate(() => dispatchEvent(new Event('keydown')));
-  await expect.poll(() => loaded).toBe(true);
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(500);
+  expect(turnstileRequests, 'loaded on focus').toBe(0);
+
+  const send = page.getByRole('button', { name: 'Send message' });
+  await send.click();
+  await expect(page.getByText('Please add your name.')).toBeVisible();
+  expect(turnstileRequests, 'loaded for an invalid form').toBe(0);
+
+  await page.getByLabel('Your name').fill('Test Visitor');
+  await page.getByLabel('Your email').fill('visitor@example.com');
+  await page.getByLabel('Message').fill('Hello there, this is a test message.');
+  await send.click();
+  await expect(page.getByText("Thanks, your message is in. I'll write back soon.")).toBeVisible();
+  expect(turnstileRequests).toBe(1);
+  expect(sent).toMatchObject({ name: 'Test Visitor', token: 'stub-token' });
   expect(problems).toEqual([]);
 });
 
