@@ -18,8 +18,9 @@ interface MountOptions {
 /**
  * Loaded only after Start. Returns a function that tears the 3D view down and
  * frees its WebGL context. State for tests and QA lands on the container as
- * data-ready, data-quality, data-calls and data-triangles. `?quality=` pins a
- * level and `?hour=` sets the clock for the window.
+ * data-ready, data-quality, data-calls, data-triangles, data-fps and
+ * data-rewinding. `?quality=` pins a level, `?hour=` sets the clock for the
+ * window and `?post=off` turns the post pass off to compare.
  */
 export async function mountStory(container: HTMLElement, options: MountOptions): Promise<() => void> {
   const [response] = await Promise.all([
@@ -38,6 +39,7 @@ export async function mountStory(container: HTMLElement, options: MountOptions):
   const hourParam = Number(params.get('hour'));
   const hour = params.has('hour') && hourParam >= 0 && hourParam < 24 ? hourParam : new Date().getHours();
   const coarse = matchMedia('(pointer: coarse)').matches;
+  const post = params.get('post') !== 'off';
 
   const root = createRoot(container, { onUncaughtError: options.onError });
   // No StrictMode: its dev-only double effect run would drop the WebGL context on first mount.
@@ -50,19 +52,25 @@ export async function mountStory(container: HTMLElement, options: MountOptions):
       initialQuality={pinned ?? (coarse ? 'medium' : 'high')}
       pinned={pinned !== undefined}
       still={options.reducedMotion}
+      post={post}
       onReady={() => {
         container.dataset['ready'] = 'true';
         options.onReady();
       }}
       onQuality={(quality) => (container.dataset['quality'] = quality)}
-      onStats={({ calls, triangles }) => {
+      onStats={({ calls, triangles, fps }) => {
         container.dataset['calls'] = String(calls);
         container.dataset['triangles'] = String(triangles);
+        container.dataset['fps'] = String(Math.round(fps));
+      }}
+      onRewind={(rewinding) => {
+        if (rewinding) container.dataset['rewinding'] = 'true';
+        else delete container.dataset['rewinding'];
       }}
     />,
   );
   return () => {
     root.unmount();
-    for (const key of ['ready', 'quality', 'calls', 'triangles']) delete container.dataset[key];
+    for (const key of ['ready', 'quality', 'calls', 'triangles', 'fps', 'rewinding']) delete container.dataset[key];
   };
 }

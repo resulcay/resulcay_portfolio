@@ -11,6 +11,7 @@ import { Corkboard, Journal, Laptop, Phone, RecordPlayer } from './scene/Props';
 import { Polaroids } from './scene/Polaroids';
 import { Character } from './scene/Character';
 import { Butterfly } from './scene/Butterfly';
+import { Post } from './scene/Post';
 import { PHASES, type Phase } from './scene/time';
 import { createQualityGovernor, DPR, type Quality } from './scene/quality';
 import type { StoryObject } from './lines';
@@ -22,6 +23,7 @@ const TARGET: [number, number, number] = [-0.1, 1.0, -0.6];
 export interface Stats {
   calls: number;
   triangles: number;
+  fps: number;
 }
 
 interface StageProps {
@@ -34,6 +36,13 @@ interface StageProps {
   hovered: string | null;
   /** The object the camera should move to, or null for the room view. */
   focus: StoryObject | null;
+  /** Where the butterfly suggests looking next. */
+  guide: StoryObject | null;
+  /** Ticks once per rewind; `rewinding` is true while one plays. */
+  rewind: number;
+  rewinding: boolean;
+  /** The painterly post pass; `?post=off` turns it off to compare. */
+  post: boolean;
   onHover: (id: string | null) => void;
   onSelect: (id: string) => void;
   onArrive: (object: StoryObject) => void;
@@ -43,7 +52,7 @@ interface StageProps {
 }
 
 export function Stage(props: StageProps) {
-  const { data, phase, still, hovered, onHover, onSelect, onQuality } = props;
+  const { data, phase, still, hovered, guide, onHover, onSelect, onQuality } = props;
   const [quality, setQuality] = useState(props.initialQuality);
   useEffect(() => {
     onQuality(quality);
@@ -77,8 +86,11 @@ export function Stage(props: StageProps) {
           <Polaroids projects={data.projects} />
           <Character variant="procedural" still={still} />
         </KitProvider>
+        <Butterfly still={still} target={guide} onTap={() => guide && onHover(guide)} />
       </InteractionContext.Provider>
-      <Butterfly still={still} />
+      {props.post && (quality !== 'low' || props.rewinding) && (
+        <Post paint={quality === 'high' ? 2 : quality === 'medium' ? 1 : 0} rewind={props.rewind} still={still} />
+      )}
       <Director focus={props.focus} still={still} hovered={hovered} onArrive={props.onArrive} />
       <QualityWatch quality={quality} pinned={props.pinned} onChange={setQuality} onStats={props.onStats} />
       <PauseWhenHidden />
@@ -232,7 +244,7 @@ function QualityWatch({
     const fps = (w.frames * 1000) / (now - w.start);
     w.start = now;
     w.frames = 0;
-    onStats({ calls: info.render.calls, triangles: info.render.triangles });
+    onStats({ calls: info.render.calls, triangles: info.render.triangles, fps });
     // The first window includes shader compiles; don't judge it.
     if (w.count++ === 0 || pinned) return;
     const next = governor.window(fps);

@@ -30,6 +30,23 @@ for (const size of SIZES) {
     await expect(scene).toHaveAttribute('data-calls', /^\d+$/, { timeout: 20_000 });
     expect(await overflowsX(page)).toBe(false);
 
+    // First visit: who's visiting? A recruiter gets shortcut chips.
+    const choice = page.getByRole('dialog', { name: "Who's visiting?" });
+    await expect(choice).toBeVisible();
+    if (size.width === 390) await page.screenshot({ path: 'test-results/choice-390.png' });
+    await choice.getByRole('button', { name: 'Recruiter' }).click();
+    await expect(page.locator('.story-thought')).toHaveText('Resul will remember that.');
+    await expect(page.getByRole('link', { name: 'CV', exact: true })).toHaveAttribute('href', '/resul-cay-cv.pdf');
+    await page.getByRole('button', { name: 'Experience', exact: true }).click();
+    const fromChip = page.getByRole('dialog', { name: 'Experience' });
+    await expect(fromChip).toBeVisible();
+    await fromChip.getByRole('button', { name: 'Close' }).click();
+    // Closing plays the rewind.
+    await expect(scene).toHaveAttribute('data-rewinding', 'true');
+    if (size.width === 1440) await page.screenshot({ path: 'test-results/rewind-1440.png' });
+    await expect(scene).not.toHaveAttribute('data-rewinding');
+    await expect(fromChip).toBeHidden();
+
     if (size.width === 1440) await page.screenshot({ path: 'test-results/story-1440.png' });
 
     // Keyboard path: focus the laptop, read the thought, open it, close it.
@@ -65,11 +82,22 @@ for (const size of SIZES) {
     await expect(page.locator('canvas')).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Start story' })).toBeFocused();
 
+    // A reload remembers the answer.
+    await page.reload();
+    await page.getByRole('button', { name: 'Start story' }).click();
+    await expect(scene).toHaveAttribute('data-ready', 'true', { timeout: 60_000 });
+    await expect(page.getByRole('link', { name: 'CV', exact: true })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: "Who's visiting?" })).toHaveCount(0);
+
     expect(problems).toEqual([]);
   });
 }
 
+// These skip the first-visit question.
+const returning = (page: Page) => page.addInitScript(() => localStorage.setItem('story-visitor', 'explorer'));
+
 test('a deep link opens its panel, and Back closes it', async ({ page }) => {
+  await returning(page);
   const problems = watchConsole(page);
   await page.goto('/');
   await page.goto('/tr/story#laptop');
@@ -90,16 +118,19 @@ test('a deep link opens its panel, and Back closes it', async ({ page }) => {
 });
 
 test('reports scene cost at each quality level', async ({ page }) => {
+  await returning(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   const problems = watchConsole(page);
-  for (const quality of ['high', 'medium', 'low']) {
-    await page.goto(`/story?quality=${quality}`);
+  for (const query of ['quality=high', 'quality=high&post=off', 'quality=medium', 'quality=low']) {
+    await page.goto(`/story?${query}`);
     await page.getByRole('button', { name: 'Start story' }).click();
     const scene = page.locator('[data-canvas]');
     await expect(scene).toHaveAttribute('data-calls', /^\d+$/, { timeout: 60_000 });
+    // Wait for a later window, so the fps isn't the warm-up one.
+    await page.waitForTimeout(4500);
     const calls = Number(await scene.getAttribute('data-calls'));
     const triangles = Number(await scene.getAttribute('data-triangles'));
-    console.log(`${await scene.getAttribute('data-quality')}: ${calls} draw calls, ${triangles} triangles`);
+    console.log(`${query}: ${calls} draw calls, ${triangles} triangles, ${await scene.getAttribute('data-fps')} fps`);
     expect(calls).toBeLessThan(150);
   }
   expect(problems).toEqual([]);

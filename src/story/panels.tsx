@@ -5,6 +5,7 @@ import { localizePath, t } from '@/i18n/ui';
 import { LINES } from './lines';
 import type { Route } from './route';
 import type { Phase } from './scene/time';
+import { VISITORS, type Visitor } from './visitor';
 
 type Project = StoryData['projects'][number];
 
@@ -13,6 +14,7 @@ interface PanelsProps {
   data: StoryData;
   lang: Locale;
   siteKey: string | undefined;
+  visitor: Visitor;
   phaseChoice: Phase | 'auto';
   onPhase: (phase: Phase | 'auto') => void;
   onGo: (route: Route) => void;
@@ -20,19 +22,25 @@ interface PanelsProps {
 }
 
 /** The paper-page dialog for whichever object is open. */
-export function Panels({ route, data, lang, siteKey, phaseChoice, onPhase, onGo, onClose }: PanelsProps) {
+export function Panels({ route, data, lang, siteKey, visitor, phaseChoice, onPhase, onGo, onClose }: PanelsProps) {
   const ui = LINES[lang].ui;
   switch (route.object) {
     case 'polaroids': {
       const project = data.projects.find((p) => p.slug === route.project);
+      // A client sees paid work first (a stable sort keeps the rest in order); "Paid work" shows only that.
+      const shown = route.paid
+        ? data.projects.filter((p) => p.paid)
+        : visitor === 'client'
+          ? [...data.projects].sort((a, b) => Number(b.paid) - Number(a.paid))
+          : data.projects;
       return project ? (
         <Panel title={project.title} lang={lang} onClose={onClose}>
           <CaseStudy project={project} lang={lang} onAll={() => onGo({ object: 'polaroids' })} />
         </Panel>
       ) : (
-        <Panel title={t(lang, 'projects.title')} lang={lang} onClose={onClose}>
+        <Panel title={route.paid ? ui.chips.paidWork : t(lang, 'projects.title')} lang={lang} onClose={onClose}>
           <ul className="story-grid">
-            {data.projects.map((p) => (
+            {shown.map((p) => (
               <li key={p.slug}>
                 <button type="button" onClick={() => onGo({ object: 'polaroids', project: p.slug })}>
                   <strong>{p.title}</strong>
@@ -145,14 +153,8 @@ export function Panels({ route, data, lang, siteKey, phaseChoice, onPhase, onGo,
  * camera can move back first.
  */
 function Panel({ title, lang, onClose, children }: { title: string; lang: Locale; onClose: () => void; children: ReactNode }) {
-  const ref = useRef<HTMLDialogElement>(null);
+  const ref = useModal();
   const titleId = useId();
-  // A layout effect, so close() runs before React removes the element and focus is restored.
-  useLayoutEffect(() => {
-    const dialog = ref.current!;
-    dialog.showModal();
-    return () => dialog.close();
-  }, []);
   return (
     <dialog
       ref={ref}
@@ -174,6 +176,47 @@ function Panel({ title, lang, onClose, children }: { title: string; lang: Locale
           </button>
         </header>
         {children}
+      </div>
+    </dialog>
+  );
+}
+
+/** Opens a dialog as modal on mount and closes it on unmount. */
+function useModal() {
+  const ref = useRef<HTMLDialogElement>(null);
+  // A layout effect, so close() runs before React removes the element and focus is restored.
+  useLayoutEffect(() => {
+    const dialog = ref.current!;
+    dialog.showModal();
+    return () => dialog.close();
+  }, []);
+  return ref;
+}
+
+/** "Who's visiting?" on the first visit. Esc counts as just looking around. */
+export function Choice({ lang, onChoose }: { lang: Locale; onChoose: (visitor: Visitor) => void }) {
+  const ui = LINES[lang].ui;
+  const ref = useModal();
+  const titleId = useId();
+  return (
+    <dialog
+      ref={ref}
+      className="story-panel story-choice"
+      aria-labelledby={titleId}
+      onCancel={(event) => {
+        event.preventDefault();
+        onChoose('explorer');
+      }}
+    >
+      <div className="story-panel__page">
+        <h2 id={titleId}>{ui.who}</h2>
+        <div className="story-actions">
+          {VISITORS.map((visitor, i) => (
+            <button key={visitor} type="button" className={i === 0 ? 'button button--primary' : 'button'} onClick={() => onChoose(visitor)}>
+              {ui.visitors[visitor]}
+            </button>
+          ))}
+        </div>
       </div>
     </dialog>
   );

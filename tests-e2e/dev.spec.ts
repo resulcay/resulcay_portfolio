@@ -5,6 +5,7 @@ import { watchConsole } from './console';
 // break there while the production build works.
 test('story mode starts in the dev server', async ({ page }) => {
   const problems = watchConsole(page);
+  await page.addInitScript(() => localStorage.setItem('story-visitor', 'explorer'));
   await page.goto('/story');
   await page.getByRole('button', { name: 'Start story' }).click();
   await expect(page.locator('[data-canvas]')).toHaveAttribute('data-ready', 'true', { timeout: 90_000 });

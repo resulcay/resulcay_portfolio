@@ -49,8 +49,9 @@ if (siteKey) allowTurnstile(Astro);
       <p class="title__desc">{t(lang, 'story.description')}</p>
       <p class="title__unfit" data-unfit hidden>{t(lang, 'story.unfit')}</p>
       <div class="title__actions">
-        <button class="button button--primary" type="button" data-start data-anyway={t(lang, 'story.tryAnyway')}>
-          {t(lang, 'story.start')}
+        <button class="button button--primary start" type="button" data-start data-anyway={t(lang, 'story.tryAnyway')}>
+          <Butterfly size={18} class="start__butterfly" />
+          <span data-start-label>{t(lang, 'story.start')}</span>
         </button>
         <a class="button" href={localizePath('/', lang)}>{t(lang, 'story.journal')}</a>
         <a class="button" href={profile.cvPath} download>{t(lang, 'nav.cv')}</a>
@@ -84,7 +85,7 @@ if (siteKey) allowTurnstile(Astro);
   const device = readDevice();
   if (!storyFits(device)) {
     document.querySelector<HTMLElement>('[data-unfit]')!.hidden = false;
-    start.textContent = start.dataset['anyway'] ?? start.textContent;
+    start.querySelector('[data-start-label]')!.textContent = start.dataset['anyway'] ?? '';
   }
 
   let teardown: (() => void) | undefined;
@@ -203,6 +204,19 @@ if (siteKey) allowTurnstile(Astro);
     flex-wrap: wrap;
     gap: 12px;
   }
+  .start :global(.start__butterfly) {
+    transform-origin: center;
+  }
+  .start:hover :global(.start__butterfly),
+  .start:focus-visible :global(.start__butterfly) {
+    animation: flutter 0.35s ease-in-out infinite alternate;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .start:hover :global(.start__butterfly),
+    .start:focus-visible :global(.start__butterfly) {
+      animation: none;
+    }
+  }
   .title__note {
     font-size: 1.375rem;
     color: var(--ink-quiet);
@@ -296,6 +310,58 @@ if (siteKey) allowTurnstile(Astro);
   }
   .story-thought:empty {
     display: none;
+  }
+  .story-hud {
+    position: absolute;
+    left: 50%;
+    bottom: 76px;
+    translate: -50% 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: max-content;
+    max-width: calc(100% - 32px);
+  }
+  .story-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 6px 16px;
+    border: 0;
+    border-radius: 999px;
+    background: #e8a657;
+    color: #1e1b24;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .story-chip:hover {
+    background: #f4ebdd;
+    color: #1e1b24;
+  }
+  .story-hud__change {
+    min-height: 40px;
+    padding: 6px 10px;
+    border: 0;
+    background: none;
+    color: #f4ebdd;
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .story-rewind {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    translate: -50% 0;
+    color: #f4ebdd;
+    filter: drop-shadow(0 2px 6px rgb(30 27 36 / 0.6));
+  }
+  .story-choice {
+    width: min(520px, calc(100% - 24px));
   }
 
   .story-panel {

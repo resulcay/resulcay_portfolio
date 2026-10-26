@@ -1,5 +1,6 @@
 import type { Locale } from '@/domain/schemas';
 import type { Phase } from './scene/time';
+import type { Visitor } from './visitor';
 
 /** The objects you can open, in the order they appear from left to right. */
 export const OBJECTS = ['recordPlayer', 'polaroids', 'journal', 'phone', 'corkboard', 'laptop', 'window'] as const;
@@ -24,6 +25,13 @@ interface Lines {
     phases: Record<Phase, string>;
     consequences: string;
     chat: { hello: string; email: string; phone: string; linkedin: string };
+    who: string;
+    visitors: Record<Visitor, string>;
+    remember: string;
+    change: string;
+    chips: { cv: string; experience: string; contact: string; projects: string; paidWork: string };
+    guide: string;
+    rewinding: string;
   };
 }
 
@@ -71,6 +79,13 @@ export const LINES: Record<Locale, Lines> = {
         phone: 'Or call or text me:',
         linkedin: "I'm on LinkedIn too:",
       },
+      who: "Who's visiting?",
+      visitors: { recruiter: 'Recruiter', client: 'Client', explorer: 'Just looking around' },
+      remember: 'Resul will remember that.',
+      change: 'Change',
+      chips: { cv: 'CV', experience: 'Experience', contact: 'Contact', projects: 'Projects', paidWork: 'Paid work' },
+      guide: 'Butterfly: show me what to look at next',
+      rewinding: 'Rewinding',
     },
   },
   tr: {
@@ -116,6 +131,13 @@ export const LINES: Record<Locale, Lines> = {
         phone: 'Ya da ara veya mesaj at:',
         linkedin: "LinkedIn'de de varım:",
       },
+      who: 'Kim geliyor?',
+      visitors: { recruiter: 'İşe alım', client: 'Müşteri', explorer: 'Sadece bakıyorum' },
+      remember: 'Resul bunu hatırlayacak.',
+      change: 'Değiştir',
+      chips: { cv: 'CV', experience: 'Deneyim', contact: 'İletişim', projects: 'Projeler', paidWork: 'Ücretli işler' },
+      guide: 'Kelebek: sıradaki şeyi göster',
+      rewinding: 'Geri sarılıyor',
     },
   },
 };

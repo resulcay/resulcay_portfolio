@@ -41,6 +41,8 @@ export function storyData(
       period: formatPeriod(p.start, p.end, lang),
       story: p.story[lang],
       highlights: p.highlights.map((h) => h[lang]),
+      // Work someone paid for: what a client wants to see first.
+      paid: ['paid', 'freemium', 'in-app-purchases'].includes(p.pricing) || p.workType === 'freelance',
       tags: [p.category, ...p.appTypes, ...p.platforms, ...p.languages, ...p.tech].map((tag) => tagLabel(tag, lang)),
       links: p.links,
       images: (p.images ?? []).map((i) => ({ src: `/media/${i.key}`, alt: i.alt[lang], width: i.width, height: i.height })),

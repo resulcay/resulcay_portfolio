@@ -6,6 +6,7 @@ import { phaseAt } from '@/story/scene/time';
 import { createQualityGovernor, parseQuality } from '@/story/scene/quality';
 import { LINES, OBJECTS, thoughtFor } from '@/story/lines';
 import { parseHash, routeForHotspot, toHash } from '@/story/route';
+import { nextTarget, readVisited, readVisitor, saveVisited, saveVisitor } from '@/story/visitor';
 import { experience, profile, projects, testimonials } from '@/infrastructure/content/seed';
 
 const str = z.string().min(1);
@@ -42,6 +43,7 @@ const storyDataSchema = z.strictObject({
       story: str,
       highlights: z.array(str),
       tags: z.array(str),
+      paid: z.boolean(),
       links: z.record(z.string(), z.url()),
       images: z.array(z.strictObject({ src: z.string().startsWith('/media/'), alt: str, width: z.number(), height: z.number() })),
     }),
@@ -149,6 +151,7 @@ describe('story routes', () => {
     ['#laptop', { object: 'laptop' }],
     ['#project/macyap', { object: 'polaroids', project: 'macyap' }],
     ['#polaroids', { object: 'polaroids' }],
+    ['#paid-work', { object: 'polaroids', paid: true }],
     ['', null],
     ['#contact', null],
     ['#project/Bad_Slug', null],
@@ -157,7 +160,11 @@ describe('story routes', () => {
   });
 
   it('round-trips through the hash', () => {
-    for (const route of [{ object: 'window' as const }, { object: 'polaroids' as const, project: 'floria' }]) {
+    for (const route of [
+      { object: 'window' as const },
+      { object: 'polaroids' as const, project: 'floria' },
+      { object: 'polaroids' as const, paid: true as const },
+    ]) {
       expect(parseHash(toHash(route))).toEqual(route);
     }
   });
@@ -165,6 +172,63 @@ describe('story routes', () => {
   it('sends a Polaroid click to its project', () => {
     expect(routeForHotspot('polaroid:floria')).toEqual({ object: 'polaroids', project: 'floria' });
     expect(routeForHotspot('phone')).toEqual({ object: 'phone' });
+  });
+});
+
+describe('visitor choice', () => {
+  const memory = (): Storage => {
+    const data = new Map<string, string>();
+    return {
+      get length() {
+        return data.size;
+      },
+      clear: () => data.clear(),
+      getItem: (key) => data.get(key) ?? null,
+      key: (i) => [...data.keys()][i] ?? null,
+      removeItem: (key) => void data.delete(key),
+      setItem: (key, value) => void data.set(key, value),
+    };
+  };
+
+  it('remembers the answer and forgets it on request', () => {
+    const storage = memory();
+    expect(readVisitor(storage)).toBeNull();
+    saveVisitor(storage, 'client');
+    expect(readVisitor(storage)).toBe('client');
+    saveVisitor(storage, null);
+    expect(readVisitor(storage)).toBeNull();
+  });
+
+  it('ignores unknown values and storage that throws', () => {
+    const storage = memory();
+    storage.setItem('story-visitor', 'boss');
+    expect(readVisitor(storage)).toBeNull();
+    const broken = { getItem: () => { throw new Error('blocked'); }, setItem: () => { throw new Error('blocked'); } } as unknown as Storage;
+    expect(readVisitor(broken)).toBeNull();
+    expect(() => saveVisitor(broken, 'recruiter')).not.toThrow();
+    expect(readVisited(broken)).toEqual([]);
+  });
+
+  it('round-trips the visited objects', () => {
+    const storage = memory();
+    saveVisited(storage, ['laptop', 'phone']);
+    expect(readVisited(storage)).toEqual(['laptop', 'phone']);
+  });
+});
+
+describe('butterfly guide', () => {
+  it.each([
+    ['recruiter', [], 'laptop'],
+    ['recruiter', ['laptop'], 'phone'],
+    ['client', [], 'polaroids'],
+    ['client', ['polaroids'], 'phone'],
+    ['explorer', ['polaroids'], 'laptop'],
+  ] as const)('%s after %j goes to %s', (visitor, visited, target) => {
+    expect(nextTarget(visitor, visited)).toBe(target);
+  });
+
+  it('rests once everything has been seen', () => {
+    expect(nextTarget('explorer', OBJECTS)).toBeNull();
   });
 });
 
