@@ -1,0 +1,248 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Butterfly from '@/components/Butterfly.astro';
+import type { Locale } from '@/domain/schemas';
+import { content } from '@/lib/content';
+import { localizePath, t } from '@/i18n/ui';
+
+interface Props {
+  lang: Locale;
+}
+const { lang } = Astro.props;
+const profile = await content.getProfile();
+---
+<BaseLayout lang={lang} title={t(lang, 'nav.story')} description={t(lang, 'story.description')}>
+  <section class="title wrap" aria-labelledby="story-title">
+    <div class="poster" aria-hidden="true">
+      <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="story-sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#5b4b8a"></stop>
+            <stop offset="0.55" stop-color="#e8a657"></stop>
+            <stop offset="1" stop-color="#f6d3a0"></stop>
+          </linearGradient>
+          <radialGradient id="story-sun">
+            <stop offset="0" stop-color="#fff3d6"></stop>
+            <stop offset="0.45" stop-color="#ffd59a" stop-opacity="0.9"></stop>
+            <stop offset="1" stop-color="#e8a657" stop-opacity="0"></stop>
+          </radialGradient>
+        </defs>
+        <rect width="400" height="300" fill="url(#story-sky)"></rect>
+        <circle cx="282" cy="196" r="90" fill="url(#story-sun)"></circle>
+        <circle cx="282" cy="196" r="28" fill="#fff0cf"></circle>
+        <path d="M0 214 C60 190 110 200 170 186 C230 172 300 196 400 178 L400 300 L0 300Z" fill="#2f6f73"></path>
+        <path d="M0 246 C70 228 140 240 210 226 C280 212 340 236 400 222 L400 300 L0 300Z" fill="#1e1b24"></path>
+        <path d="M54 246 L58 150 M58 150 L46 158 M58 150 L70 158 M120 236 L123 160 M123 160 L112 167 M123 160 L134 167" stroke="#1e1b24" stroke-width="2.5" fill="none"></path>
+        <path d="M58 156 C80 170 100 170 123 165" stroke="#1e1b24" stroke-width="1" fill="none"></path>
+        <path d="M150 90 q6 -6 12 0 q6 -6 12 0 M190 70 q5 -5 10 0 q5 -5 10 0" stroke="#1e1b24" stroke-width="1.6" fill="none"></path>
+      </svg>
+      <Butterfly size={40} class="poster__butterfly" />
+    </div>
+
+    <div class="title__text">
+      <h1 id="story-title"><span class="hand">{t(lang, 'home.kicker')}:</span> {t(lang, 'home.title')}</h1>
+      <p class="title__desc">{t(lang, 'story.description')}</p>
+      <p class="title__unfit" data-unfit hidden>{t(lang, 'story.unfit')}</p>
+      <div class="title__actions">
+        <button class="button button--primary" type="button" data-start data-anyway={t(lang, 'story.tryAnyway')}>
+          {t(lang, 'story.start')}
+        </button>
+        <a class="button" href={localizePath('/', lang)}>{t(lang, 'story.journal')}</a>
+        <a class="button" href={profile.cvPath} download>{t(lang, 'nav.cv')}</a>
+      </div>
+      <p class="hand title__note">{t(lang, 'story.headphones')}</p>
+      <p class="title__failed" data-failed role="alert" hidden>{t(lang, 'story.failed')}</p>
+    </div>
+  </section>
+
+  <div class="stage" data-stage data-url={localizePath('/story/data.json', lang)} hidden>
+    <div class="stage__canvas" data-canvas></div>
+    <div class="stage__loader" data-loader role="status">
+      <Butterfly size={56} class="stage__butterfly" />
+      <p>{t(lang, 'story.loading')}</p>
+    </div>
+    <button class="button stage__back" type="button" data-back>{t(lang, 'story.back')}</button>
+  </div>
+</BaseLayout>
+
+<script>
+  import { readDevice, storyFits } from '@/scripts/story-capability';
+
+  const start = document.querySelector<HTMLButtonElement>('[data-start]')!;
+  const stage = document.querySelector<HTMLElement>('[data-stage]')!;
+  const canvas = document.querySelector<HTMLElement>('[data-canvas]')!;
+  const loader = document.querySelector<HTMLElement>('[data-loader]')!;
+  const back = document.querySelector<HTMLButtonElement>('[data-back]')!;
+  const failed = document.querySelector<HTMLElement>('[data-failed]')!;
+
+  const device = readDevice();
+  if (!storyFits(device)) {
+    document.querySelector<HTMLElement>('[data-unfit]')!.hidden = false;
+    start.textContent = start.dataset['anyway'] ?? start.textContent;
+  }
+
+  let teardown: (() => void) | undefined;
+  // Bumped on every close, so a mount that finishes after Back is undone at once.
+  let session = 0;
+
+  function close() {
+    session++;
+    teardown?.();
+    teardown = undefined;
+    stage.hidden = true;
+    document.documentElement.classList.remove('story-open');
+    start.focus();
+  }
+
+  function fail(error: unknown) {
+    console.error('Story mode failed to start', error);
+    close();
+    failed.hidden = false;
+  }
+
+  start.addEventListener('click', async () => {
+    if (!stage.hidden) return;
+    const id = ++session;
+    failed.hidden = true;
+    loader.hidden = false;
+    stage.hidden = false;
+    document.documentElement.classList.add('story-open');
+    back.focus();
+    try {
+      const { mountStory } = await import('@/story/main');
+      const unmount = await mountStory(canvas, {
+        dataUrl: stage.dataset['url']!,
+        reducedMotion: device.reducedMotion,
+        onReady: () => (loader.hidden = true),
+        onError: fail,
+      });
+      if (id === session) teardown = unmount;
+      else unmount();
+    } catch (error) {
+      if (id === session) fail(error);
+    }
+  });
+
+  back.addEventListener('click', close);
+  addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !stage.hidden) close();
+  });
+</script>
+
+<style>
+  .title {
+    display: grid;
+    gap: clamp(28px, 5vw, 56px);
+    align-items: center;
+    padding-top: clamp(32px, 6vw, 80px);
+  }
+  @media (min-width: 900px) {
+    .title {
+      grid-template-columns: 1.1fr 1fr;
+    }
+  }
+  .poster {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border: 10px solid var(--paper-raised);
+    border-bottom-width: 36px;
+    border-radius: 4px;
+    box-shadow: 0 18px 40px rgb(30 27 36 / 0.25);
+    rotate: -1.5deg;
+    overflow: hidden;
+  }
+  .poster svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .poster :global(.poster__butterfly) {
+    position: absolute;
+    left: 58%;
+    top: 30%;
+  }
+  .title__text {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  h1 {
+    font-size: clamp(2.75rem, 7vw, 4.5rem);
+  }
+  h1 .hand {
+    display: block;
+    font-size: 0.5em;
+    color: var(--accent-text);
+  }
+  .title__desc {
+    max-width: var(--measure);
+    font-size: 1.1875rem;
+  }
+  .title__unfit,
+  .title__failed {
+    max-width: var(--measure);
+    padding: 12px 16px;
+    border-left: 4px solid var(--golden);
+    background: var(--paper-raised);
+  }
+  .title__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .title__note {
+    font-size: 1.375rem;
+    color: var(--ink-quiet);
+  }
+
+  .stage:not([hidden]) {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: #2a2140;
+  }
+  .stage__canvas {
+    position: absolute;
+    inset: 0;
+  }
+  .stage__loader:not([hidden]) {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #f4ebdd;
+    font-family: var(--font-hand);
+    font-size: 1.5rem;
+  }
+  .stage__loader :global(.stage__butterfly) {
+    animation: flutter 0.5s ease-in-out infinite alternate;
+  }
+  @keyframes flutter {
+    to {
+      transform: scaleX(0.4) translateY(-6px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stage__loader :global(.stage__butterfly) {
+      animation: none;
+    }
+  }
+  .stage__back {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: #f4ebdd;
+    color: #1e1b24;
+    border-color: #f4ebdd;
+  }
+  .stage__back:hover {
+    background: #e8a657;
+    color: #1e1b24;
+  }
+  :global(html.story-open) {
+    overflow: hidden;
+  }
+</style>

@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
+import react from '@astrojs/react';
 
 export default defineConfig({
   site: 'https://resulcay.com',
@@ -10,6 +11,8 @@ export default defineConfig({
     imageService: 'compile',
   }),
   session: false,
+  // React only powers Story mode, which loads after the visitor presses Start.
+  integrations: [react({ include: ['**/src/story/**'] })],
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'tr'],

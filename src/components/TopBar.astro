@@ -23,6 +23,7 @@ const home = localizePath('/', lang);
       <li><a href={localizePath('/projects', lang)}>{t(lang, 'nav.projects')}</a></li>
       <li><a href={localizePath('/about', lang)}>{t(lang, 'nav.about')}</a></li>
       <li><a href={`${home}#contact`}>{t(lang, 'nav.contact')}</a></li>
+      <li><a href={localizePath('/story', lang)}>{t(lang, 'nav.story')}</a></li>
       <li><a class="cv" href={cvPath} download>{t(lang, 'nav.cv')}</a></li>
       <li>
         <a class="lang" href={localizePath(path, other)} hreflang={other} lang={other}>{t(lang, 'nav.switchLang')}</a>
