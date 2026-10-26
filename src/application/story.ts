@@ -1,4 +1,4 @@
-import type { Experience, Locale, Profile, Project, Testimonial } from '@/domain/schemas';
+import type { Experience, Locale, MusicTrack, Profile, Project, Testimonial } from '@/domain/schemas';
 import { tagLabel } from '@/domain/tags';
 import { formatPeriod, t } from '@/i18n/ui';
 import { publicProjects } from './content';
@@ -10,6 +10,7 @@ export function storyData(
   projects: Project[],
   experience: Experience[],
   testimonials: Testimonial[],
+  music: MusicTrack[] = [],
 ) {
   return {
     lang,
@@ -57,6 +58,14 @@ export function storyData(
       points: e.points.map((p) => p[lang]),
     })),
     testimonials: testimonials.map((x) => ({ name: x.name, quote: x.quote[lang] })),
+    music: music.map((m) => ({
+      title: m.title,
+      artist: m.artist,
+      url: `/media/${m.key}`,
+      license: m.license,
+      sourceUrl: m.sourceUrl,
+      credit: m.credit?.[lang],
+    })),
   };
 }
 

@@ -46,6 +46,14 @@ Content lives in Firestore (`projects/{slug}`, `site/profile`, `site/experience`
 
 Uploads go to the R2 bucket `resulcay-media` and are served from `/media/...`. Rules (`src/domain/media.ts`), checked in the browser and again on the server from the file's bytes: 10 MB at most; project and site images must be PNG, JPEG, WebP or AVIF, 64 to 4096 px; the CV must be a PDF. The admin resizes photos to 2400 px and converts them to WebP before upload.
 
+### Music
+
+Story mode's record player plays the tracks listed under **Admin → Music**, in order, looping. Upload MP3, Ogg or M4A files (10 MB at most; the type is checked from the file's bytes), then fill in the title, artist, licence and source link for each, and save. The licence and source are required because they're shown in the credits (on the Story mode title screen, in the record player, and linked from the footer).
+
+Only use music you have the right to use. Good places for CC0 and CC BY tracks: the [Free Music Archive](https://freemusicarchive.org), [ccMixter](https://ccmixter.org) and [Pixabay Music](https://pixabay.com/music/). CC BY needs the artist credited, which the credits do; avoid NC (non-commercial) and ND licences unless you've checked they fit. Keep a note of the page you downloaded each track from and paste it as the source.
+
+With no tracks, Story mode simply has no music; its sound effects and room ambience are made in the browser and need no files.
+
 ### Local development
 
 Copy `.dev.vars.example` to `.dev.vars`. Without the `FIREBASE_*` lines, content is edited in memory and you sign in with any email and `DEV_ADMIN_PASSWORD`. Turnstile test keys work offline in dev.

@@ -1,13 +1,14 @@
 ---
 import type { Locale, Profile } from '@/domain/schemas';
-import { t } from '@/i18n/ui';
+import { localizePath, t } from '@/i18n/ui';
 import Butterfly from './Butterfly.astro';
 
 interface Props {
   lang: Locale;
   profile: Profile;
+  hasMusic: boolean;
 }
-const { lang, profile } = Astro.props;
+const { lang, profile, hasMusic } = Astro.props;
 const year = new Date().getFullYear();
 ---
 <footer class="footer">
@@ -19,7 +20,10 @@ const year = new Date().getFullYear();
       <li><a href={profile.links.medium} rel="me">Medium</a></li>
       <li><a href={profile.links.blog} rel="me">PureBlog</a></li>
     </ul>
-    <p class="footer__note">© {year} {profile.name}. {t(lang, 'footer.inspired')}</p>
+    <p class="footer__note">
+      © {year} {profile.name}. {t(lang, 'footer.inspired')}
+      {hasMusic && <a href={`${localizePath('/story', lang)}#credits`}>{t(lang, 'footer.musicCredits')}</a>}
+    </p>
   </div>
 </footer>
 

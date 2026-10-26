@@ -52,12 +52,24 @@ const storyDataSchema = z.strictObject({
     z.strictObject({ organization: str, title: str, start: str, end: str.optional(), location: str, period: str, points: z.array(str) }),
   ),
   testimonials: z.array(z.strictObject({ name: str, quote: str })),
+  music: z.array(
+    z.strictObject({ title: str, artist: str, url: z.string().startsWith('/media/music/'), license: str, sourceUrl: z.url(), credit: str.optional() }),
+  ),
 });
 
 describe('story data', () => {
   it.each(['en', 'tr'] as const)('has the documented shape in %s', (lang) => {
     // Through JSON, as the browser receives it.
-    const data = JSON.parse(JSON.stringify(storyData(lang, profile, projects, experience, testimonials)));
+    const track = {
+      id: 'evening-walk',
+      title: 'Evening Walk',
+      artist: 'Someone Kind',
+      key: 'music/tracks/0b6f4b5e-1c2d-4e5f-8a9b-0c1d2e3f4a5b.mp3',
+      license: 'CC BY 4.0',
+      sourceUrl: 'https://example.org/evening-walk',
+      credit: { en: 'Thanks to Someone Kind', tr: 'Someone Kind sağ olsun' },
+    };
+    const data = JSON.parse(JSON.stringify(storyData(lang, profile, projects, experience, testimonials, [track])));
     expect(() => storyDataSchema.parse(data)).not.toThrow();
   });
 

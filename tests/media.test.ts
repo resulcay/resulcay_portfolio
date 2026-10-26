@@ -73,6 +73,36 @@ describe('upload rules', () => {
     expect(checkUpload(huge, 'projects').ok).toBe(false);
   });
 
+  describe('audio', () => {
+    const bytes = (...parts: (string | number[])[]) =>
+      new Uint8Array(parts.flatMap((p) => (typeof p === 'string' ? [...p].map((c) => c.charCodeAt(0)) : p)).concat(Array(32).fill(0)));
+    const id3 = bytes('ID3', [4, 0, 0]);
+    const mp3Frame = bytes([0xff, 0xfb, 0x90, 0x64]);
+    const ogg = bytes('OggS', [0, 2]);
+    const m4a = bytes([0, 0, 0, 0x20], 'ftypM4A ');
+
+    it('recognises MP3, Ogg and M4A from their bytes', () => {
+      expect(sniffType(id3)).toBe('audio/mpeg');
+      expect(sniffType(mp3Frame)).toBe('audio/mpeg');
+      expect(sniffType(ogg)).toBe('audio/ogg');
+      expect(sniffType(m4a)).toBe('audio/mp4');
+      expect(sniffType(bytes([0, 0, 0, 0x20], 'ftypavif'))).toBe('image/avif');
+    });
+
+    it('accepts audio only in the music folder', () => {
+      expect(checkUpload(ogg, 'music')).toEqual({ ok: true, type: 'audio/ogg' });
+      expect(checkUpload(id3, 'music')).toEqual({ ok: true, type: 'audio/mpeg' });
+      expect(checkUpload(ogg, 'projects').ok).toBe(false);
+      expect(checkUpload(png(800, 600), 'music').ok).toBe(false);
+      expect(checkUpload(pdf, 'music').ok).toBe(false);
+    });
+
+    it('allows music keys', () => {
+      expect(MEDIA_KEY.test('music/tracks/0b6f4b5e-1c2d-4e5f-8a9b-0c1d2e3f4a5b.ogg')).toBe(true);
+      expect(MEDIA_KEY.test('music/tracks/0b6f4b5e1c2d.wav')).toBe(false);
+    });
+  });
+
   it('only accepts media keys the server would make', () => {
     expect(MEDIA_KEY.test('projects/macyap/0b6f4b5e-1c2d-4e5f-8a9b-0c1d2e3f4a5b.webp')).toBe(true);
     expect(MEDIA_KEY.test('projects/../secrets/0b6f4b5e.webp')).toBe(false);

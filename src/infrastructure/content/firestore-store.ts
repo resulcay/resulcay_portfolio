@@ -2,6 +2,7 @@ import type { ContentStore } from '@/application/content-repository';
 import {
   contactMessageSchema,
   experienceListSchema,
+  musicListSchema,
   profileSchema,
   projectSchema,
   testimonialListSchema,
@@ -17,6 +18,7 @@ import * as seed from './seed';
 //   site/profile          the profile
 //   site/experience       { items: Experience[] }
 //   site/testimonials     { items: Testimonial[] }
+//   site/music            { items: MusicTrack[] }
 //   messages/{id}         contact form messages
 // Until the starter content is imported, missing site documents fall back to
 // the seed data so the public site is never empty.
@@ -66,11 +68,17 @@ export function firestoreStore(db: FirestoreClient): ContentStore {
       return (doc && parse(testimonialListSchema, doc.data['items'] ?? [], 'site/testimonials')) ?? seed.testimonials;
     },
 
+    async listMusic() {
+      const doc = await db.get('site', 'music');
+      return (doc && parse(musicListSchema, doc.data['items'] ?? [], 'site/music')) ?? seed.music;
+    },
+
     saveProject: (project) => db.set('projects', project.slug, project),
     deleteProject: (slug) => db.delete('projects', slug),
     saveProfile: (profile) => db.set('site', 'profile', profile),
     saveExperience: (items) => db.set('site', 'experience', { items }),
     saveTestimonials: (items) => db.set('site', 'testimonials', { items }),
+    saveMusic: (items) => db.set('site', 'music', { items }),
 
     async listMessages() {
       const docs = await db.list('messages');

@@ -11,7 +11,7 @@ interface Props {
   lang: Locale;
 }
 const { lang } = Astro.props;
-const profile = await content.getProfile();
+const [profile, music] = await Promise.all([content.getProfile(), content.listMusic()]);
 // The phone in the room holds the contact form.
 const siteKey = turnstileSiteKey();
 if (siteKey) allowTurnstile(Astro);
@@ -57,9 +57,32 @@ if (siteKey) allowTurnstile(Astro);
         <a class="button" href={profile.cvPath} download>{t(lang, 'nav.cv')}</a>
       </div>
       <p class="hand title__note">{t(lang, 'story.headphones')}</p>
+      <p><button type="button" class="credits-link" data-credits-open>{t(lang, 'story.credits')}</button></p>
       <p class="title__failed" data-failed role="alert" hidden>{t(lang, 'story.failed')}</p>
     </div>
   </section>
+
+  <dialog class="credits" data-credits aria-labelledby="credits-title">
+    <h2 id="credits-title">{t(lang, 'story.credits')}</h2>
+    <h3>{t(lang, 'story.music')}</h3>
+    {
+      music.length > 0 ? (
+        <ul>
+          {music.map((track) => (
+            <li>
+              <strong>{track.title}</strong> · {track.artist} · {t(lang, 'story.license')}: {track.license} ·{' '}
+              <a href={track.sourceUrl} rel="noopener noreferrer" target="_blank">{t(lang, 'story.source')}</a>
+              {track.credit && <p>{track.credit[lang]}</p>}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>{t(lang, 'story.noTracks')}</p>
+      )
+    }
+    <p class="hand">{t(lang, 'footer.inspired')}</p>
+    <button type="button" class="button" data-credits-close>{t(lang, 'story.close')}</button>
+  </dialog>
 
   <div class="stage" data-stage data-url={localizePath('/story/data.json', lang)} data-lang={lang} data-sitekey={siteKey} hidden>
     <div class="stage__canvas" data-canvas></div>
@@ -139,8 +162,15 @@ if (siteKey) allowTurnstile(Astro);
     if (event.key === 'Escape' && !stage.hidden && !stage.querySelector('dialog[open]')) close();
   });
 
-  // A deep link such as /story#laptop or #project/macyap opens straight away.
-  if (location.hash.length > 1 && storyFits(device)) start.click();
+  const credits = document.querySelector<HTMLDialogElement>('[data-credits]')!;
+  document.querySelector('[data-credits-open]')!.addEventListener('click', () => credits.showModal());
+  document.querySelector('[data-credits-close]')!.addEventListener('click', () => credits.close());
+  credits.addEventListener('click', (event) => event.target === credits && credits.close());
+
+  // A deep link such as /story#laptop or #project/macyap opens straight away;
+  // #credits (linked from the journal's footer) opens the credits instead.
+  if (location.hash === '#credits') credits.showModal();
+  else if (location.hash.length > 1 && storyFits(device)) start.click();
 </script>
 
 <style>
@@ -216,6 +246,42 @@ if (siteKey) allowTurnstile(Astro);
     .start:focus-visible :global(.start__butterfly) {
       animation: none;
     }
+  }
+  .credits-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--link);
+    font: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+    min-height: 44px;
+  }
+  .credits {
+    width: min(560px, calc(100% - 24px));
+    padding: clamp(18px, 4vw, 32px);
+    border: 0;
+    border-radius: 6px;
+    background: var(--paper-raised);
+    color: var(--ink);
+  }
+  .credits::backdrop {
+    background: rgb(30 27 36 / 0.45);
+  }
+  .credits h2 {
+    font-size: 2rem;
+  }
+  .credits h3 {
+    margin-top: 16px;
+    font-size: 1.25rem;
+  }
+  .credits ul {
+    padding-left: 20px;
+  }
+  .credits .hand {
+    margin-block: 16px;
+    font-size: 1.375rem;
   }
   .title__note {
     font-size: 1.375rem;

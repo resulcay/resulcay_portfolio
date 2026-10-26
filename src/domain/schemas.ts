@@ -136,6 +136,21 @@ export const profileSchema = z.object({
 
 export type Profile = z.infer<typeof profileSchema>;
 
+export const musicTrackSchema = z.object({
+  id: slug,
+  title: text(120),
+  artist: text(120),
+  key: mediaKey.refine((key) => key.startsWith('music/'), 'Upload the track to the music folder'),
+  /** Always filled in: the licence the track is used under, e.g. "CC BY 4.0". */
+  license: text(80),
+  sourceUrl: httpsUrl,
+  credit: localized(200).optional(),
+});
+
+export type MusicTrack = z.infer<typeof musicTrackSchema>;
+
+export const musicListSchema = z.array(musicTrackSchema).max(20);
+
 export const experienceListSchema = z.array(experienceSchema).max(30);
 export const testimonialListSchema = z.array(testimonialSchema).max(20);
 

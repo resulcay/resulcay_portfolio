@@ -18,7 +18,7 @@ interface Props {
 }
 
 const { lang, title, description, jsonLd, noindex = false, ogType = 'website', ogImage } = Astro.props;
-const profile = await content.getProfile();
+const [profile, music] = await Promise.all([content.getProfile(), content.listMusic()]);
 const site = Astro.site ?? new URL('https://resulcay.com');
 // After a rewrite (e.g. to the 404 page) keep the address the visitor asked
 // for, so an admin URL and any other missing URL render byte for byte alike.
@@ -65,6 +65,6 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : undefined;
     <main id="main">
       <slot />
     </main>
-    <Footer lang={lang} profile={profile} />
+    <Footer lang={lang} profile={profile} hasMusic={music.length > 0} />
   </body>
 </html>

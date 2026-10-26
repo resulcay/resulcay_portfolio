@@ -1,4 +1,4 @@
-import type { Experience, Profile, Project, Testimonial } from '@/domain/schemas';
+import type { Experience, MusicTrack, Profile, Project, Testimonial } from '@/domain/schemas';
 
 // Starting content, taken from Resul's CV, LinkedIn and the previous site.
 // Admin will own this once Firestore is connected; until then this is the source.
@@ -425,3 +425,6 @@ export const testimonials: Testimonial[] = [
     },
   },
 ];
+
+/** Tracks are added in the admin once they're uploaded; there are none to start with. */
+export const music: MusicTrack[] = [];

@@ -1,6 +1,6 @@
 import type { ContentStore } from '@/application/content-repository';
 
-type ReadKey = 'getProfile' | 'listProjects' | 'listExperience' | 'listTestimonials';
+type ReadKey = 'getProfile' | 'listProjects' | 'listExperience' | 'listTestimonials' | 'listMusic';
 
 /**
  * Remembers public reads for a short while inside one Worker instance, so a
@@ -38,11 +38,13 @@ export function cachedStore(inner: ContentStore, ttlMs = 60_000, now = () => Dat
     listProjects: () => read('listProjects'),
     listExperience: () => read('listExperience'),
     listTestimonials: () => read('listTestimonials'),
+    listMusic: () => read('listMusic'),
     saveProject: invalidating(inner.saveProject),
     deleteProject: invalidating(inner.deleteProject),
     saveProfile: invalidating(inner.saveProfile),
     saveExperience: invalidating(inner.saveExperience),
     saveTestimonials: invalidating(inner.saveTestimonials),
+    saveMusic: invalidating(inner.saveMusic),
     listMessages: () => inner.listMessages(),
     saveMessage: (message) => inner.saveMessage(message),
     deleteMessage: (id) => inner.deleteMessage(id),

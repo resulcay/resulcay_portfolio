@@ -1,4 +1,4 @@
-import type { ContactMessage, Experience, Profile, Project, Testimonial } from '@/domain/schemas';
+import type { ContactMessage, Experience, MusicTrack, Profile, Project, Testimonial } from '@/domain/schemas';
 
 // The UI depends on these ports only. Pages read through ContentRepository;
 // the admin writes through ContentStore. Adapters live in infrastructure.
@@ -7,6 +7,8 @@ export interface ContentRepository {
   listProjects(): Promise<Project[]>;
   listExperience(): Promise<Experience[]>;
   listTestimonials(): Promise<Testimonial[]>;
+  /** Story mode's record player, in play order. */
+  listMusic(): Promise<MusicTrack[]>;
 }
 
 export interface ContentStore extends ContentRepository {
@@ -17,6 +19,7 @@ export interface ContentStore extends ContentRepository {
   saveProfile(profile: Profile): Promise<void>;
   saveExperience(items: Experience[]): Promise<void>;
   saveTestimonials(items: Testimonial[]): Promise<void>;
+  saveMusic(items: MusicTrack[]): Promise<void>;
   listMessages(): Promise<ContactMessage[]>;
   saveMessage(message: ContactMessage): Promise<void>;
   deleteMessage(id: string): Promise<void>;

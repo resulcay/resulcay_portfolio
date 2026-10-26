@@ -1,0 +1,179 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import { content } from '@/lib/content';
+import { settings } from '@/lib/env';
+
+const tracks = await content.listMusic();
+---
+<AdminLayout title="Music">
+  <section class="panel" aria-labelledby="music-help">
+    <h2 id="music-help">Story mode's record player</h2>
+    <p>
+      Tracks play in this order and loop. Upload MP3, Ogg or M4A files (up to 10 MB each), then fill in who made each
+      one, its licence and where it came from. Only use music you're allowed to: CC0 or CC BY tracks from places like
+      the Free Music Archive or ccMixter work, and the licence and source are shown in the credits.
+    </p>
+    {
+      settings.media ? (
+        <label class="field">
+          <span>Upload tracks</span>
+          <input type="file" accept=".mp3,.ogg,.m4a,audio/mpeg,audio/ogg,audio/mp4" multiple data-music-upload />
+        </label>
+      ) : (
+        <p class="notice notice--warn">R2 isn't configured, so tracks can't be uploaded yet.</p>
+      )
+    }
+    <p role="status" aria-live="polite" data-upload-status></p>
+  </section>
+
+  <form data-music-form data-tracks={JSON.stringify(tracks)} novalidate>
+    <ol class="images" data-music-list></ol>
+    <p data-empty>No tracks yet.</p>
+    <ul class="errors" data-errors></ul>
+    <div class="form-actions">
+      <button type="submit" class="button button--primary">Save</button>
+      <p role="status" aria-live="polite" data-save-status></p>
+    </div>
+  </form>
+</AdminLayout>
+
+<script>
+  import { sniffType } from '@/domain/media';
+  import { musicListSchema, type MusicTrack } from '@/domain/schemas';
+  import { issuesOf, postJson } from '@/scripts/forms';
+  import { upload } from '@/scripts/admin/upload';
+
+  const form = document.querySelector<HTMLFormElement>('[data-music-form]')!;
+  const list = form.querySelector<HTMLOListElement>('[data-music-list]')!;
+  const empty = form.querySelector<HTMLElement>('[data-empty]')!;
+  const errors = form.querySelector<HTMLElement>('[data-errors]')!;
+  const saveStatus = form.querySelector<HTMLElement>('[data-save-status]')!;
+  const uploadStatus = document.querySelector<HTMLElement>('[data-upload-status]')!;
+
+  const FIELDS = [
+    ['title', 'Title'],
+    ['artist', 'Artist'],
+    ['license', 'Licence (e.g. CC BY 4.0)'],
+    ['sourceUrl', 'Source URL (https)'],
+    ['creditEn', 'Credit line, English (optional)'],
+    ['creditTr', 'Credit line, Turkish (optional)'],
+  ] as const;
+
+  function field(name: string, label: string, value: string): HTMLLabelElement {
+    const wrap = document.createElement('label');
+    wrap.className = 'field';
+    const span = Object.assign(document.createElement('span'), { textContent: label });
+    const input = Object.assign(document.createElement('input'), { name, value });
+    // replaceChildren, not append: the Workers types redefine Element.append for HTMLRewriter.
+    wrap.replaceChildren(span, input);
+    return wrap;
+  }
+
+  function button(label: string, onClick: () => void, danger = false): HTMLButtonElement {
+    const b = Object.assign(document.createElement('button'), { type: 'button', textContent: label });
+    b.className = `button button--small${danger ? ' button--danger' : ''}`;
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  function addRow(track: Partial<MusicTrack> & { id: string; key: string }): void {
+    const row = document.createElement('li');
+    row.dataset['id'] = track.id;
+    row.dataset['key'] = track.key;
+    const audio = Object.assign(document.createElement('audio'), { controls: true, preload: 'none', src: `/media/${track.key}` });
+    const values: Record<(typeof FIELDS)[number][0], string> = {
+      title: track.title ?? '',
+      artist: track.artist ?? '',
+      license: track.license ?? '',
+      sourceUrl: track.sourceUrl ?? '',
+      creditEn: track.credit?.en ?? '',
+      creditTr: track.credit?.tr ?? '',
+    };
+    const actions = document.createElement('div');
+    actions.className = 'row';
+    actions.replaceChildren(
+      button('Move up', () => row.previousElementSibling && list.insertBefore(row, row.previousElementSibling)),
+      button('Move down', () => row.nextElementSibling && list.insertBefore(row.nextElementSibling, row)),
+      button('Remove', () => {
+        row.remove();
+        sync();
+      }, true),
+    );
+    row.replaceChildren(audio, ...FIELDS.map(([name, label]) => field(name, label, values[name])), actions);
+    list.appendChild(row);
+    sync();
+  }
+
+  const sync = () => {
+    empty.hidden = list.children.length > 0;
+  };
+
+  function read(): unknown[] {
+    return [...list.children].map((row) => {
+      const get = (name: string) => (row.querySelector<HTMLInputElement>(`[name="${name}"]`)?.value ?? '').trim();
+      const en = get('creditEn');
+      const tr = get('creditTr');
+      return {
+        id: (row as HTMLElement).dataset['id'],
+        key: (row as HTMLElement).dataset['key'],
+        title: get('title'),
+        artist: get('artist'),
+        license: get('license'),
+        sourceUrl: get('sourceUrl'),
+        ...(en || tr ? { credit: { en, tr } } : {}),
+      };
+    });
+  }
+
+  const show = (items: { path: string; message: string }[]) =>
+    errors.replaceChildren(
+      ...items.map((i) => {
+        const [index, ...rest] = i.path.split('.');
+        const where = index ? `Track ${Number(index) + 1}${rest.length ? ` · ${rest.join('.')}` : ''}` : 'List';
+        return Object.assign(document.createElement('li'), { textContent: `${where}: ${i.message}` });
+      }),
+    );
+
+  for (const track of JSON.parse(form.dataset['tracks'] ?? '[]') as MusicTrack[]) addRow(track);
+  sync();
+
+  document.querySelector<HTMLInputElement>('[data-music-upload]')?.addEventListener('change', async (event) => {
+    const input = event.currentTarget as HTMLInputElement;
+    for (const file of input.files ?? []) {
+      uploadStatus.textContent = `Uploading ${file.name}…`;
+      // Browsers name audio types inconsistently (audio/x-m4a…), so go by the bytes, as the server does.
+      const type = sniffType(new Uint8Array(await file.slice(0, 64).arrayBuffer()));
+      if (!type?.startsWith('audio/')) {
+        uploadStatus.textContent = `${file.name} isn't an MP3, Ogg or M4A file.`;
+        continue;
+      }
+      try {
+        const uploaded = await upload(new Blob([file], { type }), 'music', 'tracks');
+        const id = uploaded.key.split('/').pop()!.split('.')[0]!;
+        addRow({ id, key: uploaded.key, title: file.name.replace(/\.[^.]+$/, '').slice(0, 120) });
+        uploadStatus.textContent = `${file.name} is uploaded. Fill in its details and save.`;
+      } catch (error) {
+        uploadStatus.textContent = `${file.name}: ${(error as Error).message}`;
+      }
+    }
+    input.value = '';
+  });
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const parsed = musicListSchema.safeParse(read());
+    if (!parsed.success) {
+      show(issuesOf(parsed.error));
+      saveStatus.textContent = 'Fix the problems listed above.';
+      return;
+    }
+    show([]);
+    saveStatus.textContent = 'Saving…';
+    const result = await postJson('/api/admin/site/music', parsed.data, 'PUT');
+    if (result.ok) saveStatus.textContent = `Saved at ${new Date().toLocaleTimeString()}.`;
+    else {
+      show(result.data.fields ?? []);
+      saveStatus.textContent = result.data.error ?? 'Saving failed.';
+    }
+  });
+</script>

@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { experienceListSchema, profileSchema, testimonialListSchema } from '@/domain/schemas';
+import { experienceListSchema, musicListSchema, profileSchema, testimonialListSchema } from '@/domain/schemas';
 import { content } from '@/lib/content';
 import { json, readJson } from '@/lib/http';
 
@@ -21,6 +21,12 @@ export const PUT: APIRoute = async ({ params, request }) => {
       const parsed = await readJson(request, testimonialListSchema);
       if ('response' in parsed) return parsed.response;
       await content.saveTestimonials(parsed.data);
+      return json({ ok: true });
+    }
+    case 'music': {
+      const parsed = await readJson(request, musicListSchema);
+      if ('response' in parsed) return parsed.response;
+      await content.saveMusic(parsed.data);
       return json({ ok: true });
     }
     default:

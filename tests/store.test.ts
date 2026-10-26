@@ -3,6 +3,7 @@ import { fromFields, toFields } from '@/infrastructure/firebase/firestore-values
 import { cachedStore } from '@/infrastructure/content/cached-store';
 import { memoryStore } from '@/infrastructure/content/memory-store';
 import { withSeedProjects } from '@/infrastructure/content/firestore-store';
+import { musicListSchema, musicTrackSchema } from '@/domain/schemas';
 import { projects } from '@/infrastructure/content/seed';
 
 describe('Firestore value conversion', () => {
@@ -58,5 +59,31 @@ describe('content stores', () => {
     clock = 5000;
     await store.listProjects();
     expect(spy).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe('music tracks', () => {
+  const track = {
+    id: 'evening-walk',
+    title: 'Evening Walk',
+    artist: 'Someone Kind',
+    key: 'music/tracks/0b6f4b5e-1c2d-4e5f-8a9b-0c1d2e3f4a5b.mp3',
+    license: 'CC BY 4.0',
+    sourceUrl: 'https://example.org/evening-walk',
+  };
+
+  it('validates a track and insists on a licence, a source and the music folder', () => {
+    expect(musicTrackSchema.safeParse(track).success).toBe(true);
+    expect(musicTrackSchema.safeParse({ ...track, license: '' }).success).toBe(false);
+    expect(musicTrackSchema.safeParse({ ...track, sourceUrl: 'http://example.org' }).success).toBe(false);
+    expect(musicTrackSchema.safeParse({ ...track, key: 'site/x/0b6f4b5e1c2d.png' }).success).toBe(false);
+    expect(musicListSchema.safeParse(Array(21).fill(track)).success).toBe(false);
+  });
+
+  it('starts empty, saves, and the cache sees the save', async () => {
+    const store = cachedStore(memoryStore({ writable: true }));
+    expect(await store.listMusic()).toEqual([]);
+    await store.saveMusic([track]);
+    expect(await store.listMusic()).toEqual([track]);
   });
 });
