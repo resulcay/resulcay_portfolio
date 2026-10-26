@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import type { StoryData } from '@/application/story';
 import type { Locale } from '@/domain/schemas';
 import { StoryApp } from './StoryApp';
+import { CharacterDebug, isView } from './CharacterDebug';
 import { parseQuality } from './scene/quality';
 import { engine } from './audio/engine';
 import { unlockAudio } from '@/scripts/audio-unlock';
@@ -64,6 +65,29 @@ export async function mountStory(container: HTMLElement, options: MountOptions):
   }
 
   const root = createRoot(container, { onUncaughtError: options.onError });
+  // ?debug=character: the character alone on a turntable, for review (&view=front|34|side|face, &pose=glasses).
+  if (params.get('debug') === 'character') {
+    const view = params.get('view');
+    root.render(
+      <CharacterDebug
+        initialView={isView(view) ? view : '34'}
+        pose={params.get('pose') === 'glasses' ? 'glasses' : undefined}
+        onReady={() => {
+          container.dataset['ready'] = 'true';
+          options.onReady();
+        }}
+        onStats={({ triangles, outlineTriangles, drawCalls }) => {
+          container.dataset['triangles'] = String(triangles);
+          container.dataset['outlineTriangles'] = String(outlineTriangles);
+          container.dataset['calls'] = String(drawCalls);
+        }}
+      />,
+    );
+    return () => {
+      root.unmount();
+      for (const key of ['ready', 'triangles', 'outlineTriangles', 'calls']) delete container.dataset[key];
+    };
+  }
   // No StrictMode: its dev-only double effect run would drop the WebGL context on first mount.
   root.render(
     <StoryApp

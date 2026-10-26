@@ -4,9 +4,9 @@ import { gsap } from 'gsap';
 import { MathUtils, PerspectiveCamera, Vector3 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { StoryData } from '@/application/story';
-import { InteractionContext, KitProvider } from './scene/kit';
+import { Hotspot, InteractionContext, KitProvider } from './scene/kit';
 import { Shell, StringLights, Window } from './scene/Shell';
-import { Furniture, Posters } from './scene/Furniture';
+import { Furniture, Posters, SEAT, SEAT_TURN } from './scene/Furniture';
 import { Corkboard, Journal, Laptop, Phone, RecordPlayer } from './scene/Props';
 import { Polaroids } from './scene/Polaroids';
 import { Character } from './scene/Character';
@@ -86,7 +86,10 @@ export function Stage(props: StageProps) {
           <RecordPlayer spinning={props.spinning} />
           <Corkboard certifications={data.profile.certifications} />
           <Polaroids projects={data.projects} />
-          <Character variant="procedural" still={still} />
+          <Character variant="procedural" still={still} position={SEAT} rotationY={SEAT_TURN} highlighted={hovered === 'resul'} />
+          <group position={SEAT} rotation-y={SEAT_TURN}>
+            <Hotspot id="resul" at={[0, 0.95, -0.05]} size={[0.5, 1.1, 0.4]} anchor={[0.3, 1.45, -0.9]} highlight={false} />
+          </group>
         </KitProvider>
         <Butterfly still={still} target={guide} onTap={() => guide && onHover(guide)} />
       </InteractionContext.Provider>

@@ -10,10 +10,12 @@ interface Lines {
   /** Names for the keyboard and screen-reader buttons. */
   names: Record<StoryObject, string>;
   /** Resul's inner monologue when you look at something. The window has one per time of day. */
-  thoughts: Record<Exclude<StoryObject, 'window'>, string>;
+  thoughts: Record<Exclude<StoryObject, 'window'> | 'resul', string>;
   window: Record<Phase, string>;
   ui: {
     sceneLabel: string;
+    /** The character, as a button: looking at him opens the journal. */
+    resul: string;
     objects: string;
     close: string;
     allProjects: string;
@@ -70,6 +72,7 @@ export const LINES: Record<Locale, Lines> = {
       phone: 'Go on, send me a message.',
       recordPlayer: 'Music helps me think. Or procrastinate.',
       corkboard: 'Proof that I finish things. Sometimes.',
+      resul: "That's me. Usually more coffee involved.",
     },
     window: {
       dawn: 'Up before the bugs are. Mostly.',
@@ -80,6 +83,7 @@ export const LINES: Record<Locale, Lines> = {
     ui: {
       sceneLabel:
         "Resul's bedroom studio. He sits at his desk typing on a laptop, with photos of his projects pinned on the wall above the bed.",
+      resul: 'Resul',
       objects: 'Things in the room',
       close: 'Close',
       allProjects: 'All projects',
@@ -139,6 +143,7 @@ export const LINES: Record<Locale, Lines> = {
       phone: 'Hadi, bana bir mesaj at.',
       recordPlayer: 'Müzik düşünmeme yardım ediyor. Ya da oyalanmama.',
       corkboard: 'Bir şeyleri bitirdiğimin kanıtı. Bazen.',
+      resul: 'Bu benim. Genelde daha çok kahve oluyor.',
     },
     window: {
       dawn: 'Hatalardan önce uyandım. Çoğunlukla.',
@@ -149,6 +154,7 @@ export const LINES: Record<Locale, Lines> = {
     ui: {
       sceneLabel:
         "Resul'ün yatak odası stüdyosu. Masasında dizüstü bilgisayarında yazıyor; yatağın üstündeki duvarda projelerinin fotoğrafları asılı.",
+      resul: 'Resul',
       objects: 'Odadaki şeyler',
       close: 'Kapat',
       allProjects: 'Tüm projeler',

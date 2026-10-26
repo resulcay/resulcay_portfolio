@@ -173,6 +173,17 @@ export function StoryApp({ data, lang, siteKey, hour, onRewind, ...stage }: Stor
             </button>
           </li>
         ))}
+        <li>
+          <button
+            type="button"
+            className="visually-hidden"
+            onFocus={() => setHovered('resul')}
+            onBlur={() => setHovered((current) => (current === 'resul' ? null : current))}
+            onClick={() => select('resul')}
+          >
+            {lines.ui.resul}
+          </button>
+        </li>
         {guide && (
           <li>
             <button type="button" className="visually-hidden" onClick={() => setHovered(guide)}>

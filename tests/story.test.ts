@@ -153,6 +153,12 @@ describe('story lines', () => {
     for (const line of strings(LINES)) expect(line).not.toMatch(/graduat|mezun/i);
   });
 
+  it('gives Resul himself a thought in both languages, and opens his journal', () => {
+    expect(thoughtFor('resul', 'en', 'day', {})).toBe("That's me. Usually more coffee involved.");
+    expect(thoughtFor('resul', 'tr', 'day', {})).toBe('Bu benim. Genelde daha çok kahve oluyor.');
+    expect(routeForHotspot('resul')).toEqual({ object: 'journal' });
+  });
+
   it("uses a project's hook for its Polaroid", () => {
     expect(thoughtFor('polaroid:macyap', 'en', 'day', { macyap: 'A hook' })).toBe('A hook');
   });
