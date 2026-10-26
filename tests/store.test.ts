@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { fromFields, toFields } from '@/infrastructure/firebase/firestore-values';
 import { cachedStore } from '@/infrastructure/content/cached-store';
 import { memoryStore } from '@/infrastructure/content/memory-store';
+import { withSeedProjects } from '@/infrastructure/content/firestore-store';
 import { projects } from '@/infrastructure/content/seed';
 
 describe('Firestore value conversion', () => {
@@ -18,6 +19,18 @@ describe('Firestore value conversion', () => {
 
   it('leaves out undefined fields', () => {
     expect(Object.keys(toFields({ a: 1, b: undefined }))).toEqual(['a']);
+  });
+});
+
+describe('starter projects before the import', () => {
+  it('a saved project replaces its starter version and the rest stay', () => {
+    const edited = { ...projects[0]!, title: 'Edited' };
+    const extra = { ...projects[1]!, slug: 'brand-new' };
+    const merged = withSeedProjects([edited, extra], projects);
+    expect(merged).toHaveLength(projects.length + 1);
+    expect(merged[0]?.title).toBe('Edited');
+    expect(merged.slice(1, projects.length)).toEqual(projects.slice(1));
+    expect(merged.at(-1)?.slug).toBe('brand-new');
   });
 });
 

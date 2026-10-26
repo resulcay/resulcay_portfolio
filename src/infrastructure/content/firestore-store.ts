@@ -28,6 +28,17 @@ function parse<T>(schema: z.ZodType<T>, data: unknown, where: string): T | undef
   return undefined;
 }
 
+/**
+ * Before the import, a saved project replaces its starter version and the
+ * other starter projects stay visible, so saving one doesn't hide the rest.
+ * shortcut: deleting a starter project before the import doesn't hide it; run the import first.
+ */
+export function withSeedProjects(stored: Project[], starter: Project[]): Project[] {
+  const saved = new Map(stored.map((p) => [p.slug, p]));
+  const starterSlugs = new Set(starter.map((p) => p.slug));
+  return [...starter.map((p) => saved.get(p.slug) ?? p), ...stored.filter((p) => !starterSlugs.has(p.slug))];
+}
+
 export function firestoreStore(db: FirestoreClient): ContentStore {
   return {
     writable: true,
@@ -38,11 +49,11 @@ export function firestoreStore(db: FirestoreClient): ContentStore {
     },
 
     async listProjects() {
-      const docs = await db.list('projects');
-      if (docs.length === 0 && !(await db.get('site', 'profile'))) return seed.projects;
-      return docs
+      const [docs, imported] = await Promise.all([db.list('projects'), db.get('site', 'profile')]);
+      const stored = docs
         .map((doc) => parse(projectSchema, doc.data, `projects/${doc.id}`))
         .filter((p): p is Project => p !== undefined);
+      return imported ? stored : withSeedProjects(stored, seed.projects);
     },
 
     async listExperience() {
