@@ -41,6 +41,8 @@ interface StageProps {
   /** Ticks once per rewind; `rewinding` is true while one plays. */
   rewind: number;
   rewinding: boolean;
+  /** The record player's vinyl turns while music plays. */
+  spinning: boolean;
   /** The painterly post pass; `?post=off` turns it off to compare. */
   post: boolean;
   onHover: (id: string | null) => void;
@@ -81,7 +83,7 @@ export function Stage(props: StageProps) {
           <Laptop />
           <Journal />
           <Phone />
-          <RecordPlayer />
+          <RecordPlayer spinning={props.spinning} />
           <Corkboard certifications={data.profile.certifications} />
           <Polaroids projects={data.projects} />
           <Character variant="procedural" still={still} />

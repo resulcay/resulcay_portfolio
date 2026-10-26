@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import type { StoryData } from '@/application/story';
 import type { Locale } from '@/domain/schemas';
 import { Stage, type Stats } from './Stage';
@@ -7,6 +7,7 @@ import { parseHash, routeForHotspot, toHash, type Route } from './route';
 import { phaseAt, type Phase } from './scene/time';
 import type { Quality } from './scene/quality';
 import { Choice, Panels } from './panels';
+import { engine } from './audio/engine';
 import { browserStorage, nextTarget, readVisited, readVisitor, saveVisited, saveVisitor, type Visitor } from './visitor';
 
 interface StoryAppProps {
@@ -55,6 +56,7 @@ export function StoryApp({ data, lang, siteKey, hour, onRewind, ...stage }: Stor
   const startRewind = useCallback(() => {
     setRewind((n) => n + 1);
     setRewinding(true);
+    engine.effect('rewind');
   }, []);
 
   useEffect(() => {
@@ -112,6 +114,43 @@ export function StoryApp({ data, lang, siteKey, hour, onRewind, ...stage }: Stor
     setRemembered(next !== null);
   };
 
+  // Sound. The engine stays silent until the Start click handed it a context.
+  const audio = useSyncExternalStore(engine.subscribe, engine.snapshot);
+  const open = visitor !== null && route !== null && arrived === route.object;
+
+  useEffect(() => {
+    if (hovered) engine.effect('tick');
+  }, [hovered]);
+
+  useEffect(() => {
+    engine.duck(open);
+    if (!open || !route) return;
+    engine.effect(route.object === 'phone' ? 'buzz' : route.object === 'journal' ? 'scratch' : 'whoosh');
+  }, [open, route?.object]);
+
+  useEffect(() => engine.setPhase(phase), [phase]);
+
+  // Music starts quietly a couple of seconds after the visitor is known.
+  useEffect(() => {
+    if (!visitor) return;
+    const timer = setTimeout(() => engine.startMusic(), 2000);
+    return () => clearTimeout(timer);
+  }, [visitor]);
+
+  useEffect(() => {
+    const sync = () => engine.setHidden(document.hidden);
+    const mute = (event: KeyboardEvent) => {
+      const typing = event.target instanceof HTMLElement && event.target.closest('input, textarea, select, [contenteditable]');
+      if (event.key.toLowerCase() === 'm' && !typing && !event.ctrlKey && !event.metaKey && !event.altKey) engine.setMuted(!engine.snapshot().muted);
+    };
+    document.addEventListener('visibilitychange', sync);
+    addEventListener('keydown', mute);
+    return () => {
+      document.removeEventListener('visibilitychange', sync);
+      removeEventListener('keydown', mute);
+    };
+  }, []);
+
   const hooks = useMemo(() => Object.fromEntries(data.projects.map((p) => [p.slug, p.hook])), [data.projects]);
   const thought = hovered ? thoughtFor(hovered, lang, phase, hooks) : undefined;
   const guide = visitor ? nextTarget(visitor, visited) : null;
@@ -151,6 +190,7 @@ export function StoryApp({ data, lang, siteKey, hour, onRewind, ...stage }: Stor
           guide={guide}
           rewind={rewind}
           rewinding={rewinding}
+          spinning={audio.playing}
           onHover={setHovered}
           onSelect={select}
           onArrive={setArrived}
@@ -189,6 +229,23 @@ export function StoryApp({ data, lang, siteKey, hour, onRewind, ...stage }: Stor
           </button>
         </div>
       )}
+      <button
+        type="button"
+        className="story-mute"
+        aria-pressed={audio.muted}
+        aria-label={lines.ui.audio.mute}
+        title={`${lines.ui.audio.mute} (M)`}
+        onClick={() => engine.setMuted(!audio.muted)}
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"></path>
+          {audio.muted ? (
+            <path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"></path>
+          ) : (
+            <path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"></path>
+          )}
+        </svg>
+      </button>
       <p className="story-thought" aria-live="polite">
         {remembered ? lines.ui.remember : thought}
       </p>
@@ -198,7 +255,7 @@ export function StoryApp({ data, lang, siteKey, hour, onRewind, ...stage }: Stor
         </svg>
       )}
       {!visitor && <Choice lang={lang} onChoose={choose} />}
-      {visitor && route && arrived === route.object && (
+      {open && route && visitor && (
         <Panels
           route={route}
           data={data}

@@ -1,4 +1,4 @@
-import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import type { StoryData } from '@/application/story';
 import type { Locale } from '@/domain/schemas';
 import { localizePath, t } from '@/i18n/ui';
@@ -6,6 +6,8 @@ import { LINES } from './lines';
 import type { Route } from './route';
 import type { Phase } from './scene/time';
 import { VISITORS, type Visitor } from './visitor';
+import { engine } from './audio/engine';
+import type { Bus } from './audio/volumes';
 
 type Project = StoryData['projects'][number];
 
@@ -127,7 +129,7 @@ export function Panels({ route, data, lang, siteKey, visitor, phaseChoice, onPha
     case 'recordPlayer':
       return (
         <Panel title={ui.music} lang={lang} onClose={onClose}>
-          <p className="hand story-soon">{ui.musicSoon}</p>
+          <RecordPlayer data={data} lang={lang} />
         </Panel>
       );
     case 'window':
@@ -219,6 +221,80 @@ export function Choice({ lang, onChoose }: { lang: Locale; onChoose: (visitor: V
         </div>
       </div>
     </dialog>
+  );
+}
+
+/** Now playing, the controls, the playlist, the three volumes and the credits. */
+function RecordPlayer({ data, lang }: { data: StoryData; lang: Locale }) {
+  const audio = LINES[lang].ui.audio;
+  const state = useSyncExternalStore(engine.subscribe, engine.snapshot);
+  const current = data.music[state.index];
+  const buses: Bus[] = data.music.length > 0 ? ['music', 'effects', 'ambience'] : ['effects', 'ambience'];
+  return (
+    <>
+      {data.music.length > 0 && current ? (
+        <>
+          <p className="story-meta">{audio.nowPlaying}</p>
+          <p className="hand story-hook">
+            {current.title} · {current.artist}
+          </p>
+          <div className="story-actions">
+            <button type="button" className="button" onClick={() => engine.prev()}>
+              {audio.prev}
+            </button>
+            <button type="button" className="button button--primary" onClick={() => engine.toggle()}>
+              {state.playing ? audio.pause : audio.play}
+            </button>
+            <button type="button" className="button" onClick={() => engine.next()}>
+              {audio.next}
+            </button>
+          </div>
+          <h3>{audio.tracks}</h3>
+          <ol className="story-tracks">
+            {data.music.map((track, i) => (
+              <li key={track.url}>
+                <button type="button" aria-current={i === state.index ? 'true' : undefined} onClick={() => engine.select(i)}>
+                  {track.title} · {track.artist}
+                </button>
+              </li>
+            ))}
+          </ol>
+        </>
+      ) : (
+        <p className="hand story-soon">{audio.noTracks}</p>
+      )}
+      <h3>{audio.volume}</h3>
+      <div className="story-sliders">
+        {buses.map((bus) => (
+          <label key={bus}>
+            <span>{audio[bus]}</span>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={state[bus]}
+              onChange={(event) => engine.setVolume(bus, Number(event.currentTarget.value))}
+            />
+          </label>
+        ))}
+      </div>
+      <h3>{audio.credits}</h3>
+      {data.music.length > 0 && (
+        <ul>
+          {data.music.map((track) => (
+            <li key={track.url}>
+              {track.title} · {track.artist} · {audio.license}: {track.license} ·{' '}
+              <a href={track.sourceUrl} target="_blank" rel="noopener noreferrer">
+                {audio.source}
+              </a>
+              {track.credit && <p className="story-meta">{track.credit}</p>}
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="story-meta">{audio.inspired}</p>
+    </>
   );
 }
 

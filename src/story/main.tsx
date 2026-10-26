@@ -3,6 +3,8 @@ import type { StoryData } from '@/application/story';
 import type { Locale } from '@/domain/schemas';
 import { StoryApp } from './StoryApp';
 import { parseQuality } from './scene/quality';
+import { engine } from './audio/engine';
+import { unlockAudio } from '@/scripts/audio-unlock';
 
 interface MountOptions {
   dataUrl: string;
@@ -10,6 +12,8 @@ interface MountOptions {
   /** Turnstile site key for the phone's contact form, when configured. */
   siteKey: string | undefined;
   reducedMotion: boolean;
+  /** The AudioContext made in the Start click, if the browser has Web Audio. */
+  audio: AudioContext | undefined;
   /** Called once the renderer and scene exist, so the title screen can hide its loader. */
   onReady: () => void;
   onError: (error: unknown) => void;
@@ -41,6 +45,24 @@ export async function mountStory(container: HTMLElement, options: MountOptions):
   const coarse = matchMedia('(pointer: coarse)').matches;
   const post = params.get('post') !== 'off';
 
+  engine.setTracks(data.music);
+  // Without a context from the Start click (a deep link started the story),
+  // sound waits for the visitor's first tap or key press.
+  // pointerup and keydown are what browsers count as activation (touch only
+  // activates on release, and Esc never does).
+  const late = (event: Event) => {
+    if (event instanceof KeyboardEvent && event.key === 'Escape') return;
+    removeEventListener('pointerup', late);
+    removeEventListener('keydown', late);
+    const ctx = unlockAudio();
+    if (ctx) engine.attach(ctx);
+  };
+  if (options.audio) engine.attach(options.audio);
+  else {
+    addEventListener('pointerup', late);
+    addEventListener('keydown', late);
+  }
+
   const root = createRoot(container, { onUncaughtError: options.onError });
   // No StrictMode: its dev-only double effect run would drop the WebGL context on first mount.
   root.render(
@@ -70,7 +92,10 @@ export async function mountStory(container: HTMLElement, options: MountOptions):
     />,
   );
   return () => {
+    removeEventListener('pointerup', late);
+    removeEventListener('keydown', late);
     root.unmount();
+    engine.detach();
     for (const key of ['ready', 'quality', 'calls', 'triangles', 'fps', 'rewinding']) delete container.dataset[key];
   };
 }

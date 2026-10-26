@@ -117,6 +117,36 @@ test('a deep link opens its panel, and Back closes it', async ({ page }) => {
   expect(problems).toEqual([]);
 });
 
+test('the record player and sound controls', async ({ page }) => {
+  await returning(page);
+  const problems = watchConsole(page);
+  await page.goto('/story');
+  await page.getByRole('button', { name: 'Start story' }).click();
+  await expect(page.locator('[data-canvas]')).toHaveAttribute('data-ready', 'true', { timeout: 60_000 });
+  const stored = () => page.evaluate(() => JSON.parse(localStorage.getItem('story-volumes') ?? '{}') as Record<string, unknown>);
+
+  await page.getByRole('button', { name: 'Record player' }).focus();
+  await page.keyboard.press('Enter');
+  const music = page.getByRole('dialog', { name: 'Music' });
+  await expect(music).toContainText('No records on the shelf yet');
+  const effects = music.getByRole('slider', { name: 'Effects' });
+  await expect(effects).toHaveValue('0.7');
+  await effects.fill('0.25');
+  await music.getByRole('slider', { name: 'Room sounds' }).fill('0.1');
+  expect(await stored()).toMatchObject({ effects: 0.25, ambience: 0.1, muted: false });
+  await music.getByRole('button', { name: 'Close' }).click();
+  await expect(music).toBeHidden();
+
+  const mute = page.getByRole('button', { name: 'Sound off' });
+  await mute.click();
+  await expect(mute).toHaveAttribute('aria-pressed', 'true');
+  expect(await stored()).toMatchObject({ muted: true });
+  await page.keyboard.press('m');
+  await expect(mute).toHaveAttribute('aria-pressed', 'false');
+  expect(await stored()).toMatchObject({ muted: false });
+  expect(problems).toEqual([]);
+});
+
 test('reports scene cost at each quality level', async ({ page }) => {
   await returning(page);
   await page.setViewportSize({ width: 1440, height: 900 });

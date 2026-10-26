@@ -19,7 +19,24 @@ interface Lines {
     allProjects: string;
     readOnJournal: string;
     music: string;
-    musicSoon: string;
+    audio: {
+      mute: string;
+      nowPlaying: string;
+      play: string;
+      pause: string;
+      prev: string;
+      next: string;
+      tracks: string;
+      volume: string;
+      music: string;
+      effects: string;
+      ambience: string;
+      noTracks: string;
+      credits: string;
+      license: string;
+      source: string;
+      inspired: string;
+    };
     timeOfDay: string;
     auto: string;
     phases: Record<Phase, string>;
@@ -68,7 +85,24 @@ export const LINES: Record<Locale, Lines> = {
       allProjects: 'All projects',
       readOnJournal: 'Read on the journal',
       music: 'Music',
-      musicSoon: 'Music arrives soon. The needle is still warming up.',
+      audio: {
+        mute: 'Sound off',
+        nowPlaying: 'Now playing',
+        play: 'Play',
+        pause: 'Pause',
+        prev: 'Previous track',
+        next: 'Next track',
+        tracks: 'On the shelf',
+        volume: 'Volume',
+        music: 'Music',
+        effects: 'Effects',
+        ambience: 'Room sounds',
+        noTracks: "No records on the shelf yet. For now the room hums along on its own.",
+        credits: 'Credits',
+        license: 'Licence',
+        source: 'Source',
+        inspired: 'Inspired by narrative adventure games.',
+      },
       timeOfDay: 'Time of day',
       auto: 'Follow my clock',
       phases: { dawn: 'Dawn', day: 'Day', golden: 'Golden hour', night: 'Night' },
@@ -120,7 +154,24 @@ export const LINES: Record<Locale, Lines> = {
       allProjects: 'Tüm projeler',
       readOnJournal: 'Günlükte oku',
       music: 'Müzik',
-      musicSoon: 'Müzik yakında geliyor. İğne hâlâ ısınıyor.',
+      audio: {
+        mute: 'Ses kapalı',
+        nowPlaying: 'Şimdi çalıyor',
+        play: 'Çal',
+        pause: 'Duraklat',
+        prev: 'Önceki parça',
+        next: 'Sonraki parça',
+        tracks: 'Raftakiler',
+        volume: 'Ses düzeyi',
+        music: 'Müzik',
+        effects: 'Efektler',
+        ambience: 'Oda sesleri',
+        noTracks: 'Rafta henüz plak yok. Şimdilik oda kendi kendine mırıldanıyor.',
+        credits: 'Künye',
+        license: 'Lisans',
+        source: 'Kaynak',
+        inspired: 'Hikâye odaklı macera oyunlarından ilham alındı.',
+      },
       timeOfDay: 'Günün saati',
       auto: 'Saatime uy',
       phases: { dawn: 'Şafak', day: 'Gündüz', golden: 'Altın saat', night: 'Gece' },

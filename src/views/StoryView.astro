@@ -97,6 +97,7 @@ if (siteKey) allowTurnstile(Astro);
 
 <script>
   import { readDevice, storyFits } from '@/scripts/story-capability';
+  import { unlockAudio } from '@/scripts/audio-unlock';
 
   const start = document.querySelector<HTMLButtonElement>('[data-start]')!;
   const stage = document.querySelector<HTMLElement>('[data-stage]')!;
@@ -131,9 +132,12 @@ if (siteKey) allowTurnstile(Astro);
     failed.hidden = false;
   }
 
-  start.addEventListener('click', async () => {
+  start.addEventListener('click', async (event) => {
     if (!stage.hidden) return;
     const id = ++session;
+    // Inside a real click, so the browser lets sound start. A deep link's
+    // automatic start isn't one; the story then waits for the first tap or key.
+    const audio = event.isTrusted ? unlockAudio() : undefined;
     failed.hidden = true;
     loader.hidden = false;
     stage.hidden = false;
@@ -146,12 +150,14 @@ if (siteKey) allowTurnstile(Astro);
         lang: stage.dataset['lang'] === 'tr' ? 'tr' : 'en',
         siteKey: stage.dataset['sitekey'],
         reducedMotion: device.reducedMotion,
+        audio,
         onReady: () => (loader.hidden = true),
         onError: fail,
       });
       if (id === session) teardown = unmount;
       else unmount();
     } catch (error) {
+      void audio?.close();
       if (id === session) fail(error);
     }
   });
@@ -417,6 +423,52 @@ if (siteKey) allowTurnstile(Astro);
     font: inherit;
     text-decoration: underline;
     cursor: pointer;
+  }
+  .story-mute {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 999px;
+    background: #f4ebdd;
+    color: #1e1b24;
+    cursor: pointer;
+  }
+  .story-mute[aria-pressed='true'] {
+    background: #4a4350;
+    color: #f4ebdd;
+  }
+  .story-tracks button {
+    padding: 4px 0;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .story-tracks button[aria-current='true'] {
+    font-weight: 700;
+    color: var(--accent-text);
+  }
+  .story-sliders {
+    display: grid;
+    gap: 12px;
+  }
+  .story-sliders label {
+    display: grid;
+    grid-template-columns: 9rem 1fr;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+  }
+  .story-sliders input {
+    accent-color: #e8a657;
+    min-height: 44px;
   }
   .story-rewind {
     position: absolute;
