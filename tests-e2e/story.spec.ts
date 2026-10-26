@@ -1,20 +1,11 @@
 import { expect, test, type Page } from '@playwright/test';
+import { watchConsole } from './console';
 
 const SIZES = [
   { width: 390, height: 844 },
   { width: 768, height: 1024 },
   { width: 1440, height: 900 },
 ];
-
-/** Collects every console error or warning and page error, so a test can insist on none. */
-function watchConsole(page: Page): string[] {
-  const problems: string[] = [];
-  page.on('console', (message) => {
-    if (message.type() === 'error' || message.type() === 'warning') problems.push(`${message.type()}: ${message.text()}`);
-  });
-  page.on('pageerror', (error) => problems.push(`pageerror: ${error.message}`));
-  return problems;
-}
 
 const overflowsX = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
 
@@ -28,7 +19,8 @@ for (const size of SIZES) {
     await page.goto('/story');
     expect(await overflowsX(page)).toBe(false);
     // Only the tiny title-screen script runs before Start.
-    expect(requested.filter((url) => /\/_astro\/(main|client)\./.test(url))).toEqual([]);
+    const scripts = requested.filter((url) => url.endsWith('.js')).map((url) => new URL(url).pathname.split('/').pop());
+    expect(scripts.filter((name) => !/^(StoryView\.astro_astro_type_script|preload-helper)/.test(name ?? ''))).toEqual([]);
 
     await page.getByRole('button', { name: 'Start story' }).click();
     const scene = page.locator('[data-canvas]');

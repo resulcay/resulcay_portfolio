@@ -1,7 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
-import react from '@astrojs/react';
 
 export default defineConfig({
   site: 'https://resulcay.com',
@@ -11,8 +10,9 @@ export default defineConfig({
     imageService: 'compile',
   }),
   session: false,
-  // React only powers Story mode, which loads after the visitor presses Start.
-  integrations: [react({ include: ['**/src/story/**'] })],
+  // No @astrojs/react: Story mode's React code is imported on demand by a plain
+  // script, and Vite compiles its JSX from tsconfig. The integration's Fast
+  // Refresh needs a preamble that only island pages get, so Start broke in dev.
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'tr'],
