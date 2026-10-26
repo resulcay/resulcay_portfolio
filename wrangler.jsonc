@@ -5,6 +5,10 @@
   "compatibility_date": "2026-10-20",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
+  "routes": [
+    { "pattern": "resulcay.com", "custom_domain": true },
+    { "pattern": "www.resulcay.com", "custom_domain": true }
+  ],
   // Uploaded images and the CV. Local development uses a simulated bucket.
   "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "resulcay-media" }]
   // Secrets are set with `wrangler secret put` (see README):
