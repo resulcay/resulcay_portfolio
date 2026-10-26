@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { BoxGeometry, CatmullRomCurve3, Matrix4, TubeGeometry, Vector3, type InstancedMesh } from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { Hotspot, Merged, useDisposable, useKit, type Vec3 } from './kit';
@@ -75,15 +75,16 @@ function paintSky(ctx: CanvasRenderingContext2D, phase: Phase) {
 
 export function Window() {
   const { atlas, glow, base, phase } = useKit();
-  const sky = useDisposable(() => {
-    const cell = atlas.alloc()!;
+  const cell = useMemo(() => atlas.alloc()!, [atlas]);
+  const sky = useDisposable(() => atlas.quad(cell, 1.5, 1.2));
+  // Repaints when the visitor picks another time of day.
+  useEffect(() => {
     atlas.paint(cell, 150, 120, (ctx) => paintSky(ctx, phase));
-    return atlas.quad(cell, 1.5, 1.2);
-  });
+  }, [atlas, cell, phase]);
   const [x, y, z] = WINDOW;
   const frame = '#efe6d6';
   return (
-    <>
+    <group>
       <mesh geometry={sky} material={glow} position={[x, y, z + 0.005]} />
       <Merged
         material={base}
@@ -98,7 +99,7 @@ export function Window() {
         ]}
       />
       <Hotspot id="window" at={[x, y, z + 0.1]} size={[1.6, 1.3, 0.2]} anchor={[x, y - 0.1, -0.4]} />
-    </>
+    </group>
   );
 }
 

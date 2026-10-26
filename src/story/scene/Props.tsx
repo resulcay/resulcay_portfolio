@@ -57,7 +57,7 @@ export function Laptop() {
           return [{ geo: atlas.quad(cell, 0.31, 0.196), color: '#ffffff', at: screenAt, rot: [LID_TILT, 0, 0] }];
         }}
       />
-      <Hotspot id="laptop" at={[0, 0.12, -0.06]} size={[0.38, 0.26, 0.3]} anchor={[0, 0.25, 0.45]} />
+      <Hotspot id="laptop" at={[0, 0.12, -0.06]} size={[0.38, 0.26, 0.3]} anchor={[0.35, 0.55, 0.55]} />
     </group>
   );
 }

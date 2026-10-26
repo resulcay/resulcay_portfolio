@@ -4,6 +4,8 @@ import { storyData } from '@/application/story';
 import { storyFits } from '@/scripts/story-capability';
 import { phaseAt } from '@/story/scene/time';
 import { createQualityGovernor, parseQuality } from '@/story/scene/quality';
+import { LINES, OBJECTS, thoughtFor } from '@/story/lines';
+import { parseHash, routeForHotspot, toHash } from '@/story/route';
 import { experience, profile, projects, testimonials } from '@/infrastructure/content/seed';
 
 const str = z.string().min(1);
@@ -36,6 +38,7 @@ const storyDataSchema = z.strictObject({
       title: str,
       hook: str,
       role: str,
+      period: str.optional(),
       story: str,
       highlights: z.array(str),
       tags: z.array(str),
@@ -44,7 +47,7 @@ const storyDataSchema = z.strictObject({
     }),
   ),
   experience: z.array(
-    z.strictObject({ organization: str, title: str, start: str, end: str.optional(), location: str, points: z.array(str) }),
+    z.strictObject({ organization: str, title: str, start: str, end: str.optional(), location: str, period: str, points: z.array(str) }),
   ),
   testimonials: z.array(z.strictObject({ name: str, quote: str })),
 });
@@ -110,6 +113,58 @@ describe('quality governor', () => {
   it('reads a pinned level from the URL', () => {
     expect(parseQuality('low')).toBe('low');
     expect(parseQuality('ultra')).toBeUndefined();
+  });
+});
+
+describe('story lines', () => {
+  const strings = (value: unknown): string[] =>
+    typeof value === 'string' ? [value] : Object.values(value as Record<string, unknown>).flatMap(strings);
+
+  it('gives every object a name and a thought in both languages', () => {
+    for (const lang of ['en', 'tr'] as const) {
+      for (const object of OBJECTS) {
+        expect(LINES[lang].names[object], `${lang} ${object}`).toBeTruthy();
+        expect(thoughtFor(object, lang, 'golden', {}), `${lang} ${object}`).toBeTruthy();
+      }
+    }
+  });
+
+  it('has the same keys in English and Turkish', () => {
+    const keys = (value: unknown, prefix = ''): string[] =>
+      typeof value === 'string' ? [prefix] : Object.entries(value as Record<string, unknown>).flatMap(([k, v]) => keys(v, `${prefix}.${k}`));
+    expect(keys(LINES.tr).sort()).toEqual(keys(LINES.en).sort());
+  });
+
+  it('never mentions graduating', () => {
+    for (const line of strings(LINES)) expect(line).not.toMatch(/graduat|mezun/i);
+  });
+
+  it("uses a project's hook for its Polaroid", () => {
+    expect(thoughtFor('polaroid:macyap', 'en', 'day', { macyap: 'A hook' })).toBe('A hook');
+  });
+});
+
+describe('story routes', () => {
+  it.each([
+    ['#laptop', { object: 'laptop' }],
+    ['#project/macyap', { object: 'polaroids', project: 'macyap' }],
+    ['#polaroids', { object: 'polaroids' }],
+    ['', null],
+    ['#contact', null],
+    ['#project/Bad_Slug', null],
+  ])('%s', (hash, route) => {
+    expect(parseHash(hash)).toEqual(route);
+  });
+
+  it('round-trips through the hash', () => {
+    for (const route of [{ object: 'window' as const }, { object: 'polaroids' as const, project: 'floria' }]) {
+      expect(parseHash(toHash(route))).toEqual(route);
+    }
+  });
+
+  it('sends a Polaroid click to its project', () => {
+    expect(routeForHotspot('polaroid:floria')).toEqual({ object: 'polaroids', project: 'floria' });
+    expect(routeForHotspot('phone')).toEqual({ object: 'phone' });
   });
 });
 

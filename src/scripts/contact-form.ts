@@ -6,9 +6,11 @@ export function setUpContactForm(form: HTMLFormElement): void {
   const status = form.querySelector<HTMLElement>('[role="status"]');
   const widget = form.querySelector<HTMLElement>('[data-turnstile]');
   const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-  const messages = form.querySelector<HTMLTemplateElement>('template[data-messages]');
+  // A <template> on the site; a hidden element in Story mode, where React renders the form.
+  const messages = form.querySelector<HTMLElement>('[data-messages]');
   if (!status || !widget || !submit || !messages) return;
-  const text = (key: string) => messages.content.querySelector(`[data-key="${key}"]`)?.textContent ?? '';
+  const texts = messages instanceof HTMLTemplateElement ? messages.content : messages;
+  const text = (key: string) => texts.querySelector(`[data-key="${key}"]`)?.textContent ?? '';
   const say = (key: string) => {
     status.textContent = text(key);
   };

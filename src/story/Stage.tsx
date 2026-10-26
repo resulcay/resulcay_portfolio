@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { MathUtils, PerspectiveCamera } from 'three';
+import { gsap } from 'gsap';
+import { MathUtils, PerspectiveCamera, Vector3 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { StoryData } from '@/application/story';
-import { KitProvider } from './scene/kit';
+import { InteractionContext, KitProvider } from './scene/kit';
 import { Shell, StringLights, Window } from './scene/Shell';
 import { Furniture, Posters } from './scene/Furniture';
 import { Corkboard, Journal, Laptop, Phone, RecordPlayer } from './scene/Props';
@@ -12,6 +13,7 @@ import { Character } from './scene/Character';
 import { Butterfly } from './scene/Butterfly';
 import { PHASES, type Phase } from './scene/time';
 import { createQualityGovernor, DPR, type Quality } from './scene/quality';
+import type { StoryObject } from './lines';
 
 const BACKGROUND = '#2a2140';
 const CAMERA: [number, number, number] = [3.7, 2.45, 3.9];
@@ -29,16 +31,24 @@ interface StageProps {
   /** A quality pinned from the URL; the governor then stays out of the way. */
   pinned: boolean;
   still: boolean;
+  hovered: string | null;
+  /** The object the camera should move to, or null for the room view. */
+  focus: StoryObject | null;
+  onHover: (id: string | null) => void;
+  onSelect: (id: string) => void;
+  onArrive: (object: StoryObject) => void;
   onReady: () => void;
   onQuality: (quality: Quality) => void;
   onStats: (stats: Stats) => void;
 }
 
-export function Stage({ data, phase, initialQuality, pinned, still, onReady, onQuality, onStats }: StageProps) {
-  const [quality, setQuality] = useState(initialQuality);
+export function Stage(props: StageProps) {
+  const { data, phase, still, hovered, onHover, onSelect, onQuality } = props;
+  const [quality, setQuality] = useState(props.initialQuality);
   useEffect(() => {
     onQuality(quality);
   }, [quality, onQuality]);
+  const interaction = useMemo(() => ({ hovered, hover: onHover, select: onSelect }), [hovered, onHover, onSelect]);
 
   return (
     <Canvas
@@ -46,28 +56,31 @@ export function Stage({ data, phase, initialQuality, pinned, still, onReady, onQ
       dpr={DPR[quality]}
       camera={{ position: CAMERA, fov: 40, near: 0.1, far: 30 }}
       gl={{ antialias: true, powerPreference: 'high-performance' }}
-      onCreated={onReady}
+      onCreated={props.onReady}
+      onPointerMissed={() => onHover(null)}
     >
       <color attach="background" args={[BACKGROUND]} />
       <fog attach="fog" args={[BACKGROUND, 9, 18]} />
       <Lights phase={phase} quality={quality} />
-      <KitProvider phase={phase}>
-        <Shell />
-        <Window />
-        <StringLights />
-        <Furniture />
-        <Posters />
-        <Laptop />
-        <Journal />
-        <Phone />
-        <RecordPlayer />
-        <Corkboard certifications={data.profile.certifications} />
-        <Polaroids projects={data.projects} />
-        <Character variant="procedural" still={still} />
-      </KitProvider>
+      <InteractionContext.Provider value={interaction}>
+        <KitProvider phase={phase}>
+          <Shell />
+          <Window />
+          <StringLights />
+          <Furniture />
+          <Posters />
+          <Laptop />
+          <Journal />
+          <Phone />
+          <RecordPlayer />
+          <Corkboard certifications={data.profile.certifications} />
+          <Polaroids projects={data.projects} />
+          <Character variant="procedural" still={still} />
+        </KitProvider>
+      </InteractionContext.Provider>
       <Butterfly still={still} />
-      <Controls />
-      <QualityWatch quality={quality} pinned={pinned} onChange={setQuality} onStats={onStats} />
+      <Director focus={props.focus} still={still} hovered={hovered} onArrive={props.onArrive} />
+      <QualityWatch quality={quality} pinned={props.pinned} onChange={setQuality} onStats={props.onStats} />
       <PauseWhenHidden />
     </Canvas>
   );
@@ -99,9 +112,23 @@ function Lights({ phase, quality }: { phase: Phase; quality: Quality }) {
   );
 }
 
-/** A diorama camera: a gentle, clamped orbit with damping and no panning. */
-function Controls() {
+/**
+ * The camera: a gentle, clamped diorama orbit, and GSAP moves to an object's
+ * anchor and back. Orbiting is off while an object is in focus.
+ */
+function Director({
+  focus,
+  still,
+  hovered,
+  onArrive,
+}: {
+  focus: StoryObject | null;
+  still: boolean;
+  hovered: string | null;
+  onArrive: (object: StoryObject) => void;
+}) {
   const camera = useThree((s) => s.camera);
+  const scene = useThree((s) => s.scene);
   const element = useThree((s) => s.gl.domElement);
   const controls = useMemo(() => {
     const c = new OrbitControls(camera, element);
@@ -120,7 +147,46 @@ function Controls() {
     return c;
   }, [camera, element]);
   useEffect(() => () => controls.dispose(), [controls]);
-  useFrame(() => controls.update());
+
+  // Where the visitor had orbited to before the first move, to return there.
+  const home = useRef<{ position: Vector3; target: Vector3 } | null>(null);
+  const moving = useRef(false);
+
+  useEffect(() => {
+    const ease = { duration: still ? 0 : 0.9, ease: 'power2.inOut' };
+    const spot = focus && scene.getObjectByName(focus);
+    if (spot && spot.parent) {
+      home.current ??= { position: camera.position.clone(), target: controls.target.clone() };
+      const to = spot.parent.localToWorld(new Vector3(...(spot.userData['anchor'] as [number, number, number])));
+      const look = spot.getWorldPosition(new Vector3());
+      controls.enabled = false;
+      moving.current = true;
+      const move = gsap
+        .timeline({ onComplete: () => onArrive(focus) })
+        .to(camera.position, { x: to.x, y: to.y, z: to.z, ...ease }, 0)
+        .to(controls.target, { x: look.x, y: look.y, z: look.z, ...ease }, 0);
+      return () => void move.kill();
+    }
+    if (!home.current) return;
+    const back = home.current;
+    home.current = null;
+    const move = gsap
+      .timeline({
+        onComplete: () => {
+          controls.enabled = true;
+          moving.current = false;
+        },
+      })
+      .to(camera.position, { x: back.position.x, y: back.position.y, z: back.position.z, ...ease }, 0)
+      .to(controls.target, { x: back.target.x, y: back.target.y, z: back.target.z, ...ease }, 0);
+    return () => void move.kill();
+  }, [focus, still, scene, camera, controls, onArrive]);
+
+  useFrame(() => {
+    // The orbit's clamps would fight a camera move, so steer by hand meanwhile.
+    if (moving.current) camera.lookAt(controls.target);
+    else controls.update();
+  });
 
   // Keep about a 60° horizontal view, so a portrait phone still sees the room.
   const aspect = useThree((s) => s.size.width / s.size.height);
@@ -130,6 +196,10 @@ function Controls() {
     camera.fov = MathUtils.clamp(MathUtils.radToDeg(vertical), 32, 70);
     camera.updateProjectionMatrix();
   }, [camera, aspect]);
+
+  useEffect(() => {
+    element.style.cursor = hovered ? 'pointer' : '';
+  }, [element, hovered]);
   return null;
 }
 

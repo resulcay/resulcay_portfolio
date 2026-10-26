@@ -1,6 +1,6 @@
 import type { Experience, Locale, Profile, Project, Testimonial } from '@/domain/schemas';
 import { tagLabel } from '@/domain/tags';
-import { t } from '@/i18n/ui';
+import { formatPeriod, t } from '@/i18n/ui';
 import { publicProjects } from './content';
 
 /** Everything Story mode shows, in one language, so the 3D view never needs the Journal's pages. */
@@ -38,6 +38,7 @@ export function storyData(
       title: p.title,
       hook: p.hook[lang],
       role: p.role[lang],
+      period: formatPeriod(p.start, p.end, lang),
       story: p.story[lang],
       highlights: p.highlights.map((h) => h[lang]),
       tags: [p.category, ...p.appTypes, ...p.platforms, ...p.languages, ...p.tech].map((tag) => tagLabel(tag, lang)),
@@ -50,6 +51,7 @@ export function storyData(
       start: e.start,
       end: e.end,
       location: e.location,
+      period: formatPeriod(e.start, e.end, lang),
       points: e.points.map((p) => p[lang]),
     })),
     testimonials: testimonials.map((x) => ({ name: x.name, quote: x.quote[lang] })),

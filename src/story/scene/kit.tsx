@@ -1,9 +1,11 @@
-import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode } from 'react';
+import type { ThreeEvent } from '@react-three/fiber';
 import {
   BufferAttribute,
   Color,
   Euler,
   Matrix4,
+  Mesh,
   MeshBasicMaterial,
   MeshLambertMaterial,
   Quaternion,
@@ -98,14 +100,80 @@ export function Merged({
  * a later camera move will look from (`anchor`, in the same space as `at`).
  * It costs no draw call.
  */
-export function Hotspot({ id, at, size, anchor, rotY = 0 }: { id: string; at: Vec3; size: Vec3; anchor: Vec3; rotY?: number }) {
+export function Hotspot({
+  id,
+  at,
+  size,
+  anchor,
+  rotY = 0,
+  highlight = true,
+}: {
+  id: string;
+  at: Vec3;
+  size: Vec3;
+  anchor: Vec3;
+  rotY?: number;
+  /** Make the hotspot's sibling meshes glow while it's looked at. */
+  highlight?: boolean;
+}) {
+  const { hovered, hover, select } = useInteraction();
+  const { lift } = useKit();
+  const ref = useRef<Mesh>(null);
+  const active = hovered === id;
+
+  useEffect(() => {
+    const parent = ref.current?.parent;
+    if (!active || !highlight || !parent) return;
+    const swapped: [Mesh, Material][] = [];
+    parent.traverse((o) => {
+      if (!(o instanceof Mesh) || Array.isArray(o.material)) return;
+      const glowing = lift.get(o.material);
+      if (!glowing) return;
+      swapped.push([o, o.material]);
+      o.material = glowing;
+    });
+    return () => swapped.forEach(([mesh, material]) => (mesh.material = material));
+  }, [active, highlight, lift]);
+
+  const pointerType = (event: ThreeEvent<MouseEvent>) => (event.nativeEvent as PointerEvent).pointerType;
   return (
-    <mesh name={id} position={at} rotation-y={rotY} userData={{ id, anchor }}>
+    <mesh
+      ref={ref}
+      name={id}
+      position={at}
+      rotation-y={rotY}
+      userData={{ id, anchor }}
+      onPointerOver={(event) => {
+        event.stopPropagation();
+        if (pointerType(event) === 'mouse') hover(id);
+      }}
+      onPointerOut={(event) => {
+        if (pointerType(event) === 'mouse' && active) hover(null);
+      }}
+      onClick={(event) => {
+        event.stopPropagation();
+        // A drag that orbits the camera isn't a click.
+        if (event.delta > 6) return;
+        // Touch: the first tap shows the thought, the second opens it.
+        if (pointerType(event) === 'mouse' || active) select(id);
+        else hover(id);
+      }}
+    >
       <boxGeometry args={size} />
       <meshBasicMaterial visible={false} />
     </mesh>
   );
 }
+
+interface Interaction {
+  hovered: string | null;
+  hover: (id: string | null) => void;
+  select: (id: string) => void;
+}
+
+export const InteractionContext = createContext<Interaction>({ hovered: null, hover: () => {}, select: () => {} });
+
+export const useInteraction = () => useContext(InteractionContext);
 
 interface Kit {
   atlas: Atlas;
@@ -119,6 +187,8 @@ interface Kit {
   /** Atlas surfaces that glow: screens and the sky. */
   glow: MeshBasicMaterial;
   lens: MeshBasicMaterial;
+  /** Glowing stand-ins for base and lit, used while an object is looked at. */
+  lift: Map<Material, Material>;
 }
 
 const KitContext = createContext<Kit | null>(null);
@@ -139,6 +209,20 @@ export function KitProvider({ phase, children }: { phase: Phase; children: React
   const lens = useDisposable(
     () => new MeshBasicMaterial({ color: '#d8e8ff', transparent: true, opacity: 0.18, depthWrite: false }),
   );
-  const kit = useMemo(() => ({ atlas, phase, base, wall, lit, glow, lens }), [atlas, phase, base, wall, lit, glow, lens]);
+  // Warm, glowing twins of the shared materials, swapped in while an object is looked at.
+  const baseLift = useDisposable(() => new MeshLambertMaterial({ vertexColors: true, emissive: '#e8a657', emissiveIntensity: 0.4 }));
+  const litLift = useDisposable(() => new MeshLambertMaterial({ map: atlas.texture, emissive: '#e8a657', emissiveIntensity: 0.3 }));
+  const lift = useMemo(
+    () =>
+      new Map<Material, Material>([
+        [base, baseLift],
+        [lit, litLift],
+      ]),
+    [base, baseLift, lit, litLift],
+  );
+  const kit = useMemo(
+    () => ({ atlas, phase, base, wall, lit, glow, lens, lift }),
+    [atlas, phase, base, wall, lit, glow, lens, lift],
+  );
   return <KitContext.Provider value={kit}>{children}</KitContext.Provider>;
 }

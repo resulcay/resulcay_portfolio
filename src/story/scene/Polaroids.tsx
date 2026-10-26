@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { BoxGeometry, CatmullRomCurve3, TubeGeometry, Vector3 } from 'three';
 import type { StoryData } from '@/application/story';
-import { Hotspot, Merged, useKit, type Part, type Vec3 } from './kit';
+import { Hotspot, Merged, useInteraction, useKit, type Part, type Vec3 } from './kit';
 import { wrapText, type Atlas, type Cell } from './atlas';
 
 type Project = StoryData['projects'][number];
@@ -54,6 +54,7 @@ function paintFace(atlas: Atlas, cell: Cell, project: Project, index: number, ph
 /** Polaroids on strings above the bed, one per public project. */
 export function Polaroids({ projects }: { projects: Project[] }) {
   const { atlas, base, lit } = useKit();
+  const { hovered } = useInteraction();
   const layout = useMemo(() => {
     // shortcut: shows the first 12 projects, about what the atlas has room for; a second atlas would lift that.
     const shown = projects.slice(0, 12);
@@ -86,8 +87,17 @@ export function Polaroids({ projects }: { projects: Project[] }) {
   }, [atlas, layout]);
 
   const facing = (tilt: number): Vec3 => [tilt, Math.PI / 2, 0];
+  const lookedAt = layout.find(({ project }) => hovered === `polaroid:${project.slug}`);
   return (
     <>
+      {/* The camera frames the whole wall from here. */}
+      <group name="polaroids" position={[WALL_X, 1.9, -1.0]} userData={{ id: 'polaroids', anchor: [-0.5, 1.8, -1.0] }} />
+      {lookedAt && (
+        <mesh position={[WALL_X - 0.005, lookedAt.at[1], lookedAt.at[2]]} rotation-y={Math.PI / 2}>
+          <planeGeometry args={[W + 0.05, H + 0.05]} />
+          <meshBasicMaterial color="#ffd59a" toneMapped={false} />
+        </mesh>
+      )}
       <Merged
         material={base}
         parts={() => [
@@ -116,7 +126,7 @@ export function Polaroids({ projects }: { projects: Project[] }) {
         }
       />
       {layout.map(({ project, at }) => (
-        <Hotspot key={project.slug} id={`polaroid:${project.slug}`} at={[at[0] + 0.03, at[1], at[2]]} size={[0.06, H, W]} anchor={[-0.6, at[1] - 0.1, at[2]]} />
+        <Hotspot key={project.slug} id={`polaroid:${project.slug}`} at={[at[0] + 0.03, at[1], at[2]]} size={[0.06, H, W]} anchor={[-0.5, 1.8, -1.0]} highlight={false} />
       ))}
     </>
   );

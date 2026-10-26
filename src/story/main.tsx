@@ -1,11 +1,14 @@
 import { createRoot } from 'react-dom/client';
 import type { StoryData } from '@/application/story';
-import { Stage } from './Stage';
-import { phaseAt } from './scene/time';
+import type { Locale } from '@/domain/schemas';
+import { StoryApp } from './StoryApp';
 import { parseQuality } from './scene/quality';
 
 interface MountOptions {
   dataUrl: string;
+  lang: Locale;
+  /** Turnstile site key for the phone's contact form, when configured. */
+  siteKey: string | undefined;
   reducedMotion: boolean;
   /** Called once the renderer and scene exist, so the title screen can hide its loader. */
   onReady: () => void;
@@ -39,9 +42,11 @@ export async function mountStory(container: HTMLElement, options: MountOptions):
   const root = createRoot(container, { onUncaughtError: options.onError });
   // No StrictMode: its dev-only double effect run would drop the WebGL context on first mount.
   root.render(
-    <Stage
+    <StoryApp
       data={data}
-      phase={phaseAt(hour)}
+      lang={options.lang}
+      siteKey={options.siteKey}
+      hour={hour}
       initialQuality={pinned ?? (coarse ? 'medium' : 'high')}
       pinned={pinned !== undefined}
       still={options.reducedMotion}

@@ -17,8 +17,6 @@ export const ui = {
     'story.tryAnyway': 'Try story mode anyway',
     'story.loading': 'Setting the scene…',
     'story.back': 'Back to title',
-    'story.sceneLabel':
-      "Resul's bedroom studio. He sits at his desk typing on a laptop, with photos of his projects pinned on the wall above the bed.",
     'story.failed': "The 3D view couldn't start on this device. The journal has everything.",
     'home.kicker': 'Episode 1',
     'home.title': 'Compile',
@@ -99,8 +97,6 @@ export const ui = {
     'story.tryAnyway': 'Yine de hikâye modunu dene',
     'story.loading': 'Sahne hazırlanıyor…',
     'story.back': 'Başlığa dön',
-    'story.sceneLabel':
-      "Resul'ün yatak odası stüdyosu. Masasında dizüstü bilgisayarında yazıyor; yatağın üstündeki duvarda projelerinin fotoğrafları asılı.",
     'story.failed': '3D görünüm bu cihazda başlatılamadı. Günlükte her şey var.',
     'home.kicker': 'Bölüm 1',
     'home.title': 'Derleme',

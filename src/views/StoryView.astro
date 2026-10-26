@@ -4,12 +4,17 @@ import Butterfly from '@/components/Butterfly.astro';
 import type { Locale } from '@/domain/schemas';
 import { content } from '@/lib/content';
 import { localizePath, t } from '@/i18n/ui';
+import { turnstileSiteKey } from '@/lib/auth';
+import { allowTurnstile } from '@/lib/csp';
 
 interface Props {
   lang: Locale;
 }
 const { lang } = Astro.props;
 const profile = await content.getProfile();
+// The phone in the room holds the contact form.
+const siteKey = turnstileSiteKey();
+if (siteKey) allowTurnstile(Astro);
 ---
 <BaseLayout lang={lang} title={t(lang, 'nav.story')} description={t(lang, 'story.description')}>
   <section class="title wrap" aria-labelledby="story-title">
@@ -55,8 +60,8 @@ const profile = await content.getProfile();
     </div>
   </section>
 
-  <div class="stage" data-stage data-url={localizePath('/story/data.json', lang)} hidden>
-    <div class="stage__canvas" data-canvas role="img" aria-label={t(lang, 'story.sceneLabel')}></div>
+  <div class="stage" data-stage data-url={localizePath('/story/data.json', lang)} data-lang={lang} data-sitekey={siteKey} hidden>
+    <div class="stage__canvas" data-canvas></div>
     <div class="stage__vignette" aria-hidden="true"></div>
     <div class="stage__loader" data-loader role="status">
       <Butterfly size={56} class="stage__butterfly" />
@@ -92,6 +97,7 @@ const profile = await content.getProfile();
     teardown = undefined;
     stage.hidden = true;
     document.documentElement.classList.remove('story-open');
+    if (location.hash) history.replaceState(null, '', location.pathname + location.search);
     start.focus();
   }
 
@@ -113,6 +119,8 @@ const profile = await content.getProfile();
       const { mountStory } = await import('@/story/main');
       const unmount = await mountStory(canvas, {
         dataUrl: stage.dataset['url']!,
+        lang: stage.dataset['lang'] === 'tr' ? 'tr' : 'en',
+        siteKey: stage.dataset['sitekey'],
         reducedMotion: device.reducedMotion,
         onReady: () => (loader.hidden = true),
         onError: fail,
@@ -126,8 +134,12 @@ const profile = await content.getProfile();
 
   back.addEventListener('click', close);
   addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !stage.hidden) close();
+    // With a panel open, Esc closes the panel, not the whole story.
+    if (event.key === 'Escape' && !stage.hidden && !stage.querySelector('dialog[open]')) close();
   });
+
+  // A deep link such as /story#laptop or #project/macyap opens straight away.
+  if (location.hash.length > 1 && storyFits(device)) start.click();
 </script>
 
 <style>
@@ -251,5 +263,288 @@ const profile = await content.getProfile();
   }
   :global(html.story-open) {
     overflow: hidden;
+  }
+</style>
+
+<!-- Story mode's React UI renders outside this component's scope, so its styles are global and prefixed. -->
+<style is:global>
+  .story-objects {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .story-scene {
+    position: absolute;
+    inset: 0;
+  }
+  .story-thought {
+    position: absolute;
+    left: 50%;
+    bottom: 20px;
+    translate: -50% 0;
+    width: max-content;
+    max-width: calc(100% - 32px);
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: rgb(244 235 221 / 0.92);
+    color: #1e1b24;
+    font-family: var(--font-hand);
+    font-size: 1.5rem;
+    line-height: 1.3;
+    text-align: center;
+    pointer-events: none;
+  }
+  .story-thought:empty {
+    display: none;
+  }
+
+  .story-panel {
+    width: min(720px, calc(100% - 24px));
+    max-height: min(86vh, 900px);
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: var(--paper-raised);
+    color: var(--ink);
+    box-shadow: 0 24px 60px rgb(30 27 36 / 0.45);
+  }
+  .story-panel::backdrop {
+    background: rgb(30 27 36 / 0.45);
+  }
+  .story-panel__page {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: clamp(18px, 4vw, 36px);
+    /* Faint ruled lines, like a journal page. */
+    background: repeating-linear-gradient(to bottom, transparent 0 31px, color-mix(in srgb, var(--rule) 45%, transparent) 31px 32px);
+  }
+  .story-panel__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .story-panel h2 {
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+  }
+  .story-panel h3 {
+    margin-top: 10px;
+    font-size: 1.375rem;
+  }
+  .story-panel ul,
+  .story-panel ol {
+    margin: 0;
+    padding-left: 20px;
+  }
+  .story-panel img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+  }
+  .story-panel__close {
+    flex: none;
+    min-height: 44px;
+    padding: 8px 16px;
+  }
+  .story-meta {
+    color: var(--ink-quiet);
+    font-size: 0.9375rem;
+  }
+  .story-hook {
+    font-size: 1.5rem;
+    color: var(--accent-text);
+  }
+  .story-facts,
+  .story-skills {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px 24px;
+    margin: 0;
+  }
+  .story-facts dt,
+  .story-skills dt {
+    font-weight: 700;
+  }
+  .story-facts dd,
+  .story-skills dd {
+    margin: 0;
+  }
+  .story-panel .story-chips,
+  .story-panel .story-cards,
+  .story-panel .story-grid,
+  .story-panel .story-thread,
+  .story-panel .story-timeline {
+    padding: 0;
+    list-style: none;
+  }
+  .story-panel .story-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .story-chips li,
+  .story-badge {
+    padding: 2px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    font-size: 0.8125rem;
+  }
+  .story-badge {
+    margin-left: 8px;
+  }
+  .story-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+    font-weight: 700;
+  }
+  .story-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .story-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .story-grid button {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    height: 100%;
+    padding: 14px;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    rotate: -0.6deg;
+  }
+  .story-grid li:nth-child(even) button {
+    rotate: 0.6deg;
+  }
+  .story-grid button:hover,
+  .story-grid button:focus-visible {
+    border-color: var(--golden);
+  }
+  .story-grid strong {
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+  }
+  .story-grid span {
+    color: var(--ink-quiet);
+    font-size: 0.9375rem;
+  }
+  .story-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    border-left: 2px solid var(--golden);
+    padding-left: 18px !important;
+  }
+  .story-timeline ul {
+    margin-top: 6px;
+  }
+  .story-quote {
+    margin: 0;
+    padding-left: 14px;
+    border-left: 3px solid var(--violet);
+  }
+  .story-quote footer {
+    margin-top: 4px;
+    font-weight: 700;
+  }
+  .story-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .story-cards li {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px;
+    border-top: 6px solid var(--golden);
+    background: var(--paper);
+  }
+  .story-cards span {
+    color: var(--ink-quiet);
+  }
+  .story-soon {
+    font-size: 1.75rem;
+  }
+  .story-phases {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .story-phases label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    font-weight: 700;
+  }
+  .story-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .story-thread li {
+    width: fit-content;
+    max-width: 85%;
+    padding: 8px 14px;
+    border-radius: 18px 18px 18px 4px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+  }
+  .story-thread a {
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+  .story-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .story-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-weight: 700;
+  }
+  .story-form input,
+  .story-form textarea {
+    padding: 10px 12px;
+    border: 1.5px solid var(--rule);
+    border-radius: 8px;
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    font-weight: 400;
+  }
+  .story-form small {
+    color: #b3402a;
+    font-weight: 400;
+  }
+  .story-toast {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: #1e1b24;
+    color: #f4ebdd;
+    font-family: var(--font-hand);
+    font-size: 1.375rem;
+    text-align: center;
   }
 </style>
