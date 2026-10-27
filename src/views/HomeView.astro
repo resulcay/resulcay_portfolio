@@ -3,7 +3,9 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import PolaroidCard from '@/components/PolaroidCard.astro';
 import Butterfly from '@/components/Butterfly.astro';
 import type { Locale } from '@/domain/schemas';
-import { featuredProjects } from '@/application/content';
+import { featuredProjects, publicProjects } from '@/application/content';
+import { experienceMonths, latestRole, storeApps, topTech } from '@/application/glance';
+import TagChips from '@/components/TagChips.astro';
 import { content } from '@/lib/content';
 import { personLd } from '@/lib/structured-data';
 import { formatPeriod, localizePath, t } from '@/i18n/ui';
@@ -21,6 +23,15 @@ const [profile, projects, experience, testimonials] = await Promise.all([
 ]);
 const featured = featuredProjects(projects);
 const school = profile.education.find((e) => !e.completed);
+const latest = latestRole(experience);
+const stack = topTech(projects, 8);
+// Only facts the content backs; a zero count is left out rather than shown.
+const stats = [
+  { value: `${Math.floor(experienceMonths(experience, new Date()) / 12)}+`, label: t(lang, 'glance.years') },
+  { value: String(publicProjects(projects).length), label: t(lang, 'glance.projects') },
+  { value: String(storeApps(projects)), label: t(lang, 'glance.storeApps') },
+  { value: String(testimonials.length), label: t(lang, 'glance.testimonials') },
+].filter((s) => s.value !== '0' && s.value !== '0+');
 const siteKey = turnstileSiteKey();
 const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/, '+90 $1 $2 $3 $4');
 ---
@@ -45,16 +56,45 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
 
   <section class="wrap facts" aria-labelledby="facts-title">
     <h2 id="facts-title" class="eyebrow">{t(lang, 'home.facts')}</h2>
+    <ul class="glance">
+      {
+        stats.map((s) => (
+          <li>
+            <span class="glance__value">{s.value}</span>
+            <span class="glance__label">{s.label}</span>
+          </li>
+        ))
+      }
+    </ul>
     <dl>
       <div><dt>{t(lang, 'facts.role')}</dt><dd>{profile.title[lang]}</dd></div>
       <div><dt>{t(lang, 'facts.location')}</dt><dd>{profile.location[lang]}</dd></div>
-      <div><dt>{t(lang, 'facts.experience')}</dt><dd>{t(lang, 'facts.experienceValue')}</dd></div>
+      {
+        latest && (
+          <div>
+            <dt>{t(lang, 'facts.latest')}</dt>
+            <dd>
+              {latest.title[lang]}, {latest.organization} ({formatPeriod(latest.start, latest.end, lang)})
+            </dd>
+          </div>
+        )
+      }
+      {
+        stack.length > 0 && (
+          <div>
+            <dt>{t(lang, 'facts.stack')}</dt>
+            <dd>
+              <TagChips tags={stack} lang={lang} />
+            </dd>
+          </div>
+        )
+      }
       {
         school && (
           <div>
             <dt>{t(lang, 'facts.education')}</dt>
             <dd>
-              {school.program[lang]}, {school.school}, {school.start}–{school.end}. {school.note?.[lang]}
+              {school.school}, {school.program[lang]}, {school.start}–{school.end} ({t(lang, 'facts.notCompleted')})
             </dd>
           </div>
         )
@@ -230,6 +270,50 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
   .facts {
     padding: 24px 0;
     border-block: 1px solid var(--rule);
+  }
+  .glance {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin: 16px 0 8px;
+    padding: 0;
+    list-style: none;
+  }
+  .glance li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 14px 16px;
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+  }
+  .glance__value {
+    font-family: var(--font-display);
+    font-size: 2.4rem;
+    line-height: 1;
+    color: var(--accent-text);
+  }
+  .glance__label {
+    color: var(--ink-quiet);
+    font-size: 0.95rem;
+  }
+  /* A gentle rise as the facts scroll in; anything already in view is shown as is. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .glance li,
+      .facts dl > div {
+        animation: glance-rise linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 60%;
+      }
+    }
+  }
+  @keyframes glance-rise {
+    from {
+      opacity: 0.3;
+      transform: translateY(12px);
+    }
   }
   .facts dl,
   .contact dl {
