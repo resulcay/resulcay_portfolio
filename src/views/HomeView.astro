@@ -56,58 +56,58 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
 
   <section class="wrap facts" aria-labelledby="facts-title">
     <h2 id="facts-title" class="eyebrow">{t(lang, 'home.facts')}</h2>
-    <ul class="glance">
-      {
-        stats.map((s) => (
-          <li>
-            <span class="glance__value">{s.value}</span>
-            <span class="glance__label">{s.label}</span>
-          </li>
-        ))
-      }
-    </ul>
-    <ul class="facts__chips">
-      <li>
-        <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="5" width="12" height="8.5" rx="2" /><path d="M5.5 5V3.5h5V5M2 9h12" /></svg>
-        {profile.title[lang]}
-      </li>
-      <li>
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14.5s4.5-4.2 4.5-7.7a4.5 4.5 0 0 0-9 0c0 3.5 4.5 7.7 4.5 7.7Z" /><circle cx="8" cy="6.8" r="1.6" /></svg>
-        {profile.location[lang]}
-      </li>
-      {
-        latest && (
-          <li title={`${latest.title[lang]}, ${latest.organization} (${formatPeriod(latest.start, latest.end, lang)})`}>
-            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 14V3.5h7V14M10 7h3v7M1.5 14h13M5.5 6h2M5.5 9h2" /></svg>
-            <span>
-              {latest.title[lang]} @ {latest.organization} · {latest.start.slice(0, 4)}–{latest.end?.slice(2, 4) ?? ''}
-            </span>
-          </li>
-        )
-      }
-      {
-        school && (
-          <li title={`${school.school}, ${school.program[lang]}, ${school.start}–${school.end} (${t(lang, 'facts.notCompleted')})`}>
-            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 6.5 8 3.5l6.5 3L8 9.5Z" /><path d="M4.5 8v3.2c1.9 1.6 5.1 1.6 7 0V8" /></svg>
-            <span>
-              {school.school}, {school.program[lang]} · {t(lang, 'facts.notCompleted')}
-            </span>
-          </li>
-        )
-      }
-      <li class="facts__open">
-        <span class="facts__dot" aria-hidden="true"></span>
-        {profile.availability[lang]}
-      </li>
-    </ul>
-    {
-      stack.length > 0 && (
-        <div class="facts__stack">
-          <span class="facts__label">{t(lang, 'facts.stack')}</span>
-          <TagChips tags={stack} lang={lang} />
+    <div class="facts__grid">
+      <dl class="notebook">
+        <div>
+          <dt>{t(lang, 'facts.role')}</dt>
+          <dd>{profile.title[lang]} · {profile.location[lang]}</dd>
         </div>
-      )
-    }
+        {
+          latest && (
+            <div>
+              <dt>{t(lang, 'facts.lately')}</dt>
+              <dd>
+                {latest.title[lang]}, {latest.organization} ({formatPeriod(latest.start, latest.end, lang)})
+              </dd>
+            </div>
+          )
+        }
+        {
+          stack.length > 0 && (
+            <div>
+              <dt>{t(lang, 'facts.stack')}</dt>
+              <dd>
+                <TagChips tags={stack} lang={lang} />
+              </dd>
+            </div>
+          )
+        }
+        {
+          school && (
+            <div>
+              <dt>{t(lang, 'facts.studied')}</dt>
+              <dd>
+                {school.school}, {school.program[lang]}, {school.start}–{school.end} ({t(lang, 'facts.notCompleted')})
+              </dd>
+            </div>
+          )
+        }
+        <div>
+          <dt>{t(lang, 'facts.availability')}</dt>
+          <dd>{profile.availability[lang]}</dd>
+        </div>
+      </dl>
+      <ul class="glance">
+        {
+          stats.map((s) => (
+            <li>
+              <span class="glance__value">{s.value}</span>
+              <span class="glance__label">{s.label}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
   </section>
 
   <section class="wrap section" aria-labelledby="featured-title">
@@ -278,26 +278,68 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
     padding: 24px 0;
     border-block: 1px solid var(--rule);
   }
+  /* A notebook card of facts beside the stat tiles; they stack on narrow screens. */
+  .facts__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 16px;
+    margin-top: 16px;
+  }
+  @media (max-width: 760px) {
+    .facts__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .notebook,
+  .glance li {
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+  }
+  .notebook {
+    margin: 0;
+    padding: 6px 18px;
+    /* A notebook's margin line, between the handwritten labels and the text. */
+    background-image: linear-gradient(to right, transparent calc(18px + 6.5rem + 5px), color-mix(in srgb, var(--golden) 45%, transparent) calc(18px + 6.5rem + 5px) calc(18px + 6.5rem + 6px), transparent calc(18px + 6.5rem + 6px));
+  }
+  .notebook > div {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: 12px;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--rule);
+  }
+  .notebook > div:last-child {
+    border-bottom: 0;
+  }
+  .notebook dt {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 1.15rem;
+    color: var(--accent-text);
+  }
+  .notebook dd {
+    margin: 0;
+  }
   .glance {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 1fr;
     gap: 12px;
-    margin: 16px 0 8px;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
   .glance li {
     display: flex;
     flex-direction: column;
-    gap: 0;
-    padding: 10px 14px;
-    background: var(--paper-raised);
-    border: 1px solid var(--rule);
-    border-radius: var(--radius);
+    justify-content: center;
+    padding: 14px 16px;
   }
   .glance__value {
     font-family: var(--font-display);
-    font-size: 2.1rem;
+    font-size: 2.3rem;
     line-height: 1;
     color: var(--accent-text);
   }
@@ -307,67 +349,11 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
     line-height: 1.35;
     text-wrap: balance;
   }
-  .facts__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 4px 0 0;
-    padding: 0;
-    list-style: none;
-  }
-  .facts__chips li {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    max-width: 100%;
-    padding: 4px 12px;
-    border: 1px solid var(--rule);
-    border-radius: 999px;
-    font-size: 0.875rem;
-    line-height: 1.5;
-  }
-  .facts__chips li span:not([aria-hidden]) {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-  .facts__chips svg {
-    flex: none;
-    width: 14px;
-    height: 14px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.4;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-  .facts__open {
-    border-color: var(--golden) !important;
-    color: var(--accent-text);
-  }
-  .facts__dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--golden);
-  }
-  .facts__stack {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px 12px;
-    margin-top: 14px;
-  }
-  .facts__label {
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    color: var(--ink-quiet);
-  }
   /* A gentle rise as the facts scroll in; anything already in view is shown as is. */
   @media (prefers-reduced-motion: no-preference) {
     @supports (animation-timeline: view()) {
       .glance li,
-      .facts__chips li {
+      .notebook > div {
         animation: glance-rise linear both;
         animation-timeline: view();
         animation-range: entry 0% entry 60%;
