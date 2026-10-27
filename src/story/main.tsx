@@ -32,8 +32,8 @@ export async function mountStory(container: HTMLElement, options: MountOptions):
     fetch(options.dataUrl),
     // Canvas text needs the fonts in memory before it's painted.
     document.fonts.load('500 26px "Dudu Calligraphy"'),
-    document.fonts.load('700 21px "Atkinson Hyperlegible"'),
-    document.fonts.load('400 15px "Atkinson Hyperlegible"'),
+    document.fonts.load('700 21px Overpass'),
+    document.fonts.load('400 15px Overpass'),
   ]);
   if (!response.ok) throw new Error(`Story data failed: ${response.status}`);
   const data = (await response.json()) as StoryData;

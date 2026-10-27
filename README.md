@@ -6,7 +6,7 @@ Resul Çay's portfolio. A fast, server-rendered "Journal" that recruiters, searc
 
 - [Astro](https://astro.build) 7, server-rendered on Cloudflare Workers
 - TypeScript (strictest), Zod for validation shared by browser and server
-- Self-hosted fonts: Dudu Calligraphy (headings and handwriting), Atkinson Hyperlegible (body)
+- Self-hosted fonts: Dudu Calligraphy (headings and handwriting), Overpass (body)
 - English and Turkish (`/` and `/tr`)
 
 ## Layout

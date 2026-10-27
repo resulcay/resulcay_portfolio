@@ -1,7 +1,7 @@
-@import '@fontsource/atkinson-hyperlegible/latin-400.css';
-@import '@fontsource/atkinson-hyperlegible/latin-ext-400.css';
-@import '@fontsource/atkinson-hyperlegible/latin-700.css';
-@import '@fontsource/atkinson-hyperlegible/latin-ext-700.css';
+@import '@fontsource/overpass/latin-400.css';
+@import '@fontsource/overpass/latin-ext-400.css';
+@import '@fontsource/overpass/latin-700.css';
+@import '@fontsource/overpass/latin-ext-700.css';
 
 /* Resul's own handwriting font (made with Font.My), with the Turkish letters and
    dashes it lacked composed from its strokes. One weight serves every heading. */
@@ -28,7 +28,7 @@
   --on-golden: #1e1b24;
 
   --font-display: 'Dudu Calligraphy', cursive, serif;
-  --font-body: 'Dudu Calligraphy', system-ui, sans-serif;
+  --font-body: 'Overpass', system-ui, sans-serif;
   --font-hand: 'Dudu Calligraphy', cursive, serif;
 
   --radius: 12px;
