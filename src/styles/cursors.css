@@ -1,9 +1,9 @@
-/* The site's cursors: an acorn, pointing with its tip, and the blue
+/* The site's cursors: an acorn, pointing with its tip to the bottom left, and the blue
    butterfly over anything you can follow. Only for a mouse or trackpad; high-contrast and
    forced-colour modes keep the system cursors, as do text fields. */
 @media (pointer: fine) and (not (prefers-contrast: more)) and (not (forced-colors: active)) {
   :root {
-    --cursor-acorn: url('/cursors/acorn.svg') 3 3, auto;
+    --cursor-acorn: url('/cursors/acorn-down.svg') 3 29, auto;
     --cursor-link: url('/cursors/butterfly.svg') 16 16, pointer;
   }
   html {

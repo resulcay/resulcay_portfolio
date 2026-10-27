@@ -7,7 +7,7 @@
       <stop offset="0" stop-color="#8a6439"/><stop offset="1" stop-color="#4f3419"/>
     </linearGradient>
   </defs>
-  <g transform="translate(13.2 13.2) rotate(135)" stroke-linejoin="round" stroke-linecap="round">
+  <g transform="translate(13.6 18.4) rotate(45)" stroke-linejoin="round" stroke-linecap="round">
     <g fill="none" stroke="#fbf6ee" stroke-width="3">
       <path d="M-8-3C-8.5 4-4 10 0 14.4 4 10 8.5 4 8-3Z"/>
       <path d="M-9.5-2.5C-10-9-5-12.5 0-12.5 5-12.5 10-9 9.5-2.5 6-1-6-1-9.5-2.5Z"/>
