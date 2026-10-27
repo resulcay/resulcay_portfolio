@@ -123,9 +123,13 @@ export interface ResulModel {
 
 export async function loadResul(url: string): Promise<ResulModel> {
   const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
-  const gltf = await new GLTFLoader().loadAsync(url);
+  return buildResul((await new GLTFLoader().loadAsync(url)).scene);
+}
+
+/** Toon materials, ink outlines and his face, on the loaded glTF scene. */
+export function buildResul(scene: Group): ResulModel {
   const group = new Group();
-  group.add(gltf.scene);
+  group.add(scene);
   group.updateMatrixWorld(true);
 
   const gradient = gradientMap();
@@ -137,7 +141,7 @@ export async function loadResul(url: string): Promise<ResulModel> {
   let drawCalls = 0;
 
   const skinned: SkinnedMesh[] = [];
-  gltf.scene.traverse((o) => o instanceof SkinnedMesh && skinned.push(o));
+  scene.traverse((o) => o instanceof SkinnedMesh && skinned.push(o));
   for (const mesh of skinned) {
     const source = mesh.material as Material & { color: MeshToonMaterial['color'] };
     const toon = withRim(new MeshToonMaterial({ color: source.color, gradientMap: gradient }));
