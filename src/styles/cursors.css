@@ -1,13 +1,13 @@
-/* The journal's cursors: a feather quill to write with, and the blue
+/* The site's cursors: an acorn, pointing with its tip, and the blue
    butterfly over anything you can follow. Only for a mouse or trackpad; high-contrast and
    forced-colour modes keep the system cursors, as do text fields. */
 @media (pointer: fine) and (not (prefers-contrast: more)) and (not (forced-colors: active)) {
   :root {
-    --cursor-quill: url('/cursors/feather.svg') 3 29, auto;
+    --cursor-acorn: url('/cursors/acorn.svg') 3 3, auto;
     --cursor-link: url('/cursors/butterfly.svg') 16 16, pointer;
   }
   html {
-    cursor: var(--cursor-quill);
+    cursor: var(--cursor-acorn);
   }
   :is(a[href], button, summary, select, label[for], [role='button'], .button) {
     cursor: var(--cursor-link);

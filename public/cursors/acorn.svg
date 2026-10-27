@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <radialGradient id="nut" cx="-3" cy="2" r="12" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ecb675"/><stop offset="0.55" stop-color="#b9773b"/><stop offset="1" stop-color="#7a4a20"/>
+    </radialGradient>
+    <linearGradient id="cap" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8a6439"/><stop offset="1" stop-color="#4f3419"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(13.2 13.2) rotate(135)" stroke-linejoin="round" stroke-linecap="round">
+    <g fill="none" stroke="#fbf6ee" stroke-width="3">
+      <path d="M-8-3C-8.5 4-4 10 0 14.4 4 10 8.5 4 8-3Z"/>
+      <path d="M-9.5-2.5C-10-9-5-12.5 0-12.5 5-12.5 10-9 9.5-2.5 6-1-6-1-9.5-2.5Z"/>
+      <path d="M1-12C2-15.5 4.5-16 6.5-14.8"/>
+    </g>
+    <path d="M-8-3C-8.5 4-4 10 0 14.4 4 10 8.5 4 8-3Z" fill="url(#nut)" stroke="#5a3415" stroke-width="0.9"/>
+    <path d="M-4.5 0C-5 4-3 8-0.6 11M3 0C3.6 4 2.8 7.5 1.2 10.5M-1 -0.5C-1.2 4-0.8 8 0 12" fill="none" stroke="#7a4a20" stroke-width="0.5" opacity="0.6"/>
+    <path d="M-5.5 0.5C-5.6 3-4.6 5.5-3.4 7" fill="none" stroke="#f6d3a2" stroke-width="0.9" opacity="0.8"/>
+    <path d="M-9.5-2.5C-10-9-5-12.5 0-12.5 5-12.5 10-9 9.5-2.5 6-1-6-1-9.5-2.5Z" fill="url(#cap)" stroke="#3a2510" stroke-width="0.9"/>
+    <g fill="none" stroke="#c49a63" stroke-width="0.6" opacity="0.85">
+      <path d="M-7-4.5q1.2 1.2 2.4 0M-3.5-4.2q1.2 1.2 2.4 0M0-4.2q1.2 1.2 2.4 0M3.5-4.5q1.2 1.2 2.4 0"/>
+      <path d="M-5.6-7.4q1.2 1.2 2.4 0M-2-7.6q1.2 1.2 2.4 0M1.6-7.4q1.2 1.2 2.4 0M5-7q1 1 2 0"/>
+      <path d="M-3.6-10.2q1.1 1.1 2.2 0M-0.2-10.6q1.1 1.1 2.2 0M3.2-10.2q1 1 2 0"/>
+    </g>
+    <path d="M1-12C2-15.5 4.5-16 6.5-14.8" fill="none" stroke="#4a3020" stroke-width="1.6"/>
+    <path d="M-0.9 13.2 0 15.4 0.9 13.2Z" fill="#4a2a10"/>
+  </g>
+</svg>
