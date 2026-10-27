@@ -15,12 +15,16 @@ export type View = keyof typeof VIEWS;
 
 export const isView = (value: string | null): value is View => value !== null && value in VIEWS;
 
-function Rig({ view }: { view: View }) {
+/** `lift` raises the cameras and pulls them back, to frame him standing. */
+function Rig({ view, lift }: { view: View; lift: number }) {
   const camera = useThree((s) => s.camera);
   useEffect(() => {
-    camera.position.set(...VIEWS[view].position);
-    camera.lookAt(...VIEWS[view].target);
-  }, [camera, view]);
+    const [x, y, z] = VIEWS[view].position;
+    const [tx, ty, tz] = VIEWS[view].target;
+    const back = view === 'face' ? 1 : 1 + lift;
+    camera.position.set(tx + (x - tx) * back, y + lift, tz + (z - tz) * back);
+    camera.lookAt(tx, ty + lift, tz);
+  }, [camera, view, lift]);
   return null;
 }
 
@@ -30,11 +34,13 @@ function Rig({ view }: { view: View }) {
  */
 export function CharacterDebug({
   initialView,
+  variant,
   pose,
   onReady,
   onStats,
 }: {
   initialView: View;
+  variant: 'procedural' | 'modly';
   pose: 'glasses' | undefined;
   onReady: () => void;
   onStats: (stats: CharacterStats) => void;
@@ -59,12 +65,15 @@ export function CharacterDebug({
             <circleGeometry args={[1.1, 48]} />
             <meshLambertMaterial color="#b8ab9c" />
           </mesh>
-          <mesh position={[0, 0.235, 0]} castShadow receiveShadow>
-            <boxGeometry args={[0.46, 0.47, 0.44]} />
-            <meshLambertMaterial color="#e8a657" />
-          </mesh>
-          <Character still {...(pose ? { pose } : {})} onStats={onStats} />
-          <Rig view={view} />
+          {variant === 'procedural' && (
+            <mesh position={[0, 0.235, 0]} castShadow receiveShadow>
+              <boxGeometry args={[0.46, 0.47, 0.44]} />
+              <meshLambertMaterial color="#e8a657" />
+            </mesh>
+          )}
+          {/* The scan faces +z; turn him to face the cameras like the seated one. */}
+          <Character variant={variant} rotationY={variant === 'modly' ? Math.PI : 0} still {...(pose ? { pose } : {})} onStats={onStats} />
+          <Rig view={view} lift={variant === 'modly' ? 0.3 : 0} />
         </Canvas>
       </div>
     </>

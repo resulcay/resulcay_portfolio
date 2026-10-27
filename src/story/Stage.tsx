@@ -19,6 +19,9 @@ import type { StoryObject } from './lines';
 const BACKGROUND = '#2a2140';
 const CAMERA: [number, number, number] = [3.7, 2.45, 3.9];
 const TARGET: [number, number, number] = [-0.1, 1.0, -0.6];
+/** Where Modly's standing Resul waits, at the desk's left end facing the laptop (the scan faces +z). */
+const STAND: [number, number, number] = [-0.02, 0, -1.4];
+const STAND_TURN = 1.45;
 
 export interface Stats {
   calls: number;
@@ -86,10 +89,21 @@ export function Stage(props: StageProps) {
           <RecordPlayer spinning={props.spinning} />
           <Corkboard certifications={data.profile.certifications} />
           <Polaroids projects={data.projects} />
-          <Character variant="procedural" still={still} position={SEAT} rotationY={SEAT_TURN} highlighted={hovered === 'resul'} />
-          <group position={SEAT} rotation-y={SEAT_TURN}>
-            <Hotspot id="resul" at={[0, 0.95, -0.05]} size={[0.5, 1.1, 0.4]} anchor={[0.3, 1.45, -0.9]} highlight={false} />
-          </group>
+          {quality === 'low' ? (
+            <>
+              <Character variant="procedural" still={still} position={SEAT} rotationY={SEAT_TURN} highlighted={hovered === 'resul'} />
+              <group position={SEAT} rotation-y={SEAT_TURN}>
+                <Hotspot id="resul" at={[0, 0.95, -0.05]} size={[0.5, 1.1, 0.4]} anchor={[0.3, 1.45, -0.9]} highlight={false} />
+              </group>
+            </>
+          ) : (
+            <>
+              <Character variant="modly" still={still} position={STAND} rotationY={STAND_TURN} highlighted={hovered === 'resul'} />
+              <group position={STAND} rotation-y={STAND_TURN}>
+                <Hotspot id="resul" at={[0, 0.9, 0]} size={[0.5, 1.8, 0.4]} anchor={[-0.3, 1.75, 0.6]} highlight={false} />
+              </group>
+            </>
+          )}
         </KitProvider>
         <Butterfly still={still} target={guide} onTap={() => guide && onHover(guide)} />
       </InteractionContext.Provider>

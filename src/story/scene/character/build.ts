@@ -32,6 +32,7 @@ import {
   Vector3,
   type BufferGeometry,
   type Material,
+  type WebGLProgramParametersWithUniforms,
 } from 'three';
 import { mergeGeometries, mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { HEAD_SCALE, hairCap, sculptedHead, taperTube } from './shapes';
@@ -367,7 +368,8 @@ function outlineGeometry(geometry: BufferGeometry): BufferGeometry {
   return welded;
 }
 
-function gradientMap(): DataTexture {
+/** The toon ramp both character variants share: four flat steps of light. */
+export function gradientMap(): DataTexture {
   const texture = new DataTexture(new Uint8Array([72, 132, 196, 255]), 4, 1, RedFormat);
   texture.minFilter = texture.magFilter = NearestFilter;
   texture.needsUpdate = true;
@@ -394,9 +396,10 @@ function waffleTexture(): CanvasTexture {
   return texture;
 }
 
-/** A warm rim of light on the edges facing away from the camera's view. */
-function withRim(material: MeshToonMaterial): MeshToonMaterial {
+/** A warm rim of light on the edges facing away from the camera's view; `extend` can patch the shader further. */
+export function withRim(material: MeshToonMaterial, extend?: (shader: WebGLProgramParametersWithUniforms) => void): MeshToonMaterial {
   material.onBeforeCompile = (shader) => {
+    extend?.(shader);
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <opaque_fragment>',
       `{
@@ -407,6 +410,20 @@ function withRim(material: MeshToonMaterial): MeshToonMaterial {
     );
   };
   return material;
+}
+
+/** An inked line, drawn inside out on a smooth hull, whose width grows with distance so it reads the same near and far. */
+export function inkOutline(): MeshBasicMaterial {
+  const outline = new MeshBasicMaterial({ color: '#2a1d22', side: BackSide });
+  outline.onBeforeCompile = (shader) => {
+    shader.uniforms['uThickness'] = { value: 0.0016 };
+    shader.vertexShader = `uniform float uThickness;\n${shader.vertexShader}`.replace(
+      '#include <begin_vertex>',
+      `#include <begin_vertex>
+      transformed += normal * length((modelViewMatrix * vec4(position, 1.0)).xyz) * uThickness;`,
+    );
+  };
+  return outline;
 }
 
 export interface BuiltCharacter {
@@ -462,17 +479,7 @@ export function buildCharacter(): BuiltCharacter {
       gl_FragColor.a = 0.05 + 0.5 * pow(1.0 - abs(dot(normalize(normal), normalize(vViewPosition))), 2.5);`,
     );
   };
-  const outline = new MeshBasicMaterial({ color: '#2a1d22', side: BackSide });
-  const thickness = { value: 0.0016 };
-  // An inked line whose width grows with distance, so it reads the same near and far.
-  outline.onBeforeCompile = (shader) => {
-    shader.uniforms['uThickness'] = thickness;
-    shader.vertexShader = `uniform float uThickness;\n${shader.vertexShader}`.replace(
-      '#include <begin_vertex>',
-      `#include <begin_vertex>
-      transformed += normal * length((modelViewMatrix * vec4(position, 1.0)).xyz) * uThickness;`,
-    );
-  };
+  const outline = inkOutline();
 
   const group = new Group();
   group.add(bones.get('root')!);

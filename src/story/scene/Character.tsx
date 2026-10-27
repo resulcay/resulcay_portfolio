@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { buildCharacter } from './character/build';
+import { loadModly, type ModlyCharacter } from './character/modly';
 import type { Vec3 } from './kit';
 
 const FINGERS = ['thumb', 'index', 'middle', 'ring', 'pinky'] as const;
@@ -13,8 +14,8 @@ export interface CharacterStats {
 }
 
 interface CharacterProps {
-  /** Only the procedural figure exists today; a glTF variant can slot in here later. */
-  variant?: 'procedural';
+  /** The figure built in code (seated), or Modly's scan from a glTF (standing); a failed load falls back to the first. */
+  variant?: 'procedural' | 'modly';
   still?: boolean;
   position?: Vec3;
   rotationY?: number;
@@ -26,7 +27,68 @@ interface CharacterProps {
 }
 
 export function Character({ variant = 'procedural', ...props }: CharacterProps) {
-  return variant === 'procedural' ? <Procedural {...props} /> : null;
+  return variant === 'modly' ? <Modly {...props} /> : <Procedural {...props} />;
+}
+
+const MODEL_URL = '/models/resul.glb';
+
+function Modly(props: Omit<CharacterProps, 'variant'>) {
+  const [built, setBuilt] = useState<ModlyCharacter | 'failed'>();
+  useEffect(() => {
+    let live = true;
+    let loaded: ModlyCharacter | undefined;
+    loadModly(MODEL_URL).then(
+      (character) => {
+        loaded = character;
+        if (live) setBuilt(character);
+        else character.dispose();
+      },
+      (error: unknown) => {
+        console.warn('Character model failed, using the procedural one', error);
+        if (live) setBuilt('failed');
+      },
+    );
+    return () => {
+      live = false;
+      loaded?.dispose();
+    };
+  }, []);
+  if (built === 'failed') return <Procedural {...props} />;
+  return built ? <ModlyFigure built={built} {...props} /> : null;
+}
+
+/** Looking at the laptop, he glances up at the window now and then. */
+const GLANCE_YAW = 0.65;
+const DOWN_PITCH = 0.35;
+
+function ModlyFigure({ built, still = false, position, rotationY = 0, highlighted = false, onStats }: Omit<CharacterProps, 'variant'> & { built: ModlyCharacter }) {
+  useEffect(() => {
+    onStats?.({ triangles: built.triangles, outlineTriangles: built.outlineTriangles, drawCalls: built.drawCalls });
+  }, [built, onStats]);
+  useEffect(() => {
+    built.outline.color.set(highlighted ? '#e8a657' : '#2a1d22');
+  }, [built, highlighted]);
+
+  useFrame(({ clock: { elapsedTime: t } }) => {
+    const [, , spine, chest, neck, head, arm] = built.bones;
+    const glancing = !still && t % 12 > 8.5;
+    const yaw = glancing ? GLANCE_YAW : 0;
+    const pitch = glancing ? 0.05 : DOWN_PITCH;
+    const ease = still ? 1 : 0.05;
+    head!.rotation.y += (yaw * 0.7 - head!.rotation.y) * ease;
+    neck!.rotation.y += (yaw * 0.3 - neck!.rotation.y) * ease;
+    head!.rotation.x += (pitch * 0.6 - head!.rotation.x) * ease;
+    neck!.rotation.x += (pitch * 0.4 - neck!.rotation.x) * ease;
+    if (still) return;
+    // Breathing, and the hanging arm swaying with it.
+    chest!.rotation.x = Math.sin(t * 1.7) * 0.012;
+    spine!.rotation.z = Math.sin(t * 0.5) * 0.008;
+    head!.rotation.z = Math.sin(t * 0.6) * 0.02;
+    arm!.rotation.x = Math.sin(t * 0.9) * 0.045;
+    arm!.rotation.z = -0.02 + Math.sin(t * 0.7) * 0.012;
+  });
+
+  return <primitive object={built.group} position={position ?? [0, 0, 0]} rotation-y={rotationY} />;
 }
 
 const bell = (x: number) => (x > 0 && x < 1 ? Math.sin(Math.PI * x) : 0);
