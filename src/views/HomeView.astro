@@ -66,9 +66,8 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
       </symbol>
     </svg>
     <div class="spread">
+      <svg class="clip" aria-hidden="true"><use href="#binder-clip" /></svg>
       <div class="page page--left">
-        <svg class="clip clip--a" aria-hidden="true"><use href="#binder-clip" /></svg>
-        <svg class="clip clip--b" aria-hidden="true"><use href="#binder-clip" /></svg>
         <h2 id="facts-title" class="page__title">{t(lang, 'home.facts')}</h2>
           <dl class="notebook">
             <div>
@@ -112,8 +111,6 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
           </dl>
       </div>
       <div class="page page--right">
-        <svg class="clip clip--right clip--a" aria-hidden="true"><use href="#binder-clip" /></svg>
-        <svg class="clip clip--right clip--b" aria-hidden="true"><use href="#binder-clip" /></svg>
           <ul class="glance">
             {
               stats.map((s) => (
@@ -328,8 +325,7 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
     border-radius: 0 10px 10px 0;
     box-shadow: inset 24px 0 24px -20px rgb(0 0 0 / 0.25);
   }
-  /* Binder clips along each page's outer edge (the left edge on phones),
-     and a paper clip on each sticky note. */
+  /* One binder clip holding the notebook by its left edge, and a paper clip on each sticky note. */
   .clip-defs {
     position: absolute;
     width: 0;
@@ -338,22 +334,13 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
   .clip {
     position: absolute;
     z-index: 2;
+    top: 50%;
     left: -20px;
     width: 40px;
     height: 40px;
+    translate: 0 -50%;
     rotate: -90deg;
     filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.35));
-  }
-  .clip--right {
-    left: auto;
-    right: -20px;
-    rotate: 90deg;
-  }
-  .clip--a {
-    top: 18%;
-  }
-  .clip--b {
-    top: 72%;
   }
   .paperclip {
     position: absolute;
@@ -385,6 +372,10 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
     color: var(--accent-text);
   }
   @media (max-width: 760px) {
+    /* The phone's side gutter is 16px; keep the clip's handles on screen. */
+    .clip {
+      left: -14px;
+    }
     .spread {
       grid-template-columns: minmax(0, 1fr);
       margin-top: 12px;
@@ -399,11 +390,6 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
     }
     .page--right {
       border-radius: 0 0 10px 10px;
-    }
-    .clip--right {
-      left: -20px;
-      right: auto;
-      rotate: -90deg;
     }
   }
   .notebook {
