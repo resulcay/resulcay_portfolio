@@ -53,7 +53,7 @@ export function Laptop() {
               ctx.fillRect(x, 24 + i * 26, w, 14);
             });
             ctx.fillStyle = '#f4ebdd';
-            ctx.font = '700 11px Overpass';
+            ctx.font = '700 11px Nunito';
             ctx.fillText('2023          2024          2025          2026', 22, 186);
           });
           return [{ geo: atlas.quad(cell, 0.31, 0.196), color: '#ffffff', at: screenAt, rot: [LID_TILT, 0, 0] }];
@@ -179,12 +179,12 @@ export function Corkboard({ certifications }: { certifications: { name: string; 
                 ctx.fillStyle = CARD_COLORS[i % CARD_COLORS.length]!;
                 ctx.fillRect(0, 0, 240, 18);
                 ctx.fillStyle = '#1e1b24';
-                ctx.font = '700 21px Overpass';
+                ctx.font = '700 21px Nunito';
                 wrapText(ctx, card.name, 212)
                   .slice(0, 4)
                   .forEach((line, n) => ctx.fillText(line, 14, 50 + n * 25));
                 ctx.fillStyle = '#4a4350';
-                ctx.font = '400 15px Overpass';
+                ctx.font = '400 15px Nunito';
                 ctx.fillText(card.issuer, 14, 156);
               });
               const [x, y] = slot(i);
