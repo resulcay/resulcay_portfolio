@@ -16,7 +16,18 @@ const HIP_LIFT = 0.055;
 /** How far forward of the chair's centre he sits. */
 const SIT_FORWARD = 0.04;
 /** Where his wrists rest, in the chair's frame (he faces -z): on the laptop's front edge. */
-const WRIST: Vec3 = [0.17, DESK_TOP + 0.035, LAPTOP_Z + 0.08];
+const WRIST: Vec3 = [0.14, DESK_TOP + 0.035, LAPTOP_Z + 0.08];
+
+/**
+ * Where a wrist goes while typing, in the chair's frame: `x` is +1 for his
+ * left hand (the chair's -x). The hands take turns bobbing, with a slight sway.
+ */
+export function typingWrist(x: number, time: number, glance: number): Vec3 {
+  const phase = x > 0 ? 0 : Math.PI;
+  const bob = Math.max(0, Math.sin(time * 7 + phase)) * 0.012 * (1 - glance);
+  const sway = Math.sin(time * 1.3 + phase) * 0.008;
+  return [-x * WRIST[0] + sway, WRIST[1] + bob, WRIST[2]];
+}
 
 export interface CharacterStats {
   triangles: number;
@@ -130,12 +141,8 @@ function Seated({ model, still = false, position, rotationY = 0, highlighted = f
       setModel(bone(`${side}Foot`), rest.world.get(bone(`${side}Foot`))!.clone());
       follow(bone(`${side}ToeBase`));
 
-      // Typing: the hands take turns bobbing over the keys, with a slight sway.
       const phase = x > 0 ? 0 : Math.PI;
-      const bob = Math.max(0, Math.sin(time * 7 + phase)) * 0.012 * (1 - glance);
-      const sway = Math.sin(time * 1.3 + phase) * 0.008;
-      // His left is the model's +x, and the chair's -x.
-      const wrist = inModel([-x * WRIST[0] + sway, WRIST[1] + bob, WRIST[2]]);
+      const wrist = inModel(typingWrist(x, time, glance));
       follow(bone(`${side}Shoulder`));
       const shoulder = group.worldToLocal(bone(`${side}Arm`).getWorldPosition(new Vector3()));
       const elbow = solveElbow(shoulder, wrist, rest.upper, rest.lower, new Vector3(x * 0.6, -1, -0.3));

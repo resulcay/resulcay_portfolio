@@ -3,12 +3,14 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
 import { around, Merged, useKit, type Part, type Vec3 } from './kit';
 
 /** Where the chair stands and how it's turned; the character sits here. */
-export const SEAT: Vec3 = [0.42, 0, -0.98];
+export const SEAT: Vec3 = [0.48, 0, -1.06];
 export const SEAT_TURN = -Math.PI / 4;
 // Sized to Resul's short-legged, big-headed build: feet flat on the floor from
 // the seat, and hands a little below his shoulders on the keyboard.
 export const SEAT_TOP = 0.4;
 export const DESK_TOP = 0.62;
+/** The desk top's centre and size, in the room. */
+export const DESK = { x: 0.9, z: -1.565, width: 1.5, depth: 0.85 };
 /** The laptop, in the chair's frame (facing -z). */
 export const LAPTOP_Z = -0.47;
 
@@ -30,11 +32,11 @@ function bed(): Part[] {
 function desk(): Part[] {
   const legs = ([-0.7, 0.7] as const).flatMap((dx) =>
     ([-0.38, 0.38] as const).map(
-      (dz): Part => ({ geo: new BoxGeometry(0.05, DESK_TOP - 0.05, 0.05), color: WOOD, at: [0.9 + dx, (DESK_TOP - 0.05) / 2, -1.565 + dz] }),
+      (dz): Part => ({ geo: new BoxGeometry(0.05, DESK_TOP - 0.05, 0.05), color: WOOD, at: [DESK.x + dx, (DESK_TOP - 0.05) / 2, DESK.z + dz] }),
     ),
   );
   return [
-    { geo: rounded(1.5, 0.05, 0.85, 0.015), color: LIGHT_WOOD, at: [0.9, DESK_TOP - 0.025, -1.565] },
+    { geo: rounded(DESK.width, 0.05, DESK.depth, 0.015), color: LIGHT_WOOD, at: [DESK.x, DESK_TOP - 0.025, DESK.z] },
     { geo: new BoxGeometry(0.42, DESK_TOP - 0.2, 0.7), color: '#2f6f73', at: [1.42, (DESK_TOP + 0.15) / 2, -1.6] },
     ...legs,
   ];

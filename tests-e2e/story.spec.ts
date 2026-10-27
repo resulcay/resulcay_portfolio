@@ -39,7 +39,9 @@ for (const size of SIZES) {
     await expect(page.getByRole('link', { name: 'CV', exact: true })).toHaveAttribute('href', '/resul-cay-cv.pdf');
     await page.getByRole('button', { name: 'Experience', exact: true }).click();
     const fromChip = page.getByRole('dialog', { name: 'Experience' });
-    await expect(fromChip).toBeVisible();
+    // The panel waits for the camera's flight; on the software renderer each frame takes
+    // over a second and GSAP's lag smoothing stretches the 0.9 s move to several seconds.
+    await expect(fromChip).toBeVisible({ timeout: 15_000 });
     await fromChip.getByRole('button', { name: 'Close' }).click();
     // Closing plays the rewind.
     await expect(scene).toHaveAttribute('data-rewinding', 'true');
