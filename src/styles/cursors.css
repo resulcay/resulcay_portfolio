@@ -9,8 +9,9 @@
   html {
     cursor: var(--cursor-acorn);
   }
-  /* Not in the 3D story: the system arrow there, and the butterfly over what you can hover. */
-  html.story-open {
+  /* Not on the story page (only it has the stage): the system arrow there,
+     and the butterfly over buttons, links and the room's objects. */
+  html:has([data-stage]) {
     cursor: auto;
   }
   :is(a[href], button, summary, select, label[for], [role='button'], .button) {
