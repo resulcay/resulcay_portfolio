@@ -1,47 +1,40 @@
 import { useEffect, useState } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { Character, type CharacterStats } from './scene/Character';
+import { DESK_TOP, LAPTOP_Z, SEAT_TOP } from './scene/Furniture';
 
 /** Camera positions and targets for reviewing the character (he faces -z). */
 type Triple = [number, number, number];
 const VIEWS: Record<'front' | '34' | 'side' | 'face', { position: Triple; target: Triple }> = {
-  front: { position: [0, 1.2, -2.4], target: [0, 0.85, -0.12] },
-  '34': { position: [1.6, 1.45, -1.9], target: [0, 0.9, -0.15] },
-  side: { position: [2.4, 1.1, -0.1], target: [0, 0.85, -0.12] },
-  face: { position: [0.32, 1.44, -0.72], target: [0, 1.36, -0.06] },
+  front: { position: [0, 1.4, -3.0], target: [0, 0.8, -0.2] },
+  '34': { position: [1.9, 1.6, -2.3], target: [0, 0.8, -0.2] },
+  side: { position: [3.0, 1.1, -0.3], target: [0, 0.8, -0.2] },
+  face: { position: [0.45, 1.2, -1.7], target: [0, 1.02, -0.2] },
 };
 
 export type View = keyof typeof VIEWS;
 
 export const isView = (value: string | null): value is View => value !== null && value in VIEWS;
 
-/** `lift` raises the cameras and pulls them back, to frame him standing. */
-function Rig({ view, lift }: { view: View; lift: number }) {
+function Rig({ view }: { view: View }) {
   const camera = useThree((s) => s.camera);
   useEffect(() => {
-    const [x, y, z] = VIEWS[view].position;
-    const [tx, ty, tz] = VIEWS[view].target;
-    const back = view === 'face' ? 1 : 1 + lift;
-    camera.position.set(tx + (x - tx) * back, y + lift, tz + (z - tz) * back);
-    camera.lookAt(tx, ty + lift, tz);
-  }, [camera, view, lift]);
+    camera.position.set(...VIEWS[view].position);
+    camera.lookAt(...VIEWS[view].target);
+  }, [camera, view]);
   return null;
 }
 
 /**
- * /story?debug=character: only the character, held still on a neutral
- * turntable, with camera presets for reviewing him.
+ * /story?debug=character: only the character, held still on a stand-in
+ * seat and desk at the room's heights, with camera presets for reviewing him.
  */
 export function CharacterDebug({
   initialView,
-  variant,
-  pose,
   onReady,
   onStats,
 }: {
   initialView: View;
-  variant: 'procedural' | 'modly';
-  pose: 'glasses' | undefined;
   onReady: () => void;
   onStats: (stats: CharacterStats) => void;
 }) {
@@ -65,15 +58,20 @@ export function CharacterDebug({
             <circleGeometry args={[1.1, 48]} />
             <meshLambertMaterial color="#b8ab9c" />
           </mesh>
-          {variant === 'procedural' && (
-            <mesh position={[0, 0.235, 0]} castShadow receiveShadow>
-              <boxGeometry args={[0.46, 0.47, 0.44]} />
-              <meshLambertMaterial color="#e8a657" />
-            </mesh>
-          )}
-          {/* The scan faces +z; turn him to face the cameras like the seated one. */}
-          <Character variant={variant} rotationY={variant === 'modly' ? Math.PI : 0} still {...(pose ? { pose } : {})} onStats={onStats} />
-          <Rig view={view} lift={variant === 'modly' ? 0.3 : 0} />
+          <mesh position={[0, SEAT_TOP / 2, 0]} castShadow receiveShadow>
+            <boxGeometry args={[0.46, SEAT_TOP, 0.44]} />
+            <meshLambertMaterial color="#e8a657" />
+          </mesh>
+          <mesh position={[0, DESK_TOP - 0.025, LAPTOP_Z - 0.1]} castShadow receiveShadow>
+            <boxGeometry args={[1.1, 0.05, 0.5]} />
+            <meshLambertMaterial color="#c9a37a" />
+          </mesh>
+          <mesh position={[0, DESK_TOP + 0.009, LAPTOP_Z]} castShadow>
+            <boxGeometry args={[0.34, 0.018, 0.24]} />
+            <meshLambertMaterial color="#c9ccd2" />
+          </mesh>
+          <Character still onStats={onStats} />
+          <Rig view={view} />
         </Canvas>
       </div>
     </>

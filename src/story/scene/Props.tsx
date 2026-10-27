@@ -4,7 +4,7 @@ import { BoxGeometry, CylinderGeometry, SphereGeometry, type Group } from 'three
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { around, Hotspot, Merged, useKit, type Part, type Vec3 } from './kit';
 import { wrapText } from './atlas';
-import { SEAT, SEAT_TURN } from './Furniture';
+import { DESK_TOP, LAPTOP_Z, SEAT, SEAT_TURN } from './Furniture';
 
 const rounded = (w: number, h: number, d: number, r = 0.008) => new RoundedBoxGeometry(w, h, d, 2, r);
 
@@ -12,7 +12,7 @@ const rounded = (w: number, h: number, d: number, r = 0.008) => new RoundedBoxGe
 // coordinates; the Hotspot carries its id and the camera anchor.
 
 /** On the desk, in front of the character, angled like the chair. */
-const LAPTOP: Vec3 = around(SEAT, SEAT_TURN)([0, 0.75, -0.47]);
+const LAPTOP: Vec3 = around(SEAT, SEAT_TURN)([0, DESK_TOP, LAPTOP_Z]);
 const LID_TILT = -0.3;
 
 export function Laptop() {

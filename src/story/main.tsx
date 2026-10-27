@@ -65,14 +65,12 @@ export async function mountStory(container: HTMLElement, options: MountOptions):
   }
 
   const root = createRoot(container, { onUncaughtError: options.onError });
-  // ?debug=character: the character alone on a turntable, for review (&view=front|34|side|face, &pose=glasses, &variant=modly).
+  // ?debug=character: the character alone at a stand-in desk, for review (&view=front|34|side|face).
   if (params.get('debug') === 'character') {
     const view = params.get('view');
     root.render(
       <CharacterDebug
         initialView={isView(view) ? view : '34'}
-        variant={params.get('variant') === 'modly' ? 'modly' : 'procedural'}
-        pose={params.get('pose') === 'glasses' ? 'glasses' : undefined}
         onReady={() => {
           container.dataset['ready'] = 'true';
           options.onReady();
