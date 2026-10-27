@@ -351,20 +351,10 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
     rotate: -8deg;
     filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.3));
   }
-  /* A strip of tape holding the top of the left page. */
-  .page--left::after {
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: 36px;
-    width: 84px;
-    height: 22px;
-    background: color-mix(in srgb, var(--golden) 45%, transparent);
-    rotate: -4deg;
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
-  }
+  /* Written like a page heading: just right of the margin line, over the
+     notes' column, with an empty ruled line beneath it. */
   .page__title {
-    margin: 0;
+    margin: 0 0 var(--line) calc(6.5rem + 12px);
     font-family: var(--font-display);
     font-weight: 500;
     font-size: 1.6rem;
