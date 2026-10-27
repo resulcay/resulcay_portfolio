@@ -1,8 +1,10 @@
 ---
 import '@/styles/global.css';
 import handFont from '@/assets/fonts/dudu-calligraphy.woff2?url';
+import bodyFont from '@fontsource/nunito/files/nunito-latin-400-normal.woff2?url';
+import Butterfly from '@/components/Butterfly.astro';
 import type { Locale } from '@/domain/schemas';
-import { localizePath } from '@/i18n/ui';
+import { localizePath, t } from '@/i18n/ui';
 import TopBar from '@/components/TopBar.astro';
 import Footer from '@/components/Footer.astro';
 import { content } from '@/lib/content';
@@ -36,6 +38,9 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : undefined;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="preload" href={handFont} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={bodyFont} as="font" type="font/woff2" crossorigin />
+    {/* Holds the page back until its fonts are in (see the veil script below); without JS it never runs. */}
+    <script is:inline>document.documentElement.classList.add('loading');</script>
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     {
@@ -63,10 +68,28 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : undefined;
     {ld && <script type="application/ld+json" set:html={ld} />}
   </head>
   <body>
+    <div class="veil" role="status">
+      <Butterfly size={64} class="veil__butterfly" />
+      <span class="visually-hidden">{t(lang, 'loading')}</span>
+    </div>
     <TopBar lang={lang} path={path} cvPath={profile.cvPath} />
     <main id="main">
       <slot />
     </main>
     <Footer lang={lang} profile={profile} hasMusic={music.length > 0} />
+    <script>
+      import { settleWithin } from '@/scripts/ready';
+
+      // Show the page once its fonts are in, so text never flashes in a fallback face. The veil
+      // only appears if that takes longer than 150 ms (see .veil); at most 3 s, then the page shows.
+      const root = document.documentElement;
+      const veil = document.querySelector<HTMLElement>('.veil');
+      const faces = ['500 1em "Dudu Calligraphy"', '400 1em Nunito', '700 1em Nunito'];
+      void settleWithin(Promise.all(faces.map((face) => document.fonts.load(face))).then(() => document.fonts.ready), 3000).then(() => {
+        if (!veil || getComputedStyle(veil).opacity === '0') return root.classList.remove('loading');
+        root.classList.add('loaded');
+        setTimeout(() => root.classList.remove('loading', 'loaded'), 400);
+      });
+    </script>
   </body>
 </html>

@@ -1,7 +1,7 @@
-import { useEffect, useMemo } from 'react';
+import { useContext, useEffect, useMemo } from 'react';
 import { BoxGeometry, CatmullRomCurve3, TubeGeometry, Vector3 } from 'three';
 import type { StoryData } from '@/application/story';
-import { Hotspot, Merged, useInteraction, useKit, type Part, type Vec3 } from './kit';
+import { GateContext, Hotspot, Merged, useInteraction, useKit, type Part, type Vec3 } from './kit';
 import { wrapText, type Atlas, type Cell } from './atlas';
 
 type Project = StoryData['projects'][number];
@@ -54,6 +54,7 @@ function paintFace(atlas: Atlas, cell: Cell, project: Project, index: number, ph
 /** Polaroids on strings above the bed, one per public project. */
 export function Polaroids({ projects }: { projects: Project[] }) {
   const { atlas, base, lit } = useKit();
+  const gate = useContext(GateContext);
   const { hovered } = useInteraction();
   const layout = useMemo(() => {
     // shortcut: shows the first 12 projects, about what the atlas has room for; a second atlas would lift that.
@@ -76,15 +77,17 @@ export function Polaroids({ projects }: { projects: Project[] }) {
       if (!src) return;
       const photo = new Image();
       photo.src = src;
-      photo.decode().then(
-        () => live && paintFace(atlas, cell, project, i, photo),
-        () => undefined,
+      gate?.track(
+        photo.decode().then(
+          () => live && paintFace(atlas, cell, project, i, photo),
+          () => undefined,
+        ),
       );
     });
     return () => {
       live = false;
     };
-  }, [atlas, layout]);
+  }, [atlas, layout, gate]);
 
   const facing = (tilt: number): Vec3 => [tilt, Math.PI / 2, 0];
   const lookedAt = layout.find(({ project }) => hovered === `polaroid:${project.slug}`);

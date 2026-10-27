@@ -4,7 +4,8 @@ import { gsap } from 'gsap';
 import { MathUtils, PerspectiveCamera, Vector3 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { StoryData } from '@/application/story';
-import { Hotspot, InteractionContext, KitProvider } from './scene/kit';
+import { GateContext, Hotspot, InteractionContext, KitProvider } from './scene/kit';
+import { createGate, type Gate } from '@/scripts/ready';
 import { Shell, StringLights, Window } from './scene/Shell';
 import { Furniture, Posters, SEAT, SEAT_TURN } from './scene/Furniture';
 import { Corkboard, Journal, Laptop, Phone, RecordPlayer } from './scene/Props';
@@ -60,6 +61,7 @@ export function Stage(props: StageProps) {
     onQuality(quality);
   }, [quality, onQuality]);
   const interaction = useMemo(() => ({ hovered, hover: onHover, select: onSelect }), [hovered, onHover, onSelect]);
+  const gate = useMemo(createGate, []);
 
   return (
     <Canvas
@@ -67,40 +69,59 @@ export function Stage(props: StageProps) {
       dpr={DPR[quality]}
       camera={{ position: CAMERA, fov: 40, near: 0.1, far: 30 }}
       gl={{ antialias: true, powerPreference: 'high-performance' }}
-      onCreated={props.onReady}
       onPointerMissed={() => onHover(null)}
     >
       <color attach="background" args={[BACKGROUND]} />
       <fog attach="fog" args={[BACKGROUND, 9, 18]} />
       <Lights phase={phase} quality={quality} />
-      <InteractionContext.Provider value={interaction}>
-        <KitProvider phase={phase}>
-          <Shell />
-          <Window />
-          <StringLights />
-          <Furniture />
-          <Posters />
-          <Laptop />
-          <Journal />
-          <Phone />
-          <RecordPlayer spinning={props.spinning} />
-          <Corkboard certifications={data.profile.certifications} />
-          <Polaroids projects={data.projects} />
-          <Character still={still} position={SEAT} rotationY={SEAT_TURN} highlighted={hovered === 'resul'} />
-          <group position={SEAT} rotation-y={SEAT_TURN}>
-            <Hotspot id="resul" at={[0, 0.85, -0.05]} size={[0.7, 1.4, 0.6]} anchor={[0.3, 1.45, -0.9]} highlight={false} />
-          </group>
-        </KitProvider>
-        <Butterfly still={still} target={guide} onTap={() => guide && onHover(guide)} />
-      </InteractionContext.Provider>
+      <GateContext.Provider value={gate}>
+        <InteractionContext.Provider value={interaction}>
+          <KitProvider phase={phase}>
+            <Shell />
+            <Window />
+            <StringLights />
+            <Furniture />
+            <Posters />
+            <Laptop />
+            <Journal />
+            <Phone />
+            <RecordPlayer spinning={props.spinning} />
+            <Corkboard certifications={data.profile.certifications} />
+            <Polaroids projects={data.projects} />
+            <Character still={still} position={SEAT} rotationY={SEAT_TURN} highlighted={hovered === 'resul'} />
+            <group position={SEAT} rotation-y={SEAT_TURN}>
+              <Hotspot id="resul" at={[0, 0.85, -0.05]} size={[0.7, 1.4, 0.6]} anchor={[0.3, 1.45, -0.9]} highlight={false} />
+            </group>
+          </KitProvider>
+          <Butterfly still={still} target={guide} onTap={() => guide && onHover(guide)} />
+        </InteractionContext.Provider>
+      </GateContext.Provider>
       {props.post && (quality !== 'low' || props.rewinding) && (
         <Post paint={quality === 'high' ? 2 : quality === 'medium' ? 1 : 0} rewind={props.rewind} still={still} />
       )}
       <Director focus={props.focus} still={still} hovered={hovered} onArrive={props.onArrive} />
       <QualityWatch quality={quality} pinned={props.pinned} onChange={setQuality} onStats={props.onStats} />
       <PauseWhenHidden />
+      <Reveal gate={gate} onReady={props.onReady} />
     </Canvas>
   );
+}
+
+/** Calls `onReady` once every load is in (or 12 s have passed), the shaders are compiled and two frames are drawn. */
+function Reveal({ gate, onReady }: { gate: Gate; onReady: () => void }) {
+  const { gl, scene, camera } = useThree();
+  useEffect(() => {
+    let live = true;
+    void gate.settled(12_000).then(() => {
+      if (!live) return;
+      gl.compile(scene, camera);
+      requestAnimationFrame(() => requestAnimationFrame(() => live && onReady()));
+    });
+    return () => {
+      live = false;
+    };
+  }, [gate, gl, scene, camera, onReady]);
+  return null;
 }
 
 function Lights({ phase, quality }: { phase: Phase; quality: Quality }) {

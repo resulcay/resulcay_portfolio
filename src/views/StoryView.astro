@@ -149,7 +149,14 @@ const siteKey = turnstileSiteKey();
         siteKey: stage.dataset['sitekey'],
         reducedMotion: device.reducedMotion,
         audio,
-        onReady: () => (loader.hidden = true),
+        // The room is fully loaded and drawn: fade the veil out over it.
+        onReady: () => {
+          loader.classList.add('stage__loader--done');
+          setTimeout(() => {
+            loader.hidden = true;
+            loader.classList.remove('stage__loader--done');
+          }, 400);
+        },
         onError: fail,
       });
       if (id === session) teardown = unmount;
@@ -319,9 +326,26 @@ const siteKey = turnstileSiteKey();
     color: #f4ebdd;
     font-family: var(--font-hand);
     font-size: 1.5rem;
+    /* Opaque, the room's own colour: nothing shows until it's all loaded. */
+    background: #2a2140;
+  }
+  .stage__loader--done {
+    animation: stage-fade-out 0.4s forwards;
+  }
+  @keyframes stage-fade-out {
+    to {
+      opacity: 0;
+    }
   }
   .stage__loader :global(.stage__butterfly) {
-    animation: flutter 0.5s ease-in-out infinite alternate;
+    animation:
+      flutter 0.5s ease-in-out infinite alternate,
+      stage-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes stage-pulse {
+    50% {
+      opacity: 0.55;
+    }
   }
   @keyframes flutter {
     to {

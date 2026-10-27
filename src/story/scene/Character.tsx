@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Euler, Quaternion, Vector3, type Bone, type Object3D } from 'three';
 import { loadResul, solveElbow, type ResulModel } from './character/resul';
 // Imported as an asset so its URL carries a content hash: a new model is never served from a stale cache.
 import MODEL_URL from './character/resul.glb?url';
 import { DESK_TOP, LAPTOP_Z, SEAT_TOP } from './Furniture';
-import type { Vec3 } from './kit';
+import { GateContext, type Vec3 } from './kit';
 
 const FINGERS = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky'] as const;
 const SIDES = [
@@ -52,10 +52,13 @@ interface CharacterProps {
 /** Resul at the desk: seated on the chair at the origin of this frame, facing -z, typing on the laptop. */
 export function Character(props: CharacterProps) {
   const [model, setModel] = useState<ResulModel>();
+  const gate = useContext(GateContext);
   useEffect(() => {
     let live = true;
     let loaded: ResulModel | undefined;
-    loadResul(MODEL_URL).then(
+    const load = loadResul(MODEL_URL);
+    gate?.track(load);
+    load.then(
       (m) => {
         loaded = m;
         if (live) setModel(m);
@@ -67,7 +70,7 @@ export function Character(props: CharacterProps) {
       live = false;
       loaded?.dispose();
     };
-  }, []);
+  }, [gate]);
   return model ? <Seated model={model} {...props} /> : null;
 }
 

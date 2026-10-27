@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
+import type { Gate } from '@/scripts/ready';
 import {
   BufferAttribute,
   Color,
@@ -172,6 +173,9 @@ interface Interaction {
 }
 
 export const InteractionContext = createContext<Interaction>({ hovered: null, hover: () => {}, select: () => {} });
+
+/** The loads the room waits for before it's shown, so nothing pops in afterwards. */
+export const GateContext = createContext<Gate | null>(null);
 
 export const useInteraction = () => useContext(InteractionContext);
 

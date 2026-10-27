@@ -23,7 +23,8 @@ export default defineConfig({
   security: {
     csp: {
       // Cloudflare Web Analytics injects its beacon script at the edge.
-      scriptDirective: { resources: ["'self'", 'https://static.cloudflareinsights.com'] },
+      // The hash is BaseLayout's one-line loading script (tests/ready.test.ts keeps them in step).
+      scriptDirective: { resources: ["'self'", 'https://static.cloudflareinsights.com'], hashes: ['sha256-kj+jvIqBtImlr3Nb2wta1Di1Sp7kc9vJi3O0jz6RJL8='] },
     },
   },
 });
