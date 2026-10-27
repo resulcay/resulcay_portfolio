@@ -3,7 +3,7 @@
    forced-colour modes keep the system cursors, as do text fields. */
 @media (pointer: fine) and (not (prefers-contrast: more)) and (not (forced-colors: active)) {
   :root {
-    --cursor-quill: url('/cursors/quill.svg') 3 29, auto;
+    --cursor-quill: url('/cursors/feather.svg') 3 29, auto;
     --cursor-link: url('/cursors/butterfly.svg') 16 16, pointer;
   }
   html {
