@@ -66,41 +66,48 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
         ))
       }
     </ul>
-    <dl>
-      <div><dt>{t(lang, 'facts.role')}</dt><dd>{profile.title[lang]}</dd></div>
-      <div><dt>{t(lang, 'facts.location')}</dt><dd>{profile.location[lang]}</dd></div>
+    <ul class="facts__chips">
+      <li>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="5" width="12" height="8.5" rx="2" /><path d="M5.5 5V3.5h5V5M2 9h12" /></svg>
+        {profile.title[lang]}
+      </li>
+      <li>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14.5s4.5-4.2 4.5-7.7a4.5 4.5 0 0 0-9 0c0 3.5 4.5 7.7 4.5 7.7Z" /><circle cx="8" cy="6.8" r="1.6" /></svg>
+        {profile.location[lang]}
+      </li>
       {
         latest && (
-          <div>
-            <dt>{t(lang, 'facts.latest')}</dt>
-            <dd>
-              {latest.title[lang]}, {latest.organization} ({formatPeriod(latest.start, latest.end, lang)})
-            </dd>
-          </div>
-        )
-      }
-      {
-        stack.length > 0 && (
-          <div>
-            <dt>{t(lang, 'facts.stack')}</dt>
-            <dd>
-              <TagChips tags={stack} lang={lang} />
-            </dd>
-          </div>
+          <li title={`${latest.title[lang]}, ${latest.organization} (${formatPeriod(latest.start, latest.end, lang)})`}>
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 14V3.5h7V14M10 7h3v7M1.5 14h13M5.5 6h2M5.5 9h2" /></svg>
+            <span>
+              {latest.title[lang]} @ {latest.organization} · {latest.start.slice(0, 4)}–{latest.end?.slice(2, 4) ?? ''}
+            </span>
+          </li>
         )
       }
       {
         school && (
-          <div>
-            <dt>{t(lang, 'facts.education')}</dt>
-            <dd>
-              {school.school}, {school.program[lang]}, {school.start}–{school.end} ({t(lang, 'facts.notCompleted')})
-            </dd>
-          </div>
+          <li title={`${school.school}, ${school.program[lang]}, ${school.start}–${school.end} (${t(lang, 'facts.notCompleted')})`}>
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 6.5 8 3.5l6.5 3L8 9.5Z" /><path d="M4.5 8v3.2c1.9 1.6 5.1 1.6 7 0V8" /></svg>
+            <span>
+              {school.school}, {school.program[lang]} · {t(lang, 'facts.notCompleted')}
+            </span>
+          </li>
         )
       }
-      <div><dt>{t(lang, 'facts.availability')}</dt><dd>{profile.availability[lang]}</dd></div>
-    </dl>
+      <li class="facts__open">
+        <span class="facts__dot" aria-hidden="true"></span>
+        {profile.availability[lang]}
+      </li>
+    </ul>
+    {
+      stack.length > 0 && (
+        <div class="facts__stack">
+          <span class="facts__label">{t(lang, 'facts.stack')}</span>
+          <TagChips tags={stack} lang={lang} />
+        </div>
+      )
+    }
   </section>
 
   <section class="wrap section" aria-labelledby="featured-title">
@@ -282,27 +289,85 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
   .glance li {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    padding: 14px 16px;
+    gap: 0;
+    padding: 10px 14px;
     background: var(--paper-raised);
     border: 1px solid var(--rule);
     border-radius: var(--radius);
   }
   .glance__value {
     font-family: var(--font-display);
-    font-size: 2.4rem;
+    font-size: 2.1rem;
     line-height: 1;
     color: var(--accent-text);
   }
   .glance__label {
     color: var(--ink-quiet);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    line-height: 1.35;
+    text-wrap: balance;
+  }
+  .facts__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 4px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .facts__chips li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: 4px 12px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  .facts__chips li span:not([aria-hidden]) {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .facts__chips svg {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .facts__open {
+    border-color: var(--golden) !important;
+    color: var(--accent-text);
+  }
+  .facts__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--golden);
+  }
+  .facts__stack {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin-top: 14px;
+  }
+  .facts__label {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--ink-quiet);
   }
   /* A gentle rise as the facts scroll in; anything already in view is shown as is. */
   @media (prefers-reduced-motion: no-preference) {
     @supports (animation-timeline: view()) {
       .glance li,
-      .facts dl > div {
+      .facts__chips li {
         animation: glance-rise linear both;
         animation-timeline: view();
         animation-range: entry 0% entry 60%;
@@ -315,7 +380,6 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
       transform: translateY(12px);
     }
   }
-  .facts dl,
   .contact dl {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
