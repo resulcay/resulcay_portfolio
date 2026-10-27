@@ -18,6 +18,7 @@ resulcay.com is Resul Çay's portfolio. It has a server-rendered Journal (Englis
 
 ## Rules
 
+- **Theme and styling:** Keep existing theme and styling. Be loyal whether you need a change and ask for permission.
 - **CSP:** it's strict, with no eval and no inline scripts. Pages that add to it do so before any `await`, and must re-add `'self'` when they add a script source (see `src/lib/csp.ts`).
 - **Secrets:** never put them in git or in output. Local secrets go in `.dev.vars`; production secrets via `npx wrangler secret put`.
 - **Character:** shows Resul with glasses and no moustache. Never publish raw photos of him.
