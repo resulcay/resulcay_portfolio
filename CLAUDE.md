@@ -20,7 +20,6 @@ resulcay.com is Resul Çay's portfolio. It has a server-rendered Journal (Englis
 
 - **CSP:** it's strict, with no eval and no inline scripts. Pages that add to it do so before any `await`, and must re-add `'self'` when they add a script source (see `src/lib/csp.ts`).
 - **Secrets:** never put them in git or in output. Local secrets go in `.dev.vars`; production secrets via `npx wrangler secret put`.
-- **Education:** Resul did not finish his degree (Yalova University, Computer Engineering, 2019–2025). Never say "graduated".
 - **Character:** shows Resul with glasses and no moustache. Never publish raw photos of him.
 - **Music:** only free, licensed tracks (CC0 or CC BY), always credited with the licence and source.
 - **Git:** work on `main` and push to `main`. Stage files by name.
