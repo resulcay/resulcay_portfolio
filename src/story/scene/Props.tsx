@@ -99,7 +99,7 @@ export function Phone() {
             ctx.fillRect(0, 0, 65, 135);
             const now = new Date();
             ctx.fillStyle = '#f4ebdd';
-            ctx.font = '600 16px "Fraunces Variable"';
+            ctx.font = '500 16px "Dudu Calligraphy"';
             ctx.textAlign = 'center';
             ctx.fillText(`${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`, 32, 40);
           });

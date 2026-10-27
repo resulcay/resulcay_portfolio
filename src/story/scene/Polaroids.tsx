@@ -39,13 +39,13 @@ function paintFace(atlas: Atlas, cell: Cell, project: Project, index: number, ph
       ctx.fillStyle = paint;
       ctx.fillRect(14, 14, 212, 212);
       ctx.fillStyle = '#fbf8f2';
-      ctx.font = '600 26px "Fraunces Variable"';
+      ctx.font = '500 26px "Dudu Calligraphy"';
       ctx.textAlign = 'center';
       const lines = wrapText(ctx, project.title, 180).slice(0, 3);
       lines.forEach((line, n) => ctx.fillText(line, 120, 120 - (lines.length - 1) * 15 + n * 30));
     }
     ctx.fillStyle = '#1e1b24';
-    ctx.font = '500 26px Caveat';
+    ctx.font = '500 26px "Dudu Calligraphy"';
     ctx.textAlign = 'center';
     ctx.fillText(photo ? project.title : (project.tags[0] ?? ''), 120, 266, 220);
   });

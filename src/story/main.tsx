@@ -31,8 +31,7 @@ export async function mountStory(container: HTMLElement, options: MountOptions):
   const [response] = await Promise.all([
     fetch(options.dataUrl),
     // Canvas text needs the fonts in memory before it's painted.
-    document.fonts.load('600 26px "Fraunces Variable"'),
-    document.fonts.load('500 26px Caveat'),
+    document.fonts.load('500 26px "Dudu Calligraphy"'),
     document.fonts.load('700 21px "Atkinson Hyperlegible"'),
     document.fonts.load('400 15px "Atkinson Hyperlegible"'),
   ]);

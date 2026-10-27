@@ -1,10 +1,16 @@
-@import '@fontsource-variable/fraunces/opsz.css';
 @import '@fontsource/atkinson-hyperlegible/latin-400.css';
 @import '@fontsource/atkinson-hyperlegible/latin-ext-400.css';
 @import '@fontsource/atkinson-hyperlegible/latin-700.css';
 @import '@fontsource/atkinson-hyperlegible/latin-ext-700.css';
-@import '@fontsource/caveat/latin-500.css';
-@import '@fontsource/caveat/latin-ext-500.css';
+
+/* Resul's own handwriting font (made with Font.My), with the Turkish letters and
+   dashes it lacked composed from its strokes. One weight serves every heading. */
+@font-face {
+  font-family: 'Dudu Calligraphy';
+  src: url('../assets/fonts/dudu-calligraphy.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
 
 :root {
   --paper: #f4ebdd;
@@ -21,9 +27,9 @@
   --link-hover: #1e1b24;
   --on-golden: #1e1b24;
 
-  --font-display: 'Fraunces Variable', Georgia, serif;
+  --font-display: 'Dudu Calligraphy', cursive, serif;
   --font-body: 'Atkinson Hyperlegible', system-ui, sans-serif;
-  --font-hand: 'Caveat', cursive;
+  --font-hand: 'Dudu Calligraphy', cursive, serif;
 
   --radius: 12px;
   --gutter: clamp(16px, 4vw, 48px);

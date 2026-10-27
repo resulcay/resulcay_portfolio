@@ -1,5 +1,6 @@
 ---
 import '@/styles/global.css';
+import handFont from '@/assets/fonts/dudu-calligraphy.woff2?url';
 import type { Locale } from '@/domain/schemas';
 import { localizePath } from '@/i18n/ui';
 import TopBar from '@/components/TopBar.astro';
@@ -34,6 +35,7 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : undefined;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preload" href={handFont} as="font" type="font/woff2" crossorigin />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     {

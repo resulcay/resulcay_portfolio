@@ -131,7 +131,7 @@ export function Posters() {
           ctx.fillStyle = '#1e1b24';
           ctx.fillRect(0, 100, 110, 50);
           ctx.fillStyle = '#f4ebdd';
-          ctx.font = '600 13px "Fraunces Variable"';
+          ctx.font = '500 13px "Dudu Calligraphy"';
           ctx.fillText('SUNDOWN', 14, 128);
         });
         const b = atlas.alloc()!;
