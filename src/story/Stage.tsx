@@ -236,7 +236,7 @@ function Director({
   }, [camera, aspect]);
 
   useEffect(() => {
-    element.style.cursor = hovered ? 'pointer' : '';
+    element.style.cursor = hovered ? 'var(--cursor-link, pointer)' : '';
   }, [element, hovered]);
   return null;
 }

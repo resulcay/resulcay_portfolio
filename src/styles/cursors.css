@@ -1,0 +1,21 @@
+/* The journal's cursors: a pencil to write with, and the blue butterfly over
+   anything you can follow. Only for a mouse or trackpad; high-contrast and
+   forced-colour modes keep the system cursors, as do text fields. */
+@media (pointer: fine) and (not (prefers-contrast: more)) and (not (forced-colors: active)) {
+  :root {
+    --cursor-pencil: url('/cursors/pencil.svg') 3 29, auto;
+    --cursor-link: url('/cursors/butterfly.svg') 16 16, pointer;
+  }
+  html {
+    cursor: var(--cursor-pencil);
+  }
+  :is(a[href], button, summary, select, label[for], [role='button'], .button) {
+    cursor: var(--cursor-link);
+  }
+  :is(input:not([type='checkbox'], [type='radio'], [type='range'], [type='submit'], [type='button']), textarea, [contenteditable='true']) {
+    cursor: text;
+  }
+  :is(:disabled, [aria-disabled='true']) {
+    cursor: not-allowed;
+  }
+}

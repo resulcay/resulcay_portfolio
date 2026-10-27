@@ -266,7 +266,7 @@ const siteKey = turnstileSiteKey();
     font: inherit;
     font-weight: 700;
     text-decoration: underline;
-    cursor: pointer;
+    cursor: var(--cursor-link, pointer);
     min-height: 44px;
   }
   .credits {
@@ -430,7 +430,7 @@ const siteKey = turnstileSiteKey();
     font: inherit;
     font-weight: 700;
     text-decoration: none;
-    cursor: pointer;
+    cursor: var(--cursor-link, pointer);
   }
   .story-chip:hover {
     background: #f4ebdd;
@@ -444,7 +444,7 @@ const siteKey = turnstileSiteKey();
     color: #f4ebdd;
     font: inherit;
     text-decoration: underline;
-    cursor: pointer;
+    cursor: var(--cursor-link, pointer);
   }
   .story-mute {
     position: absolute;
@@ -458,7 +458,7 @@ const siteKey = turnstileSiteKey();
     border-radius: 999px;
     background: #f4ebdd;
     color: #1e1b24;
-    cursor: pointer;
+    cursor: var(--cursor-link, pointer);
   }
   .story-mute[aria-pressed='true'] {
     background: #4a4350;
@@ -471,7 +471,7 @@ const siteKey = turnstileSiteKey();
     color: var(--ink);
     font: inherit;
     text-align: left;
-    cursor: pointer;
+    cursor: var(--cursor-link, pointer);
   }
   .story-tracks button[aria-current='true'] {
     font-weight: 700;
@@ -640,7 +640,7 @@ const siteKey = turnstileSiteKey();
     color: var(--ink);
     font: inherit;
     text-align: left;
-    cursor: pointer;
+    cursor: var(--cursor-link, pointer);
     rotate: -0.6deg;
   }
   .story-grid li:nth-child(even) button {
