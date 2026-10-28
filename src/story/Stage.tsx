@@ -8,7 +8,7 @@ import { GateContext, Hotspot, InteractionContext, KitProvider } from './scene/k
 import { createGate, type Gate } from '@/scripts/ready';
 import { Shell, StringLights, Window } from './scene/Shell';
 import { Furniture, Posters, SEAT, SEAT_TURN } from './scene/Furniture';
-import { Corkboard, Journal, Laptop, LightSwitch, Phone, RecordPlayer } from './scene/Props';
+import { Corkboard, Journal, Laptop, LightSwitch, Mug, Phone, RecordPlayer } from './scene/Props';
 import { Polaroids } from './scene/Polaroids';
 import { Character } from './scene/Character';
 import { Butterfly } from './scene/Butterfly';
@@ -85,6 +85,7 @@ export function Stage(props: StageProps) {
             <Furniture still={still} />
             <Posters />
             <Laptop />
+            <Mug still={still} />
             <Journal />
             <Phone />
             <LightSwitch on={props.bulbs} />
