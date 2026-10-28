@@ -1,10 +1,11 @@
 // The home page as a show, told with three animation libraries, each where it's best:
 //   GSAP (+ ScrollTrigger): the hero's "Episode 1" title card, the experience path
 //     drawn as you scroll, and the lighthouse's lamp flaring when the Writing section arrives.
-//   anime.js: the sunset scene (sun rising, glints spreading), the
-//     "At a glance" notebook opening with its numbers counting up, and the featured
+//   anime.js: the Story mode card's text, the "At a glance" notebook opening with its numbers counting up, and the featured
 //     polaroids pinned one by one inside the cork board's wooden frame.
-//   Motion: springy entrances for headings, the Writing charts, the sticky notes and the phone,
+//   Motion: the Story mode card's watercolour diorama (a brush stroke painting the pencil sketch
+//     in, layers moving with the pointer; components/SunsetScene.astro), springy entrances
+//     for headings, the Writing charts, the sticky notes and the phone,
 //     and the scroll progress that drives the particle backdrop (scripts/particle-backdrop.ts).
 // Nothing runs with reduced motion. Starting poses are set while the page is still
 // hidden behind the font veil (html.loading); if a library fails to load they are
@@ -66,7 +67,10 @@ export async function startHomeShow(): Promise<void> {
   pose(heroBits, { opacity: '0' });
 
   // Sunset card, notebook, cork board.
-  pose($<SVGElement>('.teaser .sunset__sun'), { opacity: '0' });
+  // The diorama's brush stroke, undrawn: only the pencil sketch shows until it's painted in.
+  const brush = document.querySelector<SVGPathElement>('#diorama-brush');
+  const stroke = brush?.getTotalLength() ?? 0;
+  if (brush) pose([brush], { strokeDasharray: `${stroke}`, strokeDashoffset: `${stroke}` });
   pose($('.teaser__text > *'), { opacity: '0' });
   pose($('.spread .page'), { opacity: '0' });
   pose($('.glance li'), { opacity: '0' });
@@ -124,12 +128,28 @@ export async function startHomeShow(): Promise<void> {
       mountHeroLetters(title);
     });
 
-  // ── anime.js: the sunset scene ──────────────────────────────────────────────
+  // ── Motion: the Story mode card's watercolour, painted over its sketch ───────
   once(document.querySelector('.teaser'), () => {
-    anime.animate('.teaser .sunset__sun', { opacity: [0, 1], translateY: [140, 0], duration: 1800, ease: 'outCubic', ...tidy });
-    anime.animate('.teaser .sunset__glints', { opacity: [0, 0.6], scaleX: [0.2, 1], duration: 1400, delay: 700, ease: 'outQuad', ...tidy });
-    anime.animate('.teaser__text > *', { opacity: [0, 1], translateY: [24, 0], duration: 800, delay: anime.stagger(120, { start: 500 }), ease: 'outQuart', ...tidy });
-  });
+    // An even pace, so the brush is seen sweeping row by row.
+    if (brush) motion.animate(brush, { strokeDashoffset: [stroke, 0] }, { duration: 3.2, ease: 'easeInOut', delay: 0.2 }).then(() => brush.removeAttribute('style'));
+    anime.animate('.teaser__text > *', { opacity: [0, 1], translateY: [24, 0], duration: 800, delay: anime.stagger(120, { start: 2300 }), ease: 'outQuart', ...tidy });
+  }, 0.6);
+  // Its three layers shift with the pointer, each by its depth, on springs.
+  const card = document.querySelector<HTMLElement>('.teaser__card');
+  const layers = $<SVGSVGElement>('.diorama__layer');
+  if (card && matchMedia('(pointer: fine)').matches) {
+    const drift = (dx: number, dy: number) => {
+      for (const layer of layers) {
+        const depth = Number(layer.dataset['depth'] ?? 0);
+        motion.animate(layer, { x: -dx * 32 * depth, y: -dy * 18 * depth }, { type: 'spring', stiffness: 90, damping: 18 });
+      }
+    };
+    card.addEventListener('pointermove', (event) => {
+      const box = card.getBoundingClientRect();
+      drift((event.clientX - box.left) / box.width - 0.5, (event.clientY - box.top) / box.height - 0.5);
+    });
+    card.addEventListener('pointerleave', () => drift(0, 0));
+  }
 
   // ── anime.js: the notebook opens, its numbers count up ──────────────────────
   once(document.querySelector('.spread'), () => {

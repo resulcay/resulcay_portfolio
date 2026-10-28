@@ -4,19 +4,118 @@ interface Props {
 }
 const { class: className } = Astro.props;
 ---
-{/* The "Rewind" title art: a banded sunset over the sea and a house on the cliff. It fills its box, cropping the sides. */}
-<svg class={className} viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-  <rect width="1440" height="200" fill="#3b3060"></rect>
-  <rect y="200" width="1440" height="130" fill="#5b4b8a"></rect>
-  <rect y="330" width="1440" height="110" fill="#9a6a86"></rect>
-  <rect y="440" width="1440" height="90" fill="#d98a62"></rect>
-  <rect y="530" width="1440" height="50" fill="#e8a657"></rect>
-  <circle class="sunset__sun" cx="1040" cy="560" r="96" fill="#f6c47e"></circle>
-  <rect y="580" width="1440" height="320" fill="#2f6f73"></rect>
-  <path d="M900 600H1180M940 624H1140M980 648H1100M1000 676H1080" stroke="#f6c47e" stroke-width="4" stroke-linecap="round" opacity="0.6" class="sunset__glints"></path>
-  <path d="M0 520C120 500 220 470 320 480 420 490 470 540 560 560 620 574 660 600 700 640V900H0Z" fill="#1e1b24"></path>
-  <rect x="236" y="420" width="96" height="70" fill="#1e1b24"></rect>
-  <path d="M226 424 284 380 342 424Z" fill="#1e1b24"></path>
-  <rect x="262" y="440" width="22" height="22" fill="#e8a657"></rect>
-  <rect x="296" y="440" width="22" height="22" fill="#e8a657" opacity="0.6"></rect>
-</svg>
+{/*
+  The Story mode card's art as a watercolour diorama, after motion.dev's "Ocarina of Time
+  watercolour" example: the sunset over the sea and the house on the cliff, painted in three
+  layers (sky and sun; sea; cliff and house) on parchment with a torn edge. Each layer has a
+  pencil sketch under its painting, and the paintings show through one long brush stroke
+  (#diorama-brush). Drawn in full here, the card shows painted; the home show draws the stroke
+  in so the sketch is painted over, and moves the layers with the pointer (scripts/home-show.ts).
+  It fills its box, cropping the sides.
+*/}
+<div class:list={['diorama', className]} data-diorama aria-hidden="true">
+  <svg class="diorama__layer" data-depth="0.3" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+    <rect x="-100" y="-100" width="1640" height="1100" fill="#efe3cc"></rect>
+    <g class="diorama__sketch">
+      <path d="M-20 200H1460M-20 330H1460M-20 440H1460M-20 530H1460" />
+      <circle cx="1040" cy="560" r="96" />
+      <path d="M980 520l-30-30M1040 450v-40M1100 520l30-30M940 580h-40M1140 580h40" />
+    </g>
+    <g mask="url(#diorama-reveal)" filter="url(#diorama-wash)">
+      <rect x="-100" y="-100" width="1640" height="300" fill="#3b3060"></rect>
+      <rect x="-100" y="200" width="1640" height="130" fill="#5b4b8a"></rect>
+      <rect x="-100" y="330" width="1640" height="110" fill="#9a6a86"></rect>
+      <rect x="-100" y="440" width="1640" height="90" fill="#d98a62"></rect>
+      <rect x="-100" y="530" width="1640" height="80" fill="#e8a657"></rect>
+      <circle cx="1040" cy="560" r="96" fill="#f6c47e"></circle>
+    </g>
+  </svg>
+  <svg class="diorama__layer" data-depth="0.6" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+    <g class="diorama__sketch">
+      <path d="M-20 580H1460" />
+      <path d="M900 600H1180M940 624H1140M980 648H1100M1000 676H1080" />
+      <path d="M80 640q40-12 80 0t80 0M420 700q40-12 80 0t80 0M760 760q40-12 80 0t80 0M1180 720q40-12 80 0t80 0M300 820q40-12 80 0t80 0M980 840q40-12 80 0t80 0" />
+    </g>
+    <g mask="url(#diorama-reveal)" filter="url(#diorama-wash)">
+      <rect x="-100" y="580" width="1640" height="420" fill="#2f6f73"></rect>
+      <path d="M900 600H1180M940 624H1140M980 648H1100M1000 676H1080" stroke="#f6c47e" stroke-width="5" stroke-linecap="round" opacity="0.7"></path>
+      <path d="M80 640q40-12 80 0t80 0M420 700q40-12 80 0t80 0M760 760q40-12 80 0t80 0M1180 720q40-12 80 0t80 0M300 820q40-12 80 0t80 0M980 840q40-12 80 0t80 0" fill="none" stroke="#8fd0d4" stroke-width="4" stroke-linecap="round" opacity="0.35"></path>
+    </g>
+  </svg>
+  <svg class="diorama__layer" data-depth="1" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+    <g class="diorama__sketch">
+      <path d="M-100 520C120 500 220 470 320 480 420 490 470 540 560 560 620 574 660 600 700 640V1000" />
+      <path d="M236 490V420h96v70M226 424 284 380 342 424M262 440h22v22h-22ZM296 440h22v22h-22Z" />
+    </g>
+    <g mask="url(#diorama-reveal)" filter="url(#diorama-wash)">
+      <path d="M-100 520C120 500 220 470 320 480 420 490 470 540 560 560 620 574 660 600 700 640V1000H-100Z" fill="#1e1b24"></path>
+      <rect x="236" y="420" width="96" height="70" fill="#1e1b24"></rect>
+      <path d="M226 424 284 380 342 424Z" fill="#1e1b24"></path>
+      <rect x="262" y="440" width="22" height="22" fill="#e8a657"></rect>
+      <rect x="296" y="440" width="22" height="22" fill="#e8a657" opacity="0.6"></rect>
+    </g>
+  </svg>
+  <svg class="diorama__frame" viewBox="0 0 1440 900" preserveAspectRatio="none">
+    <defs>
+      <!-- Watercolour: edges bled by noise, and the paper's grain showing through the paint. -->
+      <filter id="diorama-wash" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.011" numOctaves="3" seed="4" result="noise"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="22" xChannelSelector="R" yChannelSelector="G" result="bled"></feDisplacementMap>
+        <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="9" result="grain"></feTurbulence>
+        <feColorMatrix in="grain" type="matrix" values="0.22 0 0 0 0.78  0.22 0 0 0 0.78  0.22 0 0 0 0.78  0 0 0 0 1" result="paper"></feColorMatrix>
+        <feBlend in="bled" in2="paper" mode="multiply" result="painted"></feBlend>
+        <feComposite in="painted" in2="bled" operator="in"></feComposite>
+      </filter>
+      <!-- A hand-drawn wobble for the pencil lines, and a ragged edge for the brush and the torn paper. -->
+      <filter id="diorama-pencil">
+        <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="2" result="noise"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      </filter>
+      <filter id="diorama-ragged" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="6" result="noise"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="70" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      </filter>
+      <!-- The paper's torn edge: finer and shallower than the brush's. -->
+      <filter id="diorama-torn" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="3" seed="6" result="noise"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      </filter>
+      <path id="diorama-brush" d="M-260 10L1700 110L-260 230L1700 340L-260 450L1700 560L-260 670L1700 780L-260 900" fill="none" stroke="#fff" stroke-width="250" stroke-linecap="round" stroke-linejoin="round"></path>
+      <mask id="diorama-reveal" maskUnits="userSpaceOnUse" x="-200" y="-200" width="1840" height="1300">
+        <use href="#diorama-brush" filter="url(#diorama-ragged)"></use>
+      </mask>
+    </defs>
+    <!-- The parchment margin, torn along its inner edge. -->
+    <path fill="#efe3cc" fill-rule="evenodd" filter="url(#diorama-torn)" d="M-120-120H1560V1020H-120ZM14 22H1426V878H14Z"></path>
+  </svg>
+</div>
+
+<style>
+  .diorama {
+    overflow: hidden;
+  }
+  .diorama__layer,
+  .diorama__frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  /* Room to move with the pointer without showing an edge. */
+  .diorama__layer {
+    scale: 1.06;
+    will-change: transform;
+  }
+  .diorama__frame {
+    z-index: 1;
+  }
+  .diorama__sketch {
+    fill: none;
+    stroke: #5a4a3c;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.75;
+    filter: url(#diorama-pencil);
+  }
+</style>
