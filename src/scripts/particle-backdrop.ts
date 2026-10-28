@@ -49,6 +49,9 @@ void main() {
   vec3 tint = uColors[0] * w.x + uColors[1] * w.y + uColors[2] * w.z + uColors[3] * w.w;
   vColor = mix(tint, uGlow, aSeed.y * 0.45);
   vAlpha = 0.55 + aSeed.y * 0.45 - twinkle * 0.3;
+  // At the very start only one in twenty shows; the rest join as the storm gathers.
+  float sparse = step(fract(aSeed.x * 13.7 + aSeed.y * 7.1), 0.95);
+  vAlpha *= 1.0 - w.x * sparse;
 }`;
 
 const FRAGMENT = `
