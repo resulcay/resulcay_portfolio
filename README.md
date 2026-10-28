@@ -67,6 +67,8 @@ The room's downloaded models, credited in Story mode's Credits:
 
 They were scaled to metres, simplified and given WebP textures with Blender before being added to `src/story/scene/models/`.
 
+The cat's meow is cut (0.7 s, faded) from "Meow of a pleading cat" by Heismark, public domain: https://commons.wikimedia.org/wiki/File:Meow_of_a_pleading_cat.oga
+
 With no tracks, Story mode simply has no music; its sound effects and room ambience are made in the browser and need no files.
 
 ### Local development

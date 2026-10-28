@@ -1,9 +1,24 @@
 // Short, quiet sound effects made in the browser with Web Audio, so there
-// are no files to download. Each one starts now and cleans up after itself.
+// are almost no files to download (the cat's meow is the one recording).
+// Each one starts now and cleans up after itself.
+import meowUrl from './cat-meow.wav?url';
 
 export type EffectName = 'tick' | 'whoosh' | 'buzz' | 'scratch' | 'rewind' | 'click' | 'mrrr';
 
 const noiseBuffers = new WeakMap<BaseAudioContext, AudioBuffer>();
+const samples = new Map<string, Promise<AudioBuffer>>();
+
+/** A short recorded sound, fetched and decoded once. */
+function sample(ctx: BaseAudioContext, url: string): Promise<AudioBuffer> {
+  let loading = samples.get(url);
+  if (!loading) {
+    loading = fetch(url)
+      .then((response) => response.arrayBuffer())
+      .then((bytes) => ctx.decodeAudioData(bytes));
+    samples.set(url, loading);
+  }
+  return loading;
+}
 
 /** Two seconds of white noise, made once per context. */
 export function noise(ctx: BaseAudioContext): AudioBuffer {
@@ -44,28 +59,16 @@ export const EFFECTS: Record<EffectName, (ctx: AudioContext, out: AudioNode) => 
     noiseSource(ctx, 0.04).connect(high).connect(envelope(ctx, out, 0.18, 0.001, 0.025));
   },
 
-  /** The cat's trill: a low purring "mrrr" that rises, fluttering about 28 times a second. */
+  /** The cat: a real meow, cut from a public-domain recording ("Meow of a pleading cat" by Heismark, Wikimedia Commons). */
   mrrr(ctx, out) {
-    const t = ctx.currentTime;
-    const voice = ctx.createOscillator();
-    voice.type = 'sawtooth';
-    voice.frequency.setValueAtTime(210, t);
-    voice.frequency.exponentialRampToValueAtTime(300, t + 0.45);
-    const soft = ctx.createBiquadFilter();
-    soft.type = 'lowpass';
-    soft.frequency.value = 900;
-    const flutter = ctx.createGain();
-    flutter.gain.value = 0.5;
-    const rate = ctx.createOscillator();
-    rate.frequency.value = 28;
-    const depth = ctx.createGain();
-    depth.gain.value = 0.5;
-    rate.connect(depth).connect(flutter.gain);
-    voice.connect(soft).connect(flutter).connect(envelope(ctx, out, 0.2, 0.05, 0.45));
-    voice.start(t);
-    rate.start(t);
-    voice.stop(t + 0.55);
-    rate.stop(t + 0.55);
+    void sample(ctx, meowUrl).then((buffer) => {
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      const gain = ctx.createGain();
+      gain.gain.value = 0.6;
+      source.connect(gain).connect(out);
+      source.start();
+    }, () => undefined);
   },
 
   /** A soft tick when the eye lands on something. */

@@ -25,6 +25,9 @@ const models = [
   { title: 'Radio', author: 'oxyuraatheduck', license: 'Royalty Free' },
   { title: 'Bed', author: 'andrey-ryzhko', license: 'Royalty Free' },
 ];
+const sounds = [
+  { title: 'Meow of a pleading cat', author: 'Heismark', license: 'Public domain', url: 'https://commons.wikimedia.org/wiki/File:Meow_of_a_pleading_cat.oga' },
+];
 ---
 <BaseLayout lang={lang} title={t(lang, 'nav.story')} description={t(lang, 'story.description')}>
   <section class="title" aria-labelledby="story-title">
@@ -77,6 +80,17 @@ const models = [
                 <a href={model.url} rel="noopener noreferrer" target="_blank">{t(lang, 'story.source')}</a>
               </>
             )}
+          </li>
+        ))
+      }
+    </ul>
+    <h3>{t(lang, 'story.sounds')}</h3>
+    <ul>
+      {
+        sounds.map((sound) => (
+          <li>
+            <strong>{sound.title}</strong> · {sound.author} · {t(lang, 'story.license')}: {sound.license} ·{' '}
+            <a href={sound.url} rel="noopener noreferrer" target="_blank">{t(lang, 'story.source')}</a>
           </li>
         ))
       }
