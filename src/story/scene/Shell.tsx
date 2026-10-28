@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
-import { BoxGeometry, CatmullRomCurve3, Matrix4, TubeGeometry, Vector3, type InstancedMesh } from 'three';
+import { useFrame } from '@react-three/fiber';
+import { BoxGeometry, CatmullRomCurve3, Color, Matrix4, TubeGeometry, Vector3, type InstancedMesh, type MeshBasicMaterial } from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { Hotspot, Merged, useDisposable, useKit, type Vec3 } from './kit';
 import { PHASES, type Phase } from './time';
@@ -104,25 +105,37 @@ export function Window() {
 }
 
 /** Fairy lights along the top of both walls; they glow at night. */
-export function StringLights() {
-  const { base, phase } = useKit();
-  const curve = useMemo(
-    () =>
-      new CatmullRomCurve3([
-        new Vector3(2.6, 2.6, -1.96),
-        new Vector3(1.4, 2.4, -1.96),
-        new Vector3(0.2, 2.58, -1.96),
-        new Vector3(-1.1, 2.4, -1.96),
-        new Vector3(-2.44, 2.6, -1.94),
-        new Vector3(-2.46, 2.42, -0.8),
-        new Vector3(-2.46, 2.6, 0.4),
-        new Vector3(-2.46, 2.44, 1.5),
-        new Vector3(-2.46, 2.6, 2.3),
-      ]),
-    [],
-  );
+/**
+ * The fairy-light strand: along the back wall, round the corner and along the
+ * left wall, 4 cm off each. Centripetal, so it can't overshoot into a wall at the corner.
+ */
+export const STRAND = [
+  new Vector3(2.45, 2.6, -1.96),
+  new Vector3(1.4, 2.42, -1.96),
+  new Vector3(0.2, 2.58, -1.96),
+  new Vector3(-1.1, 2.42, -1.96),
+  new Vector3(-2.2, 2.56, -1.96),
+  new Vector3(-2.42, 2.6, -1.96),
+  new Vector3(-2.46, 2.6, -1.92),
+  new Vector3(-2.46, 2.56, -1.7),
+  new Vector3(-2.46, 2.42, -0.8),
+  new Vector3(-2.46, 2.6, 0.4),
+  new Vector3(-2.46, 2.44, 1.5),
+  new Vector3(-2.46, 2.6, 2.3),
+];
+export const strand = () => new CatmullRomCurve3(STRAND, false, 'centripetal');
+
+const BULB_ON = new Color('#ffd27a');
+const BULB_OFF = new Color('#4a4236');
+
+/** The fairy lights; `on` comes from the switch on the nightstand, and the bulbs fade over about 300 ms. */
+export function StringLights({ on }: { on: boolean }) {
+  const { base } = useKit();
+  const curve = useMemo(strand, []);
   const wire = useDisposable(() => new TubeGeometry(curve, 120, 0.004, 4));
   const bulbs = useRef<InstancedMesh>(null);
+  const glass = useRef<MeshBasicMaterial>(null);
+  useFrame((_, delta) => glass.current?.color.lerp(on ? BULB_ON : BULB_OFF, Math.min(1, delta * 10)));
   const count = 36;
   useLayoutEffect(() => {
     const m = new Matrix4();
@@ -137,7 +150,7 @@ export function StringLights() {
       <mesh geometry={wire} material={base} />
       <instancedMesh ref={bulbs} args={[undefined, undefined, count]}>
         <sphereGeometry args={[0.028, 8, 6]} />
-        <meshBasicMaterial color={PHASES[phase].lightsOn ? '#ffd27a' : '#9a8b70'} toneMapped={false} />
+        <meshBasicMaterial ref={glass} color={on ? BULB_ON : BULB_OFF} toneMapped={false} />
       </instancedMesh>
     </>
   );

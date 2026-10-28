@@ -10,12 +10,16 @@ interface Lines {
   /** Names for the keyboard and screen-reader buttons. */
   names: Record<StoryObject, string>;
   /** Resul's inner monologue when you look at something. The window has one per time of day. */
-  thoughts: Record<Exclude<StoryObject, 'window'> | 'resul', string>;
+  thoughts: Record<Exclude<StoryObject, 'window'> | 'resul' | 'cat' | 'lightSwitch', string>;
   window: Record<Phase, string>;
   ui: {
     sceneLabel: string;
     /** The character, as a button: looking at him opens the journal. */
     resul: string;
+    /** The cat on the rug, as a button: she answers with a trill. */
+    cat: string;
+    /** The switch on the nightstand, as a button: it turns the fairy lights on and off. */
+    lightSwitch: string;
     objects: string;
     close: string;
     allProjects: string;
@@ -73,6 +77,8 @@ export const LINES: Record<Locale, Lines> = {
       recordPlayer: 'Music helps me think. Or procrastinate.',
       corkboard: 'Proof that I finish things. Sometimes.',
       resul: "That's me. Usually more coffee involved.",
+      cat: 'The real boss of this room.',
+      lightSwitch: 'Fairy lights: on or off?',
     },
     window: {
       dawn: 'Up before the bugs are. Mostly.',
@@ -84,6 +90,8 @@ export const LINES: Record<Locale, Lines> = {
       sceneLabel:
         "Resul's bedroom studio. He sits at his desk typing on a laptop, with photos of his projects pinned on the wall above the bed.",
       resul: 'Resul',
+      cat: 'Cat',
+      lightSwitch: 'Light switch',
       objects: 'Things in the room',
       close: 'Close',
       allProjects: 'All projects',
@@ -144,6 +152,8 @@ export const LINES: Record<Locale, Lines> = {
       recordPlayer: 'Müzik düşünmeme yardım ediyor. Ya da oyalanmama.',
       corkboard: 'Bir şeyleri bitirdiğimin kanıtı. Bazen.',
       resul: 'Bu benim. Genelde daha çok kahve oluyor.',
+      cat: 'Bu odanın asıl patronu.',
+      lightSwitch: 'Süs ışıkları: açık mı kapalı mı?',
     },
     window: {
       dawn: 'Hatalardan önce uyandım. Çoğunlukla.',
@@ -155,6 +165,8 @@ export const LINES: Record<Locale, Lines> = {
       sceneLabel:
         "Resul'ün yatak odası stüdyosu. Masasında dizüstü bilgisayarında yazıyor; yatağın üstündeki duvarda projelerinin fotoğrafları asılı.",
       resul: 'Resul',
+      cat: 'Kedi',
+      lightSwitch: 'Işık düğmesi',
       objects: 'Odadaki şeyler',
       close: 'Kapat',
       allProjects: 'Tüm projeler',

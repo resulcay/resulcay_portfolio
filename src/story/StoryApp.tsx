@@ -4,7 +4,7 @@ import type { Locale } from '@/domain/schemas';
 import { Stage, type Stats } from './Stage';
 import { LINES, OBJECTS, thoughtFor, type StoryObject } from './lines';
 import { parseHash, routeForHotspot, toHash, type Route } from './route';
-import { phaseAt, type Phase } from './scene/time';
+import { PHASES, phaseAt, type Phase } from './scene/time';
 import type { Quality } from './scene/quality';
 import { Choice, Panels } from './panels';
 import { engine } from './audio/engine';
@@ -40,6 +40,12 @@ export function StoryApp({ data, lang, siteKey, hour, onRewind, ...stage }: Stor
   const [rewind, setRewind] = useState(0);
   const [rewinding, setRewinding] = useState(false);
   const phase = phaseChoice === 'auto' ? phaseAt(hour) : phaseChoice;
+  // The fairy lights follow the time of day until the switch is used; then the choice holds for the visit.
+  const [bulbChoice, setBulbChoice] = useState<boolean | null>(() => {
+    const saved = browserStorage('sessionStorage')?.getItem('story-bulbs');
+    return saved ? saved === 'on' : null;
+  });
+  const bulbs = bulbChoice ?? PHASES[phase].lightsOn;
   const focus = route?.object ?? null;
 
   useEffect(() => {
@@ -102,10 +108,16 @@ export function StoryApp({ data, lang, siteKey, hour, onRewind, ...stage }: Stor
 
   const select = useCallback(
     (id: string) => {
+      if (id === 'cat') return engine.effect('mrrr');
+      if (id === 'lightSwitch') {
+        engine.effect('click');
+        browserStorage('sessionStorage')?.setItem('story-bulbs', bulbs ? 'off' : 'on');
+        return setBulbChoice(!bulbs);
+      }
       const next = routeForHotspot(id);
       if (next) go(next);
     },
-    [go],
+    [go, bulbs],
   );
 
   const choose = (next: Visitor | null) => {
@@ -184,6 +196,19 @@ export function StoryApp({ data, lang, siteKey, hour, onRewind, ...stage }: Stor
             {lines.ui.resul}
           </button>
         </li>
+        {(['cat', 'lightSwitch'] as const).map((id) => (
+          <li key={id}>
+            <button
+              type="button"
+              className="visually-hidden"
+              onFocus={() => setHovered(id)}
+              onBlur={() => setHovered((current) => (current === id ? null : current))}
+              onClick={() => select(id)}
+            >
+              {lines.ui[id]}
+            </button>
+          </li>
+        ))}
         {guide && (
           <li>
             <button type="button" className="visually-hidden" onClick={() => setHovered(guide)}>
@@ -203,6 +228,7 @@ export function StoryApp({ data, lang, siteKey, hour, onRewind, ...stage }: Stor
           rewind={rewind}
           rewinding={rewinding}
           spinning={audio.playing}
+          bulbs={bulbs}
           onHover={setHovered}
           onSelect={select}
           onArrive={setArrived}

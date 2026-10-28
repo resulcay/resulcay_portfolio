@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { gsap } from 'gsap';
-import { MathUtils, PerspectiveCamera, Vector3 } from 'three';
+import { MathUtils, PerspectiveCamera, Vector3, type PointLight } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { StoryData } from '@/application/story';
 import { GateContext, Hotspot, InteractionContext, KitProvider } from './scene/kit';
 import { createGate, type Gate } from '@/scripts/ready';
 import { Shell, StringLights, Window } from './scene/Shell';
 import { Furniture, Posters, SEAT, SEAT_TURN } from './scene/Furniture';
-import { Corkboard, Journal, Laptop, Phone, RecordPlayer } from './scene/Props';
+import { Corkboard, Journal, Laptop, LightSwitch, Phone, RecordPlayer } from './scene/Props';
 import { Polaroids } from './scene/Polaroids';
 import { Character } from './scene/Character';
 import { Butterfly } from './scene/Butterfly';
@@ -44,6 +44,8 @@ interface StageProps {
   rewinding: boolean;
   /** The record player's vinyl turns while music plays. */
   spinning: boolean;
+  /** The fairy lights, from the switch on the nightstand. */
+  bulbs: boolean;
   /** The painterly post pass; `?post=off` turns it off to compare. */
   post: boolean;
   onHover: (id: string | null) => void;
@@ -73,18 +75,19 @@ export function Stage(props: StageProps) {
     >
       <color attach="background" args={[BACKGROUND]} />
       <fog attach="fog" args={[BACKGROUND, 9, 18]} />
-      <Lights phase={phase} quality={quality} />
+      <Lights phase={phase} quality={quality} bulbs={props.bulbs} />
       <GateContext.Provider value={gate}>
         <InteractionContext.Provider value={interaction}>
           <KitProvider phase={phase}>
             <Shell />
             <Window />
-            <StringLights />
+            <StringLights on={props.bulbs} />
             <Furniture still={still} />
             <Posters />
             <Laptop />
             <Journal />
             <Phone />
+            <LightSwitch on={props.bulbs} />
             <RecordPlayer spinning={props.spinning} still={still} />
             <Corkboard certifications={data.profile.certifications} />
             <Polaroids projects={data.projects} />
@@ -124,7 +127,7 @@ function Reveal({ gate, onReady }: { gate: Gate; onReady: () => void }) {
   return null;
 }
 
-function Lights({ phase, quality }: { phase: Phase; quality: Quality }) {
+function Lights({ phase, quality, bulbs }: { phase: Phase; quality: Quality; bulbs: boolean }) {
   const light = PHASES[phase];
   return (
     <>
@@ -145,9 +148,18 @@ function Lights({ phase, quality }: { phase: Phase; quality: Quality }) {
         shadow-bias={-0.0008}
       />
       {quality !== 'low' && <pointLight position={[0.9, 1.7, -1.5]} color={light.sun} intensity={light.windowGlow} distance={5} />}
-      {quality !== 'low' && light.lightsOn && <pointLight position={[-0.8, 2.3, -0.6]} color="#ffcf8a" intensity={7} distance={7} />}
+      {quality !== 'low' && <FairyGlow on={bulbs} />}
     </>
   );
+}
+
+/** The fairy lights' warm glow over the room, fading in and out (about 300 ms) with the switch. */
+function FairyGlow({ on }: { on: boolean }) {
+  const light = useRef<PointLight>(null);
+  useFrame((_, delta) => {
+    if (light.current) light.current.intensity += ((on ? 7 : 0) - light.current.intensity) * Math.min(1, delta * 10);
+  });
+  return <pointLight ref={light} position={[-0.8, 2.3, -0.6]} color="#ffcf8a" intensity={on ? 7 : 0} distance={7} />;
 }
 
 /**

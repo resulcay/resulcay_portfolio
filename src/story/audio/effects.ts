@@ -1,7 +1,7 @@
 // Short, quiet sound effects made in the browser with Web Audio, so there
 // are no files to download. Each one starts now and cleans up after itself.
 
-export type EffectName = 'tick' | 'whoosh' | 'buzz' | 'scratch' | 'rewind';
+export type EffectName = 'tick' | 'whoosh' | 'buzz' | 'scratch' | 'rewind' | 'click' | 'mrrr';
 
 const noiseBuffers = new WeakMap<BaseAudioContext, AudioBuffer>();
 
@@ -36,6 +36,38 @@ function noiseSource(ctx: AudioContext, seconds: number): AudioBufferSourceNode 
 }
 
 export const EFFECTS: Record<EffectName, (ctx: AudioContext, out: AudioNode) => void> = {
+  /** The light switch: a small plastic click. */
+  click(ctx, out) {
+    const high = ctx.createBiquadFilter();
+    high.type = 'highpass';
+    high.frequency.value = 2500;
+    noiseSource(ctx, 0.04).connect(high).connect(envelope(ctx, out, 0.18, 0.001, 0.025));
+  },
+
+  /** The cat's trill: a low purring "mrrr" that rises, fluttering about 28 times a second. */
+  mrrr(ctx, out) {
+    const t = ctx.currentTime;
+    const voice = ctx.createOscillator();
+    voice.type = 'sawtooth';
+    voice.frequency.setValueAtTime(210, t);
+    voice.frequency.exponentialRampToValueAtTime(300, t + 0.45);
+    const soft = ctx.createBiquadFilter();
+    soft.type = 'lowpass';
+    soft.frequency.value = 900;
+    const flutter = ctx.createGain();
+    flutter.gain.value = 0.5;
+    const rate = ctx.createOscillator();
+    rate.frequency.value = 28;
+    const depth = ctx.createGain();
+    depth.gain.value = 0.5;
+    rate.connect(depth).connect(flutter.gain);
+    voice.connect(soft).connect(flutter).connect(envelope(ctx, out, 0.2, 0.05, 0.45));
+    voice.start(t);
+    rate.start(t);
+    voice.stop(t + 0.55);
+    rate.stop(t + 0.55);
+  },
+
   /** A soft tick when the eye lands on something. */
   tick(ctx, out) {
     const osc = ctx.createOscillator();

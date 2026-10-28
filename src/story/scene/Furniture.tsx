@@ -1,6 +1,6 @@
 import { BoxGeometry, CylinderGeometry } from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
-import { around, Merged, useKit, type Part, type Vec3 } from './kit';
+import { around, Hotspot, Merged, useKit, type Part, type Vec3 } from './kit';
 import { Model } from './Model';
 import bedUrl from './models/bed.glb?url';
 import nightstandUrl from './models/nightstand.glb?url';
@@ -93,7 +93,9 @@ export function Furniture({ still }: { still: boolean }) {
       {/* 1.15 m: the model is 1.4 m. */}
       <Model url={treeUrl} position={[2.1, 0, -1.55]} scale={0.82} />
       {/* On the rug, grooming: the cat's one clip is it licking a paw and washing its face. */}
-      <Model url={catUrl} position={[-0.2, 0.017, 0.55]} rotationY={-0.3} clip="Take 001" still={still} />
+      <Model url={catUrl} position={[-0.2, 0.017, 0.55]} rotationY={-0.3} clip="Take 001" still={still}>
+        <Hotspot id="cat" at={[0, 0.17, 0]} size={[0.42, 0.34, 0.3]} anchor={[0.6, 0.6, 0.6]} />
+      </Model>
     </>
   );
 }
