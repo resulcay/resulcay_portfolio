@@ -25,14 +25,10 @@ const LIGHT_WOOD = '#a77a55';
 
 const rounded = (w: number, h: number, d: number, r = 0.02) => new RoundedBoxGeometry(w, h, d, 2, r);
 
-/** The bed model's mattress top; the blanket and the journal rest on it. */
+/** The bed model's mattress top, where the journal rests. */
 export const MATTRESS_TOP = 0.457;
 /** The nightstand model's top, where the phone lies. */
 export const NIGHTSTAND_TOP = 0.5;
-
-function blanket(): Part[] {
-  return [{ geo: rounded(1.0, 0.06, 0.9, 0.03), color: '#6d5ba0', at: [-1.95, MATTRESS_TOP + 0.015, -0.55] }];
-}
 
 function desk(): Part[] {
   const legs = ([-0.7, 0.7] as const).flatMap((dx) =>
@@ -90,9 +86,9 @@ export function Furniture({ still }: { still: boolean }) {
   const { base } = useKit();
   return (
     <>
-      <Merged material={base} bake parts={() => [...blanket(), ...desk(), ...chair(), ...dresser(), ...shelf()]} />
+      <Merged material={base} bake parts={() => [...desk(), ...chair(), ...dresser(), ...shelf()]} />
       {/* Headboard against the back wall. */}
-      <Model url={bedUrl} position={[-1.95, 0, -0.95]} rotationY={-Math.PI / 2} color="#efe6d8" />
+      <Model url={bedUrl} position={[-1.95, 0, -0.95]} rotationY={-Math.PI / 2} />
       <Model url={nightstandUrl} position={[-1.15, 0, -1.74]} />
       <Model url={treeUrl} position={[2.1, 0, -1.55]} />
       {/* On the rug, grooming: the cat's one clip is it licking a paw and washing its face. */}

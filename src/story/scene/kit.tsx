@@ -13,6 +13,7 @@ import {
   Vector3,
   type BufferGeometry,
   type Material,
+  type MeshStandardMaterial,
 } from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { Atlas, grainTexture } from './atlas';
@@ -101,6 +102,20 @@ export function Merged({
  * a later camera move will look from (`anchor`, in the same space as `at`).
  * It costs no draw call.
  */
+const glows = new WeakMap<Material, Material>();
+/** A glowing copy of a downloaded model's own material, lit the way the room's lift is. */
+function glowOf(material: Material): Material | undefined {
+  if (!('emissive' in material)) return undefined;
+  let glowing = glows.get(material);
+  if (!glowing) {
+    const copy = material.clone() as MeshStandardMaterial;
+    copy.emissive.set('#e8a657');
+    copy.emissiveIntensity = 0.4;
+    glows.set(material, (glowing = copy));
+  }
+  return glowing;
+}
+
 export function Hotspot({
   id,
   at,
@@ -128,7 +143,7 @@ export function Hotspot({
     const swapped: [Mesh, Material][] = [];
     parent.traverse((o) => {
       if (!(o instanceof Mesh) || Array.isArray(o.material)) return;
-      const glowing = lift.get(o.material);
+      const glowing = lift.get(o.material) ?? glowOf(o.material);
       if (!glowing) return;
       swapped.push([o, o.material]);
       o.material = glowing;
