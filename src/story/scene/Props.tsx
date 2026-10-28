@@ -68,7 +68,7 @@ export function Laptop() {
 
 export function Journal() {
   return (
-    <Model url={journalUrl} position={[-1.75, MATTRESS_TOP + 0.045, -0.2]} rotationY={0.35}>
+    <Model url={journalUrl} position={[-1.92, MATTRESS_TOP, -0.75]} rotationY={0.35}>
       <Hotspot id="journal" at={[0, 0.05, 0]} size={[0.36, 0.14, 0.28]} anchor={[0.3, 0.6, 0.6]} />
     </Model>
   );

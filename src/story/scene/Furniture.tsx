@@ -25,8 +25,8 @@ const LIGHT_WOOD = '#a77a55';
 
 const rounded = (w: number, h: number, d: number, r = 0.02) => new RoundedBoxGeometry(w, h, d, 2, r);
 
-/** The bed model's mattress top, where the journal rests. */
-export const MATTRESS_TOP = 0.457;
+/** The bed's blanket top through its middle (raycast on the model), where the journal rests. */
+export const MATTRESS_TOP = 0.428;
 /** The nightstand model's top, where the phone lies. */
 export const NIGHTSTAND_TOP = 0.5;
 
@@ -90,7 +90,8 @@ export function Furniture({ still }: { still: boolean }) {
       {/* Headboard against the back wall. */}
       <Model url={bedUrl} position={[-1.95, 0, -0.95]} rotationY={-Math.PI / 2} />
       <Model url={nightstandUrl} position={[-1.15, 0, -1.74]} />
-      <Model url={treeUrl} position={[2.1, 0, -1.55]} />
+      {/* 1.15 m: the model is 1.4 m. */}
+      <Model url={treeUrl} position={[2.1, 0, -1.55]} scale={0.82} />
       {/* On the rug, grooming: the cat's one clip is it licking a paw and washing its face. */}
       <Model url={catUrl} position={[-0.2, 0.017, 0.55]} rotationY={-0.3} clip="Take 001" still={still} />
     </>
