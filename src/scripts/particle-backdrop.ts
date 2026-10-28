@@ -14,6 +14,7 @@ uniform float uMorph; // 0 scattered, 1 storm, 2 sunset, 3 scattered again
 uniform float uTime;
 uniform vec2 uView;
 uniform float uScale;
+uniform float uShift; // px right of centre for the storm and sunset
 uniform float uPoint;
 uniform vec3 uColors[4];
 uniform vec3 uGlow;
@@ -31,7 +32,7 @@ void main() {
 
   // The storm: a funnel wide at the top, turning faster near the ground.
   float a = aStorm.z + uTime * (1.6 - aStorm.y * 0.9);
-  vec3 storm = vec3(cos(a) * aStorm.x, aStorm.y * 1.7 - 0.95, sin(a) * aStorm.x) + vec3(0.3, 0.0, 0.0);
+  vec3 storm = vec3(cos(a) * aStorm.x, aStorm.y * 1.7 - 0.95, sin(a) * aStorm.x);
   // The sunset: a sun over the sea, its glints shimmering.
   vec3 sunset = aSunset + vec3(sin(uTime * 1.3 + aSeed.y * 30.0) * 0.012 * step(aSunset.y, -0.2), 0.0, 0.0);
   // Scattered, at the start and the end: stars drifting very slowly.
@@ -40,7 +41,8 @@ void main() {
   float scattered = w.x + w.w;
   vec3 p = stars * scattered + storm * w.y + sunset * w.z;
   float depth = 1.0 + p.z * 0.35;
-  vec2 screen = p.xy / depth * uScale;
+  // The storm and sunset keep to the right side of the window; the scattered stars fill it.
+  vec2 screen = p.xy / depth * uScale + vec2(uShift * (w.y + w.z), 0.0);
   gl_Position = vec4(screen.x / uView.x * 2.0, screen.y / uView.y * 2.0, 0.0, 1.0);
   float twinkle = scattered * (0.6 + 0.4 * sin(uTime * 2.0 + aSeed.y * 40.0));
   gl_PointSize = uPoint * (0.6 + aSeed.y * 0.9) / depth * (1.0 + twinkle * 0.6);
@@ -126,7 +128,7 @@ export function mountParticleBackdrop(scroll: (onProgress: (progress: number) =>
   for (const [name, data] of Object.entries(shapes)) attribute(name, data, 3);
   attribute('aSeed', seeds, 2);
   const u = (name: string) => gl.getUniformLocation(program, name);
-  const uniforms = { morph: u('uMorph'), time: u('uTime'), view: u('uView'), scale: u('uScale'), point: u('uPoint'), colors: u('uColors'), glow: u('uGlow'), opacity: u('uOpacity') };
+  const uniforms = { shift: u('uShift'), morph: u('uMorph'), time: u('uTime'), view: u('uView'), scale: u('uScale'), point: u('uPoint'), colors: u('uColors'), glow: u('uGlow'), opacity: u('uOpacity') };
   gl.enable(gl.BLEND);
 
   const dark = matchMedia('(prefers-color-scheme: dark)');
@@ -148,6 +150,7 @@ export function mountParticleBackdrop(scroll: (onProgress: (progress: number) =>
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.uniform2f(uniforms.view, innerWidth, innerHeight);
     gl.uniform1f(uniforms.scale, Math.min(innerWidth, innerHeight * 1.4) * 0.42);
+    gl.uniform1f(uniforms.shift, innerWidth * (innerWidth < 760 ? 0.15 : 0.3));
     gl.uniform1f(uniforms.point, 4.2 * ratio);
   };
   fit();
