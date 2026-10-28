@@ -16,7 +16,7 @@ const HEIGHT = 28;
 /** How long the pointer stays on something clickable before the butterfly goes to it. */
 const NOTICE_MS = 2200;
 /** The flight path stays this long, and fades this soon once the butterfly rests. */
-const TRAIL_PX = 260;
+const TRAIL_PX = 340;
 const TRAIL_MS = 1500;
 
 export function mountButterflyCursor(): void {
@@ -33,7 +33,6 @@ export function mountButterflyCursor(): void {
   document.body.appendChild(el);
   const wings = [...el.querySelectorAll('[data-wing]')];
   const pen = trail.getContext('2d');
-  const blue = getComputedStyle(root).getPropertyValue('--butterfly').trim() || '#4fa3d9';
   const fitTrail = () => {
     const ratio = Math.min(devicePixelRatio || 1, 2);
     trail.width = Math.round(innerWidth * ratio);
@@ -163,7 +162,7 @@ export function mountButterflyCursor(): void {
     }
     pen.clearRect(0, 0, innerWidth, innerHeight);
     if (points.length < 2) return;
-    pen.strokeStyle = blue;
+    pen.strokeStyle = '#ffffff';
     pen.lineWidth = 1.5;
     pen.lineCap = 'round';
     pen.setLineDash([6, 7]);
