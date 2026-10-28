@@ -55,6 +55,9 @@ interface Lines {
     chips: { cv: string; experience: string; contact: string; projects: string; paidWork: string };
     guide: string;
     rewinding: string;
+    /** The first-visit hint: click things in the room. */
+    hint: string;
+    fullscreen: string;
   };
 }
 
@@ -132,6 +135,8 @@ export const LINES: Record<Locale, Lines> = {
       chips: { cv: 'CV', experience: 'Experience', contact: 'Contact', projects: 'Projects', paidWork: 'Paid work' },
       guide: 'Butterfly: show me what to look at next',
       rewinding: 'Rewinding',
+      hint: 'Click things in the room to take a closer look',
+      fullscreen: 'Full screen',
     },
   },
   tr: {
@@ -207,6 +212,8 @@ export const LINES: Record<Locale, Lines> = {
       chips: { cv: 'CV', experience: 'Deneyim', contact: 'İletişim', projects: 'Projeler', paidWork: 'Ücretli işler' },
       guide: 'Kelebek: sıradaki şeyi göster',
       rewinding: 'Geri sarılıyor',
+      hint: 'Yakından bakmak için odadaki eşyalara tıkla',
+      fullscreen: 'Tam ekran',
     },
   },
 };

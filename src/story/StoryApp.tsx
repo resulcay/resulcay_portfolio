@@ -168,6 +168,18 @@ export function StoryApp({ data, lang, siteKey, hour, onRewind, ...stage }: Stor
   const thought = hovered ? thoughtFor(hovered, lang, phase, hooks) : undefined;
   const guide = visitor ? nextTarget(visitor, visited) : null;
   const chips = lines.ui.chips;
+  // Shown until the first object is opened; it steps aside while something is hovered.
+  const hint = visitor !== null && route === null && visited.length === 0 && !hovered;
+
+  const [fullscreen, setFullscreen] = useState(() => document.fullscreenElement !== null);
+  useEffect(() => {
+    const sync = () => setFullscreen(document.fullscreenElement !== null);
+    document.addEventListener('fullscreenchange', sync);
+    return () => document.removeEventListener('fullscreenchange', sync);
+  }, []);
+  const toggleFullscreen = () => {
+    void (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => undefined);
+  };
 
   return (
     <>
@@ -284,9 +296,45 @@ export function StoryApp({ data, lang, siteKey, hour, onRewind, ...stage }: Stor
           )}
         </svg>
       </button>
+      {document.fullscreenEnabled && (
+        <button
+          type="button"
+          className="story-fullscreen"
+          aria-pressed={fullscreen}
+          aria-label={lines.ui.fullscreen}
+          title={lines.ui.fullscreen}
+          onClick={toggleFullscreen}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d={fullscreen ? 'M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5' : 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5'}
+              stroke="currentColor"
+              strokeWidth="2"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            ></path>
+          </svg>
+        </button>
+      )}
       <p className="story-thought" aria-live="polite">
         {remembered ? lines.ui.remember : thought}
       </p>
+      {hint && (
+        <p className="story-hint">
+          <svg className="story-hint__hand" width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+            <circle className="story-hint__ripple" cx="9" cy="5" r="4" fill="none" stroke="currentColor" strokeWidth="1.5"></circle>
+            <path
+              d="M9 5v9l-2.2-2a1.5 1.5 0 0 0-2.1 2.1L9 19h8.5l1-6a1.5 1.5 0 0 0-1.3-1.7L12 10.5V5a1.5 1.5 0 0 0-3 0z"
+              fill="#f4ebdd"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              strokeLinejoin="round"
+            ></path>
+          </svg>
+          {lines.ui.hint}
+        </p>
+      )}
       {rewinding && (
         <svg className="story-rewind" width="44" height="32" viewBox="0 0 22 16" role="img" aria-label={lines.ui.rewinding}>
           <path d="M11 1 L1 8 L11 15Z M21 1 L11 8 L21 15Z" fill="currentColor"></path>
