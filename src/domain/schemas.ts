@@ -41,6 +41,7 @@ export const projectLinksSchema = z
   .object({
     appStore: httpsUrl,
     googlePlay: httpsUrl,
+    microsoftStore: httpsUrl,
     website: httpsUrl,
     repository: httpsUrl,
   })

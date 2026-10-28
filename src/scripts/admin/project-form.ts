@@ -25,7 +25,7 @@ function collect(form: HTMLFormElement): { value: unknown; issues: Issue[] } {
     issues.push({ path: 'highlights.tr', message: 'Give each English highlight a Turkish line, in the same order.' });
   }
   const links = Object.fromEntries(
-    ['appStore', 'googlePlay', 'website', 'repository']
+    ['appStore', 'googlePlay', 'microsoftStore', 'website', 'repository']
       .map((name) => [name, optional(data.get(`links.${name}`))] as const)
       .filter(([, url]) => url !== undefined),
   );

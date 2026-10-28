@@ -417,7 +417,7 @@ function RecordPlayer({ data, lang }: { data: StoryData; lang: Locale }) {
   );
 }
 
-const LINK_KEYS = ['appStore', 'googlePlay', 'website', 'repository'] as const;
+const LINK_KEYS = ['appStore', 'googlePlay', 'microsoftStore', 'website', 'repository'] as const;
 
 /** One project as a big polaroid over a journal page. */
 function CaseStudy({ project, index, lang, onAll }: { project: Project; index: number; lang: Locale; onAll: () => void }) {

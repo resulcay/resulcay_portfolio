@@ -14,7 +14,7 @@ export const APP_TYPES = [
   'tool',
 ] as const;
 export const PLATFORMS = ['ios', 'android', 'web', 'macos', 'windows', 'linux'] as const;
-export const LANGUAGES = ['dart', 'csharp', 'kotlin', 'typescript', 'javascript', 'sql'] as const;
+export const LANGUAGES = ['dart', 'csharp', 'kotlin', 'typescript', 'javascript', 'python', 'sql'] as const;
 export const TECH = [
   'flutter',
   'dotnet',
@@ -25,6 +25,9 @@ export const TECH = [
   'google-cloud',
   'react',
   'angular',
+  'nextjs',
+  'wpf',
+  'ffmpeg',
   'unity',
 ] as const;
 export const STATUSES = ['live', 'in-development', 'archived', 'concept'] as const;
@@ -37,6 +40,8 @@ export const CATEGORIES = [
   'business',
   'education',
   'health',
+  'media',
+  'mobility',
   'developer-tools',
 ] as const;
 
@@ -89,6 +94,7 @@ export const TAG_LABELS: Record<string, Label> = {
   kotlin: { en: 'Kotlin', tr: 'Kotlin' },
   typescript: { en: 'TypeScript', tr: 'TypeScript' },
   javascript: { en: 'JavaScript', tr: 'JavaScript' },
+  python: { en: 'Python', tr: 'Python' },
   sql: { en: 'SQL', tr: 'SQL' },
   flutter: { en: 'Flutter', tr: 'Flutter' },
   dotnet: { en: '.NET', tr: '.NET' },
@@ -99,6 +105,9 @@ export const TAG_LABELS: Record<string, Label> = {
   'google-cloud': { en: 'Google Cloud', tr: 'Google Cloud' },
   react: { en: 'React', tr: 'React' },
   angular: { en: 'Angular', tr: 'Angular' },
+  nextjs: { en: 'Next.js', tr: 'Next.js' },
+  wpf: { en: 'WPF', tr: 'WPF' },
+  ffmpeg: { en: 'FFmpeg', tr: 'FFmpeg' },
   unity: { en: 'Unity', tr: 'Unity' },
   live: { en: 'Live', tr: 'Yayında' },
   'in-development': { en: 'In development', tr: 'Geliştiriliyor' },
@@ -112,6 +121,8 @@ export const TAG_LABELS: Record<string, Label> = {
   business: { en: 'Business', tr: 'İş' },
   education: { en: 'Education', tr: 'Eğitim' },
   health: { en: 'Health', tr: 'Sağlık' },
+  media: { en: 'Photo and video', tr: 'Fotoğraf ve video' },
+  mobility: { en: 'Mobility', tr: 'Ulaşım' },
   'developer-tools': { en: 'Developer tools', tr: 'Geliştirici araçları' },
 };
 

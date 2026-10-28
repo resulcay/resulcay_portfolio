@@ -33,8 +33,8 @@ export function topTech(projects: Project[], count: number): string[] {
   return [...uses].sort((a, b) => b[1] - a[1]).slice(0, count).map(([tech]) => tech);
 }
 
-/** Public projects with an App Store or Google Play link. */
-export const storeApps = (projects: Project[]) => publicProjects(projects).filter((p) => p.links.appStore || p.links.googlePlay).length;
+/** Public projects with an App Store, Google Play or Microsoft Store link. */
+export const storeApps = (projects: Project[]) => publicProjects(projects).filter((p) => p.links.appStore || p.links.googlePlay || p.links.microsoftStore).length;
 
 /** The most recent role, by start date. */
 export const latestRole = (experience: Experience[]) => [...experience].sort((a, b) => b.start.localeCompare(a.start))[0];
