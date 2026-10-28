@@ -143,7 +143,7 @@ export const projects: Project[] = [
     },
     story: {
       en: 'Clipforge is a full video editor and converter built with Flutter and powered by FFmpeg. Every edit, conversion and export happens on the device: there are no accounts, no ads and no tracking, and your videos are never uploaded.\n\nThe editor has a timeline with trim, split, reorder, speed, reverse, transitions, text, colour, music and voiceover, with undo, redo and autosave. Around it sit more than twenty tools: convert, compress, merge, resize and rotate, stabilize, normalize audio, GIF and WebP, frame grabs, slideshows, subtitles, watermarks, split screen, media info, and a console for people who know FFmpeg. Exports run in a job queue with progress, and results can be played, compared, saved and shared.\n\nIt’s built in feature modules with BLoC, Drift for local data and go_router, and the only network traffic is optional crash reporting.',
-      tr: 'Clipforge, Flutter ile geliştirilmiş ve FFmpeg ile çalışan eksiksiz bir video düzenleyici ve dönüştürücü. Tüm düzenleme, dönüştürme ve dışa aktarma işlemleri cihazda yapılıyor: hesap, reklam ya da takip yok; videolarınız hiçbir yere yüklenmiyor.\n\nDüzenleyicide kırpma, bölme, sıralama, hız, ters oynatma, geçişler, yazı, renk, müzik ve seslendirme olan bir zaman çizelgesi var; geri alma, yineleme ve otomatik kayıtla. Yanında yirmiden fazla araç bulunuyor: dönüştürme, sıkıştırma, birleştirme, boyutlandırma ve döndürme, sabitleme, ses normalleştirme, GIF ve WebP, kare yakalama, slayt gösterisi, altyazı, filigran, bölünmüş ekran, medya bilgisi ve FFmpeg bilenler için bir konsol. Dışa aktarmalar ilerlemesi görünen bir iş kuyruğunda çalışıyor; sonuçlar oynatılıp karşılaştırılabiliyor, kaydedilip paylaşılabiliyor.\n\nUygulama BLoC ile özellik modüllerine ayrılmış; yerel veri için Drift, yönlendirme için go_router kullanıyor. Tek ağ trafiği isteğe bağlı çökme raporları.',
+      tr: 'Clipforge, Flutter ile geliştirilmiş ve FFmpeg ile çalışan eksiksiz bir video düzenleyici ve dönüştürücü. Tüm düzenleme, dönüştürme ve dışa aktarma işlemleri cihazda yapılıyor: hesap, reklam ya da takip yok; videolarınız hiçbir yere yüklenmiyor.\n\nDüzenleyicide kırpma, bölme, sıralama, hız, ters oynatma, geçişler, yazı, renk, müzik ve seslendirme olan bir zaman çizelgesi var; geri alma, yineleme ve otomatik kayıt da destekleniyor. Yanında yirmiden fazla araç bulunuyor: dönüştürme, sıkıştırma, birleştirme, boyutlandırma ve döndürme, sabitleme, ses normalleştirme, GIF ve WebP, kare yakalama, slayt gösterisi, altyazı, filigran, bölünmüş ekran, medya bilgisi ve FFmpeg bilenler için bir konsol. Dışa aktarmalar ilerlemesi görünen bir iş kuyruğunda çalışıyor; sonuçlar oynatılıp karşılaştırılabiliyor, kaydedilip paylaşılabiliyor.\n\nUygulama BLoC ile özellik modüllerine ayrılmış; yerel veri için Drift, yönlendirme için go_router kullanıyor. Ağa çıkan tek şey isteğe bağlı çökme raporları.',
     },
     role: { en: 'Designed and built it, solo', tr: 'Tek başıma tasarlayıp geliştirdim' },
     pricing: 'paid',
@@ -156,7 +156,7 @@ export const projects: Project[] = [
     category: 'media',
     highlights: [
       { en: 'On Google Play; in review on the App Store', tr: 'Google Play’de; App Store’da incelemede' },
-      { en: 'All processing on the device; no uploads, accounts or ads', tr: 'Tüm işlem cihazda; yükleme, hesap ya da reklam yok' },
+      { en: 'All processing on the device; no uploads, accounts or ads', tr: 'Tüm işlemler cihazda; yükleme, hesap ya da reklam yok' },
       { en: 'Timeline editor plus 20+ FFmpeg tools', tr: 'Zaman çizelgeli düzenleyici ve 20’den fazla FFmpeg aracı' },
       { en: 'Export queue with progress, compare and share', tr: 'İlerlemesi görünen dışa aktarma kuyruğu, karşılaştırma ve paylaşım' },
     ],
@@ -174,7 +174,7 @@ export const projects: Project[] = [
     },
     story: {
       en: 'Octavo is a Windows app for everyday PDF work that makes no network connections at all. You can merge PDFs; reorder, rotate, delete, split and extract pages; protect a file with an AES-256 password or remove one; make scanned pages searchable with on-device OCR; edit and sign with text, cover-and-retype, whiteout, shapes, pen, images, signatures, highlights and comments; and turn JPEG, PNG, TIFF, BMP and GIF pictures into PDFs.\n\nIt’s a WPF app on .NET 10, built around bundled command-line engines: qpdf and my own static build of Tesseract. It’s packaged as an MSIX and sold on the Microsoft Store.',
-      tr: 'Octavo, gündelik PDF işleri için hiçbir ağ bağlantısı kurmayan bir Windows uygulaması. PDF birleştirebilir; sayfaları sıralayabilir, döndürebilir, silebilir, bölebilir ve ayırabilirsiniz; dosyayı AES-256 parolayla koruyabilir ya da parolayı kaldırabilirsiniz; taranmış sayfaları cihazda çalışan OCR ile aranabilir yapabilirsiniz; metin, kapatıp yeniden yazma, beyazlatma, şekiller, kalem, görseller, imzalar, vurgular ve yorumlarla düzenleyip imzalayabilirsiniz; JPEG, PNG, TIFF, BMP ve GIF görselleri PDF’e çevirebilirsiniz.\n\n.NET 10 üzerinde bir WPF uygulaması; paketlenmiş komut satırı motorları etrafında kurulu: qpdf ve Tesseract’ın kendi derlediğim statik sürümü. MSIX olarak paketlenip Microsoft Store’da satılıyor.',
+      tr: 'Octavo, gündelik PDF işleri için hiçbir ağ bağlantısı kurmayan bir Windows uygulaması. PDF birleştirebilir; sayfaları sıralayabilir, döndürebilir, silebilir, bölebilir ve ayırabilirsiniz; dosyayı AES-256 parolayla koruyabilir ya da parolayı kaldırabilirsiniz; taranmış sayfaları cihazda çalışan OCR ile aranabilir yapabilirsiniz; metin, kapatıp yeniden yazma, beyazlatma, şekiller, kalem, görseller, imzalar, vurgular ve yorumlarla düzenleyip imzalayabilirsiniz; JPEG, PNG, TIFF, BMP ve GIF görselleri PDF’e çevirebilirsiniz.\n\n.NET 10 üzerinde bir WPF uygulaması; uygulamayla birlikte gelen komut satırı motorları üzerine kurulu: qpdf ve Tesseract’ın kendi derlediğim statik sürümü. MSIX olarak paketlenip Microsoft Store’da satılıyor.',
     },
     role: { en: 'Designed and built it, solo', tr: 'Tek başıma tasarlayıp geliştirdim' },
     pricing: 'paid',
@@ -204,7 +204,7 @@ export const projects: Project[] = [
     },
     story: {
       en: 'QuickCharge helps electric vehicle drivers find charging stations, plan a route to one, start a session by scanning the charger’s QR code and pay for it, with favourites, cards and charging history in the account. The Flutter app is on the App Store and Google Play, speaks 17 languages, and uses BLoC, auto_route, Firebase messaging, Remote Config and Crashlytics.\n\nThe website is a Next.js 15 progressive web app with an interactive station map, QR charging, light and dark themes, English and Turkish, and full SEO and analytics. The backend is a .NET 9 Clean Architecture API with CQRS through MediatR, JWT and SMS one-time-password sign-in, Redis caching, Firebase push notifications, Cloudinary media and Serilog logging, covered by xUnit tests.',
-      tr: 'QuickCharge, elektrikli araç sürücülerinin şarj istasyonu bulmasına, istasyona rota çizmesine, şarj cihazının QR kodunu okutup oturum başlatmasına ve ödemesine yardım ediyor; hesapta favoriler, kartlar ve şarj geçmişi duruyor. Flutter uygulaması App Store ve Google Play’de; 17 dili destekliyor ve BLoC, auto_route, Firebase bildirimleri, Remote Config ve Crashlytics kullanıyor.\n\nWeb sitesi; etkileşimli istasyon haritası, QR ile şarj, açık ve koyu tema, İngilizce ve Türkçe desteği, eksiksiz SEO ve analitikle bir Next.js 15 PWA. Backend ise MediatR ile CQRS, JWT ve SMS ile tek kullanımlık şifre girişi, Redis önbelleği, Firebase bildirimleri, Cloudinary medya ve Serilog kayıtları olan, xUnit testleriyle korunan bir .NET 9 Clean Architecture API.',
+      tr: 'QuickCharge, elektrikli araç sürücülerinin şarj istasyonu bulmasına, istasyona rota çizmesine, şarj cihazının QR kodunu okutup oturum başlatmasına ve ödeme yapmasına yardım ediyor; hesapta favoriler, kartlar ve şarj geçmişi duruyor. Flutter uygulaması App Store ve Google Play’de; 17 dili destekliyor ve BLoC, auto_route, Firebase bildirimleri, Remote Config ve Crashlytics kullanıyor.\n\nWeb sitesi etkileşimli istasyon haritası, QR ile şarj, açık ve koyu tema, İngilizce ve Türkçe desteği, eksiksiz SEO ve analitikle bir Next.js 15 PWA. Backend ise MediatR ile CQRS, JWT ve SMS ile tek kullanımlık şifre girişi, Redis önbelleği, Firebase bildirimleri, Cloudinary medya ve Serilog kayıtları olan, xUnit testleriyle korunan bir .NET 9 Clean Architecture API.',
     },
     role: { en: 'Designed and built it, solo: app, website and backend', tr: 'Tek başıma tasarlayıp geliştirdim: uygulama, web sitesi ve backend' },
     pricing: 'free',
@@ -234,11 +234,11 @@ export const projects: Project[] = [
     title: 'Reflector',
     hook: {
       en: 'Android mirroring and control, native to Windows, with hardware controls round every screen.',
-      tr: 'Windows’a özgü Android yansıtma ve kontrol; her ekranın etrafında donanım kontrolleri.',
+      tr: 'Windows için yerel Android ekran yansıtma ve kontrol; her ekranın çevresinde donanım tuşları.',
     },
     story: {
       en: 'Reflector is a WPF desktop app that finds Android devices over ADB, by cable or Wi-Fi, and opens each one in its own window with the live mirror embedded and real controls around it: back, home, recents, the D-pad, power, volume, media keys, the notification shade, rotation, screenshots, APK installs, file pushes and typing straight onto the device.\n\nIt watches ADB’s device tracker so the dashboard updates the moment a phone appears, and remembers every device it has seen. Press Optimize and it measures the link (throughput, latency, Wi-Fi band, signal and packet loss), then picks the resolution, bitrate, frame rate and codec that fit and says which measurement drove each choice. Session windows graph frame rate, latency and throughput live, and Wi-Fi pairing works by scanning a QR code drawn by an encoder written from scratch.',
-      tr: 'Reflector, Android cihazları ADB üzerinden kabloyla ya da Wi-Fi ile bulan ve her birini kendi penceresinde, canlı yansıtma gömülü ve etrafında gerçek kontrollerle açan bir WPF masaüstü uygulaması: geri, ana ekran, son uygulamalar, yön tuşları, güç, ses, medya tuşları, bildirim paneli, döndürme, ekran görüntüsü, APK yükleme, dosya gönderme ve doğrudan cihaza yazma.\n\nADB’nin cihaz izleyicisine abone olduğu için bir telefon bağlandığı anda pano güncelleniyor; gördüğü her cihazı da hatırlıyor. Optimize’e bastığınızda bağlantıyı ölçüyor (hız, gecikme, Wi-Fi bandı, sinyal ve paket kaybı), sonra uygun çözünürlüğü, bit hızını, kare hızını ve codec’i seçip her seçimi hangi ölçümün belirlediğini söylüyor. Oturum pencereleri kare hızını, gecikmeyi ve veri akışını canlı grafikle gösteriyor; Wi-Fi eşleştirme ise sıfırdan yazdığım bir kodlayıcının çizdiği QR kodu okutarak yapılıyor.',
+      tr: 'Reflector, Android cihazları ADB üzerinden kabloyla ya da Wi-Fi ile bulan ve her birini kendi penceresinde, canlı yansıtma gömülü ve etrafında gerçek kontrollerle açan bir WPF masaüstü uygulaması: geri, ana ekran, son uygulamalar, yön tuşları, güç, ses, medya tuşları, bildirim paneli, döndürme, ekran görüntüsü, APK yükleme, dosya gönderme ve klavyeden doğrudan cihaza yazma.\n\nADB’nin cihaz izleyicisine abone olduğu için bir telefon bağlandığı anda pano güncelleniyor; gördüğü her cihazı da hatırlıyor. Optimize’e bastığınızda bağlantıyı ölçüyor (hız, gecikme, Wi-Fi bandı, sinyal ve paket kaybı), sonra uygun çözünürlüğü, bit hızını, kare hızını ve codec’i seçip her seçimi hangi ölçümün belirlediğini söylüyor. Oturum pencereleri kare hızını, gecikmeyi ve veri akışını canlı grafikle gösteriyor; Wi-Fi eşleştirme ise sıfırdan yazdığım bir kodlayıcının çizdiği QR kodu okutarak yapılıyor.',
     },
     role: { en: 'Designed and built it, solo', tr: 'Tek başıma tasarlayıp geliştirdim' },
     pricing: 'paid',
@@ -251,9 +251,9 @@ export const projects: Project[] = [
     category: 'developer-tools',
     highlights: [
       { en: 'Sold on the Microsoft Store', tr: 'Microsoft Store’da satışta' },
-      { en: 'Each device in its own window, with hardware controls', tr: 'Her cihaz kendi penceresinde, donanım kontrolleriyle' },
+      { en: 'Each device in its own window, with hardware controls', tr: 'Her cihaz kendi penceresinde, donanım tuşlarıyla' },
       { en: 'Measures the link and tunes the stream to it', tr: 'Bağlantıyı ölçüp yayını ona göre ayarlıyor' },
-      { en: 'QR code Wi-Fi pairing with a hand-written encoder', tr: 'Elle yazılmış kodlayıcıyla QR kodlu Wi-Fi eşleştirme' },
+      { en: 'QR code Wi-Fi pairing with a hand-written encoder', tr: 'Sıfırdan yazılmış bir kodlayıcıyla QR kodlu Wi-Fi eşleştirme' },
     ],
     links: { microsoftStore: 'https://apps.microsoft.com/detail/9NLXK6GMD6XL' },
     featured: true,
@@ -265,11 +265,11 @@ export const projects: Project[] = [
     title: 'Miki Okuyor',
     hook: {
       en: 'A reading app with guided sessions, recordings, live voice calls, quizzes and a leaderboard.',
-      tr: 'Rehberli oturumlar, kayıtlar, canlı sesli görüşmeler, testler ve sıralamayla bir okuma uygulaması.',
+      tr: 'Rehberli oturumlar, kayıtlar, canlı sesli görüşmeler, testler ve liderlik tablosuyla bir okuma uygulaması.',
     },
     story: {
       en: 'Miki Okuyor is a Flutter app for building reading habits. Readers go through guided reading sessions, record themselves, hear passages read aloud by text-to-speech, answer questionnaires about what they read and climb a leaderboard, with a tutorial on first launch and confetti for milestones. Live voice calls connect readers in real time.\n\nIt signs in with a phone number and a one-time password, keeps tokens in secure storage, and uses push notifications, Remote Config, analytics and an in-app update prompt. An admin area manages the content.',
-      tr: 'Miki Okuyor, okuma alışkanlığı kazandırmak için geliştirdiğim bir Flutter uygulaması. Okuyucular rehberli okuma oturumlarından geçiyor, kendi seslerini kaydediyor, metin okuma ile bölümleri sesli dinliyor, okuduklarıyla ilgili soruları yanıtlıyor ve sıralamada yükseliyor; ilk açılışta bir rehber, başarılarda konfeti var. Canlı sesli görüşmeler okuyucuları anlık olarak buluşturuyor.\n\nTelefon numarası ve tek kullanımlık şifreyle giriş yapılıyor; oturum bilgileri güvenli depolamada tutuluyor. Bildirimler, Remote Config, analitik ve uygulama içi güncelleme uyarısı kullanıyor. İçerikler bir yönetim alanından yönetiliyor.',
+      tr: 'Miki Okuyor, okuma alışkanlığı kazandırmak için geliştirdiğim bir Flutter uygulaması. Okuyucular rehberli okuma oturumlarından geçiyor, kendi seslerini kaydediyor, bölümleri sesli okuma özelliğiyle dinliyor, okuduklarıyla ilgili soruları yanıtlıyor ve sıralamada yükseliyor; ilk açılışta bir rehber, başarılarda konfeti var. Canlı sesli görüşmeler okuyucuları anlık olarak buluşturuyor.\n\nTelefon numarası ve tek kullanımlık şifreyle giriş yapılıyor; oturum bilgileri güvenli depolamada tutuluyor. Bildirimler, Remote Config, analitik ve uygulama içi güncelleme uyarısı kullanıyor. İçerikler bir yönetim alanından yönetiliyor.',
     },
     role: { en: 'Mobile developer', tr: 'Mobil geliştirici' },
     pricing: 'free',
@@ -282,7 +282,7 @@ export const projects: Project[] = [
     category: 'education',
     highlights: [
       { en: 'Guided reading sessions with recording and text-to-speech', tr: 'Kayıt ve metin okuma ile rehberli okuma oturumları' },
-      { en: 'Live voice calls, quizzes and a leaderboard', tr: 'Canlı sesli görüşmeler, testler ve sıralama' },
+      { en: 'Live voice calls, quizzes and a leaderboard', tr: 'Canlı sesli görüşmeler, testler ve liderlik tablosu' },
     ],
     links: {
       appStore: 'https://apps.apple.com/tr/app/miki-okuyor/id6756672512',
@@ -301,7 +301,7 @@ export const projects: Project[] = [
     },
     story: {
       en: 'PureBlog is a progressive web app for writing and running a blog, built with ASP.NET Core MVC and Entity Framework Core on SQL Server. Authors create, edit and delete posts with categories, tags, images and files; readers search and filter by keyword, category and tag; and an admin side shows post statistics with charts and exports data to Excel. Sign-in uses ASP.NET Core Identity, and a JWT-secured Web API with Swagger serves the data.',
-      tr: 'PureBlog, blog yazmak ve yönetmek için ASP.NET Core MVC ve SQL Server üzerinde Entity Framework Core ile geliştirdiğim bir PWA. Yazarlar kategori, etiket, görsel ve dosyalarla yazı oluşturup düzenleyip silebiliyor; okuyucular anahtar kelime, kategori ve etikete göre arayıp süzebiliyor; yönetim tarafı yazı istatistiklerini grafiklerle gösterip verileri Excel’e aktarıyor. Giriş ASP.NET Core Identity ile yapılıyor; veriler Swagger’lı, JWT ile korunan bir Web API’den geliyor.',
+      tr: 'PureBlog, blog yazmak ve yönetmek için ASP.NET Core MVC ve SQL Server üzerinde Entity Framework Core ile geliştirdiğim bir PWA. Yazarlar kategori, etiket, görsel ve dosyalarla yazı oluşturup düzenleyip silebiliyor; okuyucular anahtar kelime, kategori ve etikete göre arayıp filtreleyebiliyor; yönetim tarafı yazı istatistiklerini grafiklerle gösterip verileri Excel’e aktarıyor. Giriş ASP.NET Core Identity ile yapılıyor; veriler Swagger’lı, JWT ile korunan bir Web API’den geliyor.',
     },
     role: { en: 'Built it end to end', tr: 'Baştan sona geliştirdim' },
     pricing: 'free',
@@ -357,7 +357,7 @@ export const projects: Project[] = [
     },
     story: {
       en: 'A notes app built to show clean architecture end to end. The Flutter app keeps domain, data and presentation layers apart, manages state with BLoC, works offline first and syncs when it can, keeps tokens in encrypted storage, and uses type-safe routing with auto_route and Material 3 light and dark themes.\n\nThe backend is a FastAPI service in Python that verifies Firebase ID tokens, stores notes in Firestore, and gives each user access only to their own notes, with validated input, logging and health checks.',
-      tr: 'Uçtan uca temiz mimariyi göstermek için geliştirdiğim bir not uygulaması. Flutter uygulaması domain, veri ve sunum katmanlarını ayrı tutuyor; durumu BLoC ile yönetiyor; önce çevrimdışı çalışıp fırsat buldukça eşitleniyor; oturum bilgilerini şifreli depolamada saklıyor; auto_route ile tip güvenli yönlendirme ve Material 3 açık ve koyu temalar kullanıyor.\n\nBackend, Firebase kimlik belirteçlerini doğrulayan, notları Firestore’da saklayan ve her kullanıcıya yalnızca kendi notlarına erişim veren Python ile yazılmış bir FastAPI servisi; doğrulanmış girdi, kayıtlar ve sağlık kontrolleriyle.',
+      tr: 'Uçtan uca temiz mimariyi göstermek için geliştirdiğim bir not uygulaması. Flutter uygulaması domain, veri ve sunum katmanlarını ayrı tutuyor; durumu BLoC ile yönetiyor; önce çevrimdışı çalışıp bağlantı geldikçe eşitleniyor; oturum bilgilerini şifreli depolamada saklıyor; yönlendirmede auto_route ile tür güvenliği sağlıyor; Material 3 açık ve koyu temaları var.\n\nBackend, Firebase kimlik belirteçlerini doğrulayan, notları Firestore’da saklayan ve her kullanıcıya yalnızca kendi notlarına erişim veren Python ile yazılmış bir FastAPI servisi; girdi doğrulama, kayıt tutma ve sağlık kontrolleri de içeriyor.',
     },
     role: { en: 'Built the app and the API', tr: 'Uygulamayı ve API’yi geliştirdim' },
     pricing: 'free',
@@ -388,7 +388,7 @@ export const projects: Project[] = [
     },
     story: {
       en: 'A Flutter case study for a movie platform. Users register and sign in, scroll a vertical, paginated feed of movies, mark favourites, and manage a profile with a photo from their gallery. It switches between light and dark themes, speaks English and Turkish, has a native splash screen and a limited-offer sheet for token packages, and is built with BLoC, auto_route, Dio and Firebase Crashlytics.',
-      tr: 'Bir film platformu için Flutter ile hazırladığım vaka çalışması. Kullanıcılar kayıt olup giriş yapıyor, dikey ve sayfalı bir film akışında geziniyor, favorilerini işaretliyor, galeriden fotoğrafla profillerini yönetiyor. Açık ve koyu tema, İngilizce ve Türkçe, yerel açılış ekranı ve jeton paketleri için sınırlı teklif penceresi var; BLoC, auto_route, Dio ve Firebase Crashlytics ile geliştirildi.',
+      tr: 'Bir film platformu için Flutter ile hazırladığım vaka çalışması. Kullanıcılar kayıt olup giriş yapıyor, dikey ve sayfalı bir film akışında geziniyor, favorilerini işaretliyor, galeriden fotoğrafla profillerini yönetiyor. Açık ve koyu tema, İngilizce ve Türkçe, yerel açılış ekranı ve jeton paketleri için sınırlı süreli teklif penceresi var; BLoC, auto_route, Dio ve Firebase Crashlytics ile geliştirildi.',
     },
     role: { en: 'Built the app', tr: 'Uygulamayı geliştirdim' },
     pricing: 'free',
@@ -437,11 +437,11 @@ export const projects: Project[] = [
     title: 'Windows wallpaper',
     hook: {
       en: 'A Windows app that changes the desktop wallpaper on its own, with photos from Unsplash.',
-      tr: 'Masaüstü duvar kağıdını Unsplash fotoğraflarıyla kendiliğinden değiştiren bir Windows uygulaması.',
+      tr: 'Masaüstü duvar kağıdını Unsplash fotoğraflarıyla otomatik olarak değiştiren bir Windows uygulaması.',
     },
     story: {
       en: 'A Flutter desktop app for Windows that browses high-quality photos from Unsplash in a staggered grid and sets them as the desktop wallpaper, changing it automatically, with colours that follow the system accent.',
-      tr: 'Unsplash’in yüksek kaliteli fotoğraflarını kademeli bir ızgarada gösterip masaüstü duvar kağıdı yapan ve kendiliğinden değiştiren, renkleri sistem vurgusuna uyan bir Flutter Windows uygulaması.',
+      tr: 'Unsplash’in yüksek kaliteli fotoğraflarını kademeli bir ızgarada gösterip masaüstü duvar kağıdı yapan ve otomatik olarak değiştiren, renkleri sistemin vurgu rengine uyan bir Flutter Windows uygulaması.',
     },
     role: { en: 'Built it', tr: 'Geliştirdim' },
     pricing: 'free',
@@ -466,7 +466,7 @@ export const projects: Project[] = [
     hook: { en: 'A web menu that customers open by scanning a QR code at the table.', tr: 'Müşterilerin masadaki QR kodu okutarak açtığı bir web menüsü.' },
     story: {
       en: 'A Flutter progressive web app for cafés: customers scan a QR code at the table and get the menu on their phone, with categories that jump to their items and more than one language.',
-      tr: 'Kafeler için Flutter ile geliştirdiğim bir PWA: müşteriler masadaki QR kodu okutup menüyü telefonlarında açıyor; kategoriler ilgili ürünlere atlıyor ve birden fazla dil var.',
+      tr: 'Kafeler için Flutter ile geliştirdiğim bir PWA: müşteriler masadaki QR kodu okutup menüyü telefonlarında açıyor; bir kategoriye dokununca ilgili ürünlere gidiliyor ve birden fazla dil destekleniyor.',
     },
     role: { en: 'Built it', tr: 'Geliştirdim' },
     pricing: 'free',
@@ -491,7 +491,7 @@ export const projects: Project[] = [
     hook: { en: 'A car rental system: a layered .NET backend and an Angular front end.', tr: 'Bir araç kiralama sistemi: katmanlı bir .NET backend ve Angular arayüz.' },
     story: {
       en: 'A full car rental project from my early backend work: a layered C# API with Entity Framework Core and SQL Server, JWT authentication, FluentValidation and Autofac interceptors for validation, caching and logging as cross-cutting concerns, and an Angular front end for browsing and renting cars.',
-      tr: 'İlk backend çalışmalarımdan eksiksiz bir araç kiralama projesi: Entity Framework Core ve SQL Server ile katmanlı bir C# API; JWT kimlik doğrulama; doğrulama, önbellek ve kayıt gibi kesişen işler için FluentValidation ve Autofac ara katmanları; araçları gezip kiralamak için bir Angular arayüz.',
+      tr: 'İlk backend çalışmalarımdan eksiksiz bir araç kiralama projesi: Entity Framework Core ve SQL Server ile katmanlı bir C# API; JWT kimlik doğrulama; doğrulama, önbellek ve kayıt gibi ortak işler için FluentValidation ve Autofac ara katmanları; araçları gezip kiralamak için bir Angular arayüz.',
     },
     role: { en: 'Built it end to end', tr: 'Baştan sona geliştirdim' },
     pricing: 'free',
@@ -653,11 +653,11 @@ export const projects: Project[] = [
     title: 'Fitness app',
     hook: {
       en: 'Exercise videos and progress tracking, built for a freelance client.',
-      tr: 'Serbest çalışma müşterisi için egzersiz videoları ve ilerleme takibi.',
+      tr: 'Serbest çalıştığım bir müşteri için egzersiz videoları ve ilerleme takibi.',
     },
     story: {
       en: 'A fitness app built with Flutter for a client, where users watch exercise videos and track their overall progress. After onboarding and sign-up, a feed leads to workouts, diet plans and guided sessions, and reports chart progress over time.',
-      tr: 'Bir müşteri için Flutter ile geliştirdiğim; kullanıcıların egzersiz videoları izleyip genel ilerlemesini takip ettiği bir fitness uygulaması. Tanıtım ve kayıttan sonra bir akış; antrenmanlara, diyet planlarına ve rehberli oturumlara götürüyor, raporlar da ilerlemeyi zaman içinde grafiklerle gösteriyor.',
+      tr: 'Bir müşteri için Flutter ile geliştirdiğim, kullanıcıların egzersiz videoları izleyip genel ilerlemesini takip ettiği bir fitness uygulaması. Tanıtım ve kayıttan sonra açılan akış kullanıcıyı antrenmanlara, diyet planlarına ve rehberli oturumlara götürüyor; raporlar da ilerlemeyi zaman içinde grafiklerle gösteriyor.',
     },
     role: { en: 'Freelance developer', tr: 'Serbest geliştirici' },
     pricing: 'not-public',
@@ -685,7 +685,7 @@ export const projects: Project[] = [
     },
     story: {
       en: 'A social app delivered for a freelance client, where users view books, movies and TV series, then leave comments and ratings.',
-      tr: 'Bir serbest çalışma müşterisine teslim ettiğim; kullanıcıların kitap, film ve dizileri görüp yorum yapabildiği ve puan verebildiği bir sosyal uygulama.',
+      tr: 'Serbest çalıştığım bir müşteriye teslim ettiğim, kullanıcıların kitap, film ve dizilere göz atıp yorum yapabildiği ve puan verebildiği bir sosyal uygulama.',
     },
     role: { en: 'Freelance developer', tr: 'Serbest geliştirici' },
     pricing: 'not-public',
@@ -713,7 +713,7 @@ export const projects: Project[] = [
     },
     story: {
       en: 'A form application for a caravan company, built as freelance work. Clients fill in their application and print their invoices as PDFs.',
-      tr: 'Serbest çalışma olarak bir karavan firması için geliştirdiğim form uygulaması. Müşteriler başvurularını doldurup faturalarını PDF olarak yazdırabiliyor.',
+      tr: 'Bir karavan firması için serbest çalışarak geliştirdiğim form uygulaması. Müşteriler başvurularını doldurup faturalarını PDF olarak yazdırabiliyor.',
     },
     role: { en: 'Freelance developer', tr: 'Serbest geliştirici' },
     pricing: 'not-public',
@@ -735,10 +735,10 @@ export const projects: Project[] = [
   {
     slug: 'baby-names',
     title: 'Baby name finder',
-    hook: { en: 'An app that suggests names for newborns.', tr: 'Yeni doğan bebekler için isim öneren bir uygulama.' },
+    hook: { en: 'An app that suggests names for newborns.', tr: 'Yenidoğan bebekler için isim öneren bir uygulama.' },
     story: {
       en: 'An early Flutter app that helps parents find names for their newborn.',
-      tr: 'Ebeveynlerin yeni doğan bebekleri için isim bulmasına yardım eden erken dönem bir Flutter uygulaması.',
+      tr: 'Ebeveynlerin yenidoğan bebekleri için isim bulmasına yardım eden erken dönem bir Flutter uygulaması.',
     },
     role: { en: 'Developer', tr: 'Geliştirici' },
     pricing: 'free',
@@ -815,7 +815,7 @@ export const testimonials: Testimonial[] = [
     name: 'Sefa Zor',
     quote: {
       en: "An original developer. I see him as a team player. He enjoys working with others; I think it's easier to achieve something when people work together.",
-      tr: 'Orijinal bir geliştirici. Onu bir takım oyuncusu olarak görüyorum. Başkalarıyla çalışmaktan hoşlanır; insanlar birlikte çalıştığında bir şeyler başarmanın daha kolay olduğunu düşünüyorum.',
+      tr: 'Özgün bir geliştirici. Onu bir takım oyuncusu olarak görüyorum. Başkalarıyla çalışmaktan hoşlanır; insanlar birlikte çalıştığında bir şeyler başarmanın daha kolay olduğunu düşünüyorum.',
     },
   },
   {

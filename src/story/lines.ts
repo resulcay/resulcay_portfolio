@@ -167,7 +167,7 @@ export const LINES: Record<Locale, Lines> = {
     },
     window: {
       dawn: 'Hatalardan önce uyandım. Çoğunlukla.',
-      day: 'Güneş ışığı hala en iyi hata ayıklayıcı.',
+      day: 'Güneş ışığı hâlâ en iyi hata ayıklayıcı.',
       golden: 'Bu ışıkta kodum bile güzel görünüyor.',
       night: 'Sessiz saatler. Yayına almak için en iyi, uyumak için en kötü zaman.',
     },
@@ -205,7 +205,7 @@ export const LINES: Record<Locale, Lines> = {
       phases: { dawn: 'Şafak', day: 'Gündüz', golden: 'Altın saat', night: 'Gece' },
       consequences: 'Bu eylemin sonuçları olacak.',
       who: 'Kim geliyor?',
-      visitors: { recruiter: 'İşe alım', client: 'Müşteri', explorer: 'Sadece bakıyorum' },
+      visitors: { recruiter: 'İşe alım uzmanı', client: 'Müşteri', explorer: 'Sadece bakıyorum' },
       remember: 'Resul bunu hatırlayacak.',
       change: 'Değiştir',
       chips: { cv: 'CV', experience: 'Deneyim', contact: 'İletişim', projects: 'Projeler', paidWork: 'Ücretli işler' },
