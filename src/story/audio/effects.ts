@@ -1,7 +1,7 @@
 // Short, quiet sound effects made in the browser with Web Audio, so there
 // are almost no files to download (the cat's meow is the one recording).
 // Each one starts now and cleans up after itself.
-import meowUrl from './cat-meow.wav?url';
+import meowUrl from './cat-meow.mp3?url';
 
 export type EffectName = 'tick' | 'whoosh' | 'buzz' | 'scratch' | 'rewind' | 'click' | 'mrrr';
 
@@ -59,7 +59,7 @@ export const EFFECTS: Record<EffectName, (ctx: AudioContext, out: AudioNode) => 
     noiseSource(ctx, 0.04).connect(high).connect(envelope(ctx, out, 0.18, 0.001, 0.025));
   },
 
-  /** The cat: a real meow, cut from a public-domain recording ("Meow of a pleading cat" by Heismark, Wikimedia Commons). */
+  /** The cat: a real meow by Yomecerlm3 (Pixabay Content License). */
   mrrr(ctx, out) {
     void sample(ctx, meowUrl).then((buffer) => {
       const source = ctx.createBufferSource();
