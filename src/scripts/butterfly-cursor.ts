@@ -92,7 +92,7 @@ export function mountButterflyCursor(): void {
     }
     const prevX = x;
     const prevY = y;
-    const follow = 1 - Math.exp(-dt * (perch ? 6 : 9));
+    const follow = 1 - Math.exp(-dt * (perch ? 4 : 5));
     x += (targetX - x) * follow;
     y += (targetY - y) * follow;
     const speed = Math.hypot(x - prevX, y - prevY) / Math.max(dt, 1e-3);
