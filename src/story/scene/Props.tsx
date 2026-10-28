@@ -21,7 +21,7 @@ export function Laptop() {
   // The screen sits just in front of the lid, along the lid's normal.
   const screenAt: Vec3 = [0, lidCenter[1] - 0.007 * Math.sin(LID_TILT), lidCenter[2] + 0.007 * Math.cos(LID_TILT)];
   return (
-    <group position={LAPTOP} rotation-y={SEAT_TURN}>
+    <group position={LAPTOP} scale={[1.5, 1.5, 1.5]} rotation-y={SEAT_TURN}>
       <Merged
         material={base}
         parts={() => [
