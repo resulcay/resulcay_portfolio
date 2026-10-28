@@ -95,9 +95,15 @@ export async function startHomeShow(): Promise<void> {
     if (el) motion.inView(el, () => void play(), { amount });
   };
 
-  // Once an animation ends, its inline styles go, so the page's own CSS (tilts, hover lifts,
-  // the cork board's frame) takes over again exactly as before.
-  const tidy = { onComplete: (done: Parameters<typeof anime.cleanInlineStyles>[0]) => void anime.cleanInlineStyles(done) };
+  // Once an animation ends, its targets' inline styles go entirely, so the page's own CSS (tilts,
+  // hover lifts, the cork board's frame) takes over again. Not anime's cleanInlineStyles: that
+  // restores the inline styles from before the animation, which here are the hidden starting poses.
+  // The strict CSP allows no style attributes in the markup, so everything inline came from the show.
+  const tidy = {
+    onComplete: (done: { targets: unknown[] }) => {
+      for (const target of done.targets) if (target instanceof Element) target.removeAttribute('style');
+    },
+  };
 
   // ── GSAP: the "Episode 1" title card ────────────────────────────────────────
   gsap
