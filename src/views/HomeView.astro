@@ -205,6 +205,11 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
           <ul class="articles">
           {articles.map((article) => (
             <li class="article">
+              <svg class="article__compass" viewBox="-20 -20 40 40" aria-hidden="true">
+                <circle r="13" fill="none" stroke="currentColor" stroke-width="0.8"></circle>
+                <path d="M0-9 1.6-1.6 9 0 1.6 1.6 0 9-1.6 1.6-9 0-1.6-1.6Z" transform="rotate(45)" fill="currentColor" opacity="0.6"></path>
+                <path d="M0-19 3-3 19 0 3 3 0 19-3 3-19 0-3-3Z" fill="currentColor"></path>
+              </svg>
               <p class="article__when">{formatYearMonth(article.date.slice(0, 7), lang)}</p>
               <h3>
                 <a href={article.url}>{article.title}</a>
@@ -762,7 +767,7 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
   }
   /* Kind words as notes pinned to the page: muted sticky-note colours, a
      slight tilt, a handwritten quote mark and the name signed below. */
-  /* Medium articles: notebook pages on the sea below the lighthouse, whose beam sweeps over them. */
+  /* Medium articles: sea charts on the water below the lighthouse, whose beam sweeps over them. */
   .lighthouse {
     position: relative;
     display: flex;
@@ -820,11 +825,13 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding: 22px 24px 20px 44px;
+    padding: 24px 64px 22px 26px;
     border-radius: 3px;
+    /* A sea chart: parchment with depth contours rippling out from a shoal off the corner. */
     background:
-      repeating-linear-gradient(transparent 0 27px, color-mix(in srgb, var(--rule) 55%, transparent) 27px 28px),
-      var(--paper-raised);
+      repeating-radial-gradient(circle at 108% -12%, transparent 0 21px, color-mix(in srgb, var(--link) 20%, transparent) 21px 22px),
+      repeating-radial-gradient(circle at -10% 115%, transparent 0 25px, color-mix(in srgb, var(--link) 12%, transparent) 25px 26px),
+      color-mix(in srgb, var(--golden) 10%, var(--paper-raised));
     color: var(--ink);
     box-shadow:
       0 1px 1px rgb(0 0 0 / 0.08),
@@ -833,14 +840,22 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
       translate 0.2s,
       box-shadow 0.3s;
   }
+  /* The chart's thin inner frame. */
   .article::before {
     content: '';
     position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 28px;
-    width: 1.5px;
-    background: color-mix(in srgb, #d9534f 55%, transparent);
+    inset: 6px;
+    border: 1px solid color-mix(in srgb, var(--link) 40%, transparent);
+    pointer-events: none;
+  }
+  .article__compass {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 40px;
+    height: 40px;
+    color: var(--link);
+    opacity: 0.55;
   }
   /* Caught in the beam. */
   .article:hover {
