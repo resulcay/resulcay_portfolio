@@ -7,15 +7,16 @@ import type { StoryData } from '@/application/story';
 import { GateContext, Hotspot, InteractionContext, KitProvider } from './scene/kit';
 import { createGate, type Gate } from '@/scripts/ready';
 import { Shell, StringLights, Window } from './scene/Shell';
-import { Furniture, Posters, SEAT, SEAT_TURN } from './scene/Furniture';
-import { Corkboard, Journal, Laptop, LightSwitch, Mug, Phone, RecordPlayer } from './scene/Props';
+import { Furniture, SEAT, SEAT_TURN } from './scene/Furniture';
+import { BandPoster, Corkboard, Journal, Laptop, LighthousePoster, LightSwitch, Mug, Phone, RecordPlayer } from './scene/Props';
+import { t } from '@/i18n/ui';
 import { Polaroids } from './scene/Polaroids';
 import { Character } from './scene/Character';
 import { Butterfly } from './scene/Butterfly';
 import { Post } from './scene/Post';
 import { PHASES, type Phase } from './scene/time';
 import { createQualityGovernor, DPR, type Quality } from './scene/quality';
-import type { StoryObject } from './lines';
+import { LINES, type StoryObject } from './lines';
 
 const BACKGROUND = '#2a2140';
 const CAMERA: [number, number, number] = [3.7, 2.45, 3.9];
@@ -44,6 +45,8 @@ interface StageProps {
   rewinding: boolean;
   /** The record player's vinyl turns while music plays. */
   spinning: boolean;
+  /** The record it's on, for the band poster. */
+  track: { title: string; artist: string } | undefined;
   /** The fairy lights, from the switch above the nightstand. */
   bulbs: boolean;
   /** The painterly post pass; `?post=off` turns it off to compare. */
@@ -83,7 +86,8 @@ export function Stage(props: StageProps) {
             <Window />
             <StringLights on={props.bulbs} />
             <Furniture still={still} />
-            <Posters />
+            <LighthousePoster caption={t(data.lang, 'home.writing')} />
+            <BandPoster track={props.track} empty={LINES[data.lang].ui.bandLive} />
             <Laptop />
             <Mug still={still} />
             <Journal />

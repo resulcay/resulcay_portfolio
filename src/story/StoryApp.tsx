@@ -240,6 +240,7 @@ export function StoryApp({ data, lang, siteKey, hour, onRewind, ...stage }: Stor
           rewind={rewind}
           rewinding={rewinding}
           spinning={audio.playing}
+          track={data.music[audio.index]}
           bulbs={bulbs}
           onHover={setHovered}
           onSelect={select}

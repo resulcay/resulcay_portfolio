@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { BoxGeometry, CanvasTexture, CircleGeometry, CylinderGeometry, SphereGeometry, SpriteMaterial, TorusGeometry, type Sprite } from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
@@ -150,6 +150,119 @@ function Steam() {
         <sprite key={i} ref={(sprite) => void (sprites.current[i] = sprite)} material={material} />
       ))}
     </>
+  );
+}
+
+// The two posters on the left wall, each in a group facing into the room.
+const POSTER_FACING = Math.PI / 2;
+const WALL_X = -2.488;
+
+/** The lighthouse at dusk, its beam out over the sea: it opens the Writing page. */
+export function LighthousePoster({ caption }: { caption: string }) {
+  const { atlas, lit } = useKit();
+  return (
+    <group position={[WALL_X, 0, 1.2]} rotation-y={POSTER_FACING}>
+      <Merged
+        material={lit}
+        shadows={false}
+        parts={() => {
+          const cell = atlas.alloc()!;
+          atlas.paint(cell, 100, 130, (ctx) => {
+            const bands: [string, number, number][] = [
+              ['#2a2342', 0, 34],
+              ['#3b3060', 34, 22],
+              ['#5b4b8a', 56, 14],
+              ['#9a6a86', 70, 10],
+            ];
+            for (const [color, y, h] of bands) {
+              ctx.fillStyle = color;
+              ctx.fillRect(0, y, 100, h);
+            }
+            ctx.fillStyle = '#f4ebdd';
+            for (const [x, y] of [[12, 10], [40, 18], [70, 8], [88, 26], [24, 30]] as const) ctx.fillRect(x, y, 1.5, 1.5);
+            ctx.fillStyle = '#2f6f73';
+            ctx.fillRect(0, 80, 100, 26);
+            // The beam, then the cliff and the tower with its lamp.
+            ctx.fillStyle = 'rgb(246 196 126 / 0.55)';
+            ctx.beginPath();
+            ctx.moveTo(72, 49);
+            ctx.lineTo(0, 36);
+            ctx.lineTo(0, 64);
+            ctx.fill();
+            ctx.fillStyle = '#1e1b24';
+            ctx.beginPath();
+            ctx.moveTo(48, 106);
+            ctx.quadraticCurveTo(58, 78, 100, 74);
+            ctx.lineTo(100, 106);
+            ctx.fill();
+            ctx.fillStyle = '#f4ebdd';
+            ctx.beginPath();
+            ctx.moveTo(66, 77);
+            ctx.lineTo(78, 77);
+            ctx.lineTo(76, 54);
+            ctx.lineTo(68, 54);
+            ctx.fill();
+            ctx.fillStyle = '#c4553b';
+            ctx.fillRect(67, 64, 10, 3);
+            ctx.fillStyle = '#1e1b24';
+            ctx.fillRect(66, 52, 12, 2);
+            ctx.beginPath();
+            ctx.moveTo(66, 45);
+            ctx.lineTo(72, 40);
+            ctx.lineTo(78, 45);
+            ctx.fill();
+            ctx.fillStyle = '#f6c47e';
+            ctx.fillRect(68, 45, 8, 7);
+            ctx.fillStyle = '#1e1b24';
+            ctx.fillRect(0, 106, 100, 24);
+            ctx.fillStyle = '#f4ebdd';
+            ctx.font = '500 15px "Dudu Calligraphy"';
+            ctx.textAlign = 'center';
+            ctx.fillText(caption, 50, 123);
+          });
+          return [{ geo: atlas.quad(cell, 0.5, 0.65), color: '#ffffff', at: [0, 1.58, 0] }];
+        }}
+      />
+      <Hotspot id="lighthouse" at={[0, 1.58, 0.03]} size={[0.54, 0.69, 0.06]} anchor={[0, 1.5, 1.3]} />
+    </group>
+  );
+}
+
+/** "Sundown", the room's band, with whatever the record player is on: it opens the music. */
+export function BandPoster({ track, empty }: { track: { title: string; artist: string } | undefined; empty: string }) {
+  const { atlas, lit } = useKit();
+  const cell = useMemo(() => atlas.alloc()!, [atlas]);
+  // Repainted whenever the record changes.
+  useEffect(() => {
+    atlas.paint(cell, 110, 150, (ctx) => {
+      ctx.fillStyle = '#2f6f73';
+      ctx.fillRect(0, 0, 110, 150);
+      ctx.fillStyle = '#e8a657';
+      ctx.beginPath();
+      ctx.arc(55, 52, 30, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#f6c47e';
+      for (let y = 88; y < 100; y += 4) ctx.fillRect(30 + (y - 88), y, 50 - (y - 88) * 2, 1.5);
+      ctx.fillStyle = '#1e1b24';
+      ctx.fillRect(0, 100, 110, 50);
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#f4ebdd';
+      ctx.font = '600 20px "Dudu Calligraphy"';
+      ctx.fillText('SUNDOWN', 55, 20);
+      ctx.fillStyle = '#e8a657';
+      ctx.font = '700 7px Nunito';
+      ctx.fillText(track ? 'NOW PLAYING' : '', 55, 112);
+      ctx.fillStyle = '#f4ebdd';
+      ctx.font = '500 11px "Dudu Calligraphy"';
+      const lines = wrapText(ctx, track ? `${track.title} · ${track.artist}` : empty, 96).slice(0, 3);
+      lines.forEach((line, i) => ctx.fillText(line, 55, (track ? 125 : 118) + i * 12));
+    });
+  }, [atlas, cell, track, empty]);
+  return (
+    <group position={[WALL_X, 0, 0.35]} rotation-y={POSTER_FACING}>
+      <Merged material={lit} shadows={false} parts={() => [{ geo: atlas.quad(cell, 0.55, 0.75), color: '#ffffff', at: [0, 1.75, 0] }]} />
+      <Hotspot id="bandPoster" at={[0, 1.75, 0.03]} size={[0.59, 0.79, 0.06]} anchor={[0, 1.6, 1.4]} />
+    </group>
   );
 }
 

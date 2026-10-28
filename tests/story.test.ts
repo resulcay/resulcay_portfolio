@@ -56,6 +56,7 @@ const storyDataSchema = z.strictObject({
   music: z.array(
     z.strictObject({ title: str, artist: str, url: z.string().startsWith('/media/music/'), license: str, sourceUrl: z.url(), credit: str.optional() }),
   ),
+  writing: z.array(z.strictObject({ title: str, url: z.url(), date: str, summary: z.string(), tags: z.array(str) })),
 });
 
 describe('story data', () => {
@@ -70,7 +71,8 @@ describe('story data', () => {
       sourceUrl: 'https://example.org/evening-walk',
       credit: { en: 'Thanks to Someone Kind', tr: 'Someone Kind sağ olsun' },
     };
-    const data = JSON.parse(JSON.stringify(storyData(lang, profile, projects, experience, testimonials, [track])));
+    const article = { title: 'Staggered grids', url: 'https://medium.com/@resulcay/staggered', date: '2023-08-01T20:56:42.000Z', summary: 'Grids of different sizes.', tags: ['flutter'] };
+    const data = JSON.parse(JSON.stringify(storyData(lang, profile, projects, experience, testimonials, [track], [article])));
     expect(() => storyDataSchema.parse(data)).not.toThrow();
   });
 
@@ -191,6 +193,8 @@ describe('story routes', () => {
   it('sends a Polaroid click to its project', () => {
     expect(routeForHotspot('polaroid:floria')).toEqual({ object: 'polaroids', project: 'floria' });
     expect(routeForHotspot('phone')).toEqual({ object: 'phone' });
+    expect(routeForHotspot('bandPoster')).toEqual({ object: 'recordPlayer' });
+    expect(routeForHotspot('lighthouse')).toEqual({ object: 'lighthouse' });
   });
 });
 

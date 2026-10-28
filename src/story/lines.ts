@@ -3,14 +3,14 @@ import type { Phase } from './scene/time';
 import type { Visitor } from './visitor';
 
 /** The objects you can open, in the order they appear from left to right. */
-export const OBJECTS = ['recordPlayer', 'polaroids', 'journal', 'phone', 'corkboard', 'laptop', 'window'] as const;
+export const OBJECTS = ['recordPlayer', 'lighthouse', 'polaroids', 'journal', 'phone', 'corkboard', 'laptop', 'window'] as const;
 export type StoryObject = (typeof OBJECTS)[number];
 
 interface Lines {
   /** Names for the keyboard and screen-reader buttons. */
   names: Record<StoryObject, string>;
   /** Resul's inner monologue when you look at something. The window has one per time of day. */
-  thoughts: Record<Exclude<StoryObject, 'window'> | 'resul' | 'cat' | 'lightSwitch', string>;
+  thoughts: Record<Exclude<StoryObject, 'window'> | 'resul' | 'cat' | 'lightSwitch' | 'bandPoster', string>;
   window: Record<Phase, string>;
   ui: {
     sceneLabel: string;
@@ -53,6 +53,10 @@ interface Lines {
     change: string;
     chips: { cv: string; experience: string; contact: string; projects: string; paidWork: string };
     guide: string;
+    /** The lighthouse poster's page with no articles yet. */
+    noArticles: string;
+    /** The band poster's line while no record is on the shelf. */
+    bandLive: string;
     rewinding: string;
     /** The first-visit hint: click things in the room. */
     hint: string;
@@ -64,6 +68,7 @@ export const LINES: Record<Locale, Lines> = {
   en: {
     names: {
       recordPlayer: 'Record player',
+      lighthouse: 'Lighthouse poster',
       polaroids: 'Photo wall',
       journal: 'Journal',
       phone: 'Phone',
@@ -77,6 +82,8 @@ export const LINES: Record<Locale, Lines> = {
       journal: 'The honest version of me. Handwriting not included.',
       phone: 'Go on, send me a message.',
       recordPlayer: 'Music helps me think. Or procrastinate.',
+      lighthouse: 'Where I write things down for other people.',
+      bandPoster: 'My favourite band. They only ever play in this room.',
       corkboard: 'Proof that I finish things. Sometimes.',
       resul: "That's me. Usually more coffee involved.",
       cat: 'The real boss of this room.',
@@ -128,6 +135,8 @@ export const LINES: Record<Locale, Lines> = {
       chips: { cv: 'CV', experience: 'Experience', contact: 'Contact', projects: 'Projects', paidWork: 'Paid work' },
       guide: 'Butterfly: show me what to look at next',
       rewinding: 'Rewinding',
+      noArticles: 'Nothing written here yet. Soon.',
+      bandLive: 'Live in this room, every night',
       hint: 'Click things in the room to take a closer look',
       fullscreen: 'Full screen',
     },
@@ -135,6 +144,7 @@ export const LINES: Record<Locale, Lines> = {
   tr: {
     names: {
       recordPlayer: 'Pikap',
+      lighthouse: 'Deniz feneri posteri',
       polaroids: 'Fotoğraf duvarı',
       journal: 'Günlük',
       phone: 'Telefon',
@@ -148,6 +158,8 @@ export const LINES: Record<Locale, Lines> = {
       journal: 'Benim dürüst halim. El yazısı dahil değil.',
       phone: 'Hadi, bana bir mesaj at.',
       recordPlayer: 'Müzik düşünmeme yardım ediyor. Ya da oyalanmama.',
+      lighthouse: 'Başkaları için bir şeyler yazdığım yer.',
+      bandPoster: 'En sevdiğim grup. Sadece bu odada çalıyorlar.',
       corkboard: 'Bir şeyleri bitirdiğimin kanıtı. Bazen.',
       resul: 'Bu benim. Genelde daha çok kahve oluyor.',
       cat: 'Bu odanın asıl patronu.',
@@ -199,6 +211,8 @@ export const LINES: Record<Locale, Lines> = {
       chips: { cv: 'CV', experience: 'Deneyim', contact: 'İletişim', projects: 'Projeler', paidWork: 'Ücretli işler' },
       guide: 'Kelebek: sıradaki şeyi göster',
       rewinding: 'Geri sarılıyor',
+      noArticles: 'Burada henüz yazı yok. Yakında.',
+      bandLive: 'Her gece bu odada canlı',
       hint: 'Yakından bakmak için odadaki eşyalara tıkla',
       fullscreen: 'Tam ekran',
     },

@@ -23,8 +23,9 @@ export function toHash(route: Route): string {
   return route.paid ? '#paid-work' : `#${route.object}`;
 }
 
-/** Where a click on a hotspot leads: a Polaroid opens its own project, and Resul his journal. */
+/** Where a click on a hotspot leads: a Polaroid opens its own project, Resul his journal, the band poster the music. */
 export function routeForHotspot(id: string): Route | null {
   if (id === 'resul') return { object: 'journal' };
+  if (id === 'bandPoster') return { object: 'recordPlayer' };
   return id.startsWith('polaroid:') ? parseHash(`#project/${id.slice('polaroid:'.length)}`) : parseHash(`#${id}`);
 }

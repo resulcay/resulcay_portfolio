@@ -33,7 +33,7 @@ const PALETTES = [
 ] as const;
 
 /**
- * Each object opens its own kind of page: the phone is the home page's contact phone, the
+ * Each object opens its own kind of page: the lighthouse poster your writing as sea charts at dusk, the phone the home page's contact phone, the
  * laptop a laptop screen, the photo wall polaroids, the journal a notebook, the cork board
  * pinned cards, the record player a spinning record, the window its skies.
  */
@@ -68,6 +68,43 @@ export function Panels({ route, data, lang, siteKey, visitor, phaseChoice, onPha
         </Panel>
       );
     }
+    case 'lighthouse':
+      return (
+        <Panel variant="lighthouse" title={t(lang, 'home.writing')} lang={lang} onClose={onClose}>
+          {data.writing.length > 0 ? (
+            <ul className="story-charts">
+              {data.writing.map((article) => (
+                <li key={article.url} className="story-chart">
+                  <svg className="story-chart__compass" viewBox="-20 -20 40 40" aria-hidden="true">
+                    <circle r="13" fill="none" stroke="currentColor" strokeWidth="0.8" />
+                    <path d="M0-9 1.6-1.6 9 0 1.6 1.6 0 9-1.6 1.6-9 0-1.6-1.6Z" transform="rotate(45)" fill="currentColor" opacity="0.6" />
+                    <path d="M0-19 3-3 19 0 3 3 0 19-3 3-19 0-3-3Z" fill="currentColor" />
+                  </svg>
+                  <p className="story-chart__when">{article.date}</p>
+                  <h3>
+                    <a href={article.url} target="_blank" rel="noopener noreferrer">
+                      {article.title}
+                    </a>
+                  </h3>
+                  {article.summary && <p>{article.summary}</p>}
+                  <ul className="story-chips">
+                    {article.tags.map((tag) => (
+                      <li key={tag}>{tag}</li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="hand story-soon">{ui.noArticles}</p>
+          )}
+          <p className="story-links">
+            <a href={data.profile.links.medium} target="_blank" rel="noopener noreferrer">
+              {t(lang, 'home.allArticles')}
+            </a>
+          </p>
+        </Panel>
+      );
     case 'laptop':
       return (
         <Panel variant="laptop" title={t(lang, 'home.experience')} lang={lang} onClose={onClose} closeButton={false}>

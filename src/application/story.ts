@@ -1,6 +1,6 @@
 import type { Experience, Locale, MusicTrack, Profile, Project, Testimonial } from '@/domain/schemas';
 import { tagLabel } from '@/domain/tags';
-import { formatPeriod, t } from '@/i18n/ui';
+import { formatPeriod, formatYearMonth, t } from '@/i18n/ui';
 import { publicProjects } from './content';
 
 /** Everything Story mode shows, in one language, so the 3D view never needs the Journal's pages. */
@@ -11,6 +11,8 @@ export function storyData(
   experience: Experience[],
   testimonials: Testimonial[],
   music: MusicTrack[] = [],
+  /** The latest Medium articles (infrastructure/medium.ts), for the lighthouse poster. */
+  articles: { title: string; url: string; date: string; summary: string; tags: string[] }[] = [],
 ) {
   return {
     lang,
@@ -67,6 +69,7 @@ export function storyData(
       sourceUrl: m.sourceUrl,
       credit: m.credit?.[lang],
     })),
+    writing: articles.map((a) => ({ title: a.title, url: a.url, date: formatYearMonth(a.date.slice(0, 7), lang), summary: a.summary, tags: a.tags.slice(0, 3) })),
   };
 }
 
