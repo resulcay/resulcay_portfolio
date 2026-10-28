@@ -18,7 +18,7 @@ interface Lines {
     resul: string;
     /** The cat on the rug, as a button: she answers with a trill. */
     cat: string;
-    /** The switch on the nightstand, as a button: it turns the fairy lights on and off. */
+    /** The switch above the nightstand, as a button: it turns the fairy lights on and off. */
     lightSwitch: string;
     objects: string;
     close: string;

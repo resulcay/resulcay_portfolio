@@ -44,7 +44,7 @@ interface StageProps {
   rewinding: boolean;
   /** The record player's vinyl turns while music plays. */
   spinning: boolean;
-  /** The fairy lights, from the switch on the nightstand. */
+  /** The fairy lights, from the switch above the nightstand. */
   bulbs: boolean;
   /** The painterly post pass; `?post=off` turns it off to compare. */
   post: boolean;

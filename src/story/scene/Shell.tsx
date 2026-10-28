@@ -128,7 +128,7 @@ export const strand = () => new CatmullRomCurve3(STRAND, false, 'centripetal');
 const BULB_ON = new Color('#ffd27a');
 const BULB_OFF = new Color('#4a4236');
 
-/** The fairy lights; `on` comes from the switch on the nightstand, and the bulbs fade over about 300 ms. */
+/** The fairy lights; `on` comes from the switch above the nightstand, and the bulbs fade over about 300 ms. */
 export function StringLights({ on }: { on: boolean }) {
   const { base } = useKit();
   const curve = useMemo(strand, []);

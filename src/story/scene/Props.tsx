@@ -82,16 +82,16 @@ export function Phone() {
   );
 }
 
-/** A rocker switch on the nightstand, on the bed's side: it turns the fairy lights on and off. */
+/** A rocker switch on the back wall above the nightstand: it turns the fairy lights on and off. */
 export function LightSwitch({ on }: { on: boolean }) {
   const { base } = useKit();
   return (
-    <group position={[-1.3, NIGHTSTAND_TOP, -1.62]} rotation-y={0.3}>
-      <Merged material={base} parts={() => [{ geo: rounded(0.07, 0.022, 0.05, 0.006), color: '#f1e9dc', at: [0, 0.011, 0] }]} />
-      <group position={[0, 0.024, 0]} rotation-x={on ? -0.28 : 0.28}>
-        <Merged material={base} parts={() => [{ geo: rounded(0.034, 0.012, 0.03, 0.004), color: '#e8a657' }]} />
+    <group position={[-1.15, NIGHTSTAND_TOP + 0.45, -2]}>
+      <Merged material={base} parts={() => [{ geo: rounded(0.08, 0.12, 0.014, 0.006), color: '#f1e9dc', at: [0, 0, 0.007] }]} />
+      <group position={[0, 0, 0.016]} rotation-x={on ? 0.28 : -0.28}>
+        <Merged material={base} parts={() => [{ geo: rounded(0.034, 0.056, 0.012, 0.004), color: '#e8a657' }]} />
       </group>
-      <Hotspot id="lightSwitch" at={[0, 0.03, 0]} size={[0.14, 0.1, 0.12]} anchor={[0.4, 0.5, 0.6]} />
+      <Hotspot id="lightSwitch" at={[0, 0, 0.03]} size={[0.14, 0.18, 0.08]} anchor={[0.3, 0.05, 0.75]} />
     </group>
   );
 }
