@@ -44,7 +44,14 @@ const sounds = [
         <a class="button" href={localizePath('/', lang)}>{t(lang, 'story.journal')}</a>
         <a class="button" href={profile.cvPath} download data-cv-hit>{t(lang, 'nav.cv')}</a>
       </div>
-      <p class="hand title__note">{t(lang, 'story.headphones')}</p>
+      <p class="hand title__note">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 15v-3a8 8 0 0 1 16 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+          <rect x="3" y="14" width="5" height="7" rx="2" fill="currentColor"></rect>
+          <rect x="16" y="14" width="5" height="7" rx="2" fill="currentColor"></rect>
+        </svg>
+        {t(lang, 'story.headphones')}
+      </p>
       <p>
         <button type="button" class="credits-link" data-credits-open>{t(lang, 'story.credits')}</button> ·{' '}
         <button type="button" class="credits-link" data-storm-sound data-on={t(lang, 'story.stormOn')} data-off={t(lang, 'story.stormOff')} aria-pressed="true">
@@ -267,6 +274,11 @@ const sounds = [
     .title .button.is-bracing {
       animation: none;
     }
+  }
+  .title .title__note {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
   .title .title__note,
   .title .credits-link {
