@@ -1,0 +1,14 @@
+---
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+{/* Story mode's title art: a 2.5D storm drawn on a canvas, filling its box. */}
+<canvas class={className} data-storm aria-hidden="true"></canvas>
+
+<script>
+  import { mountStorm } from '@/scripts/storm';
+
+  document.querySelectorAll<HTMLCanvasElement>('canvas[data-storm]').forEach(mountStorm);
+</script>

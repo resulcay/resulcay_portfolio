@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Butterfly from '@/components/Butterfly.astro';
-import SunsetScene from '@/components/SunsetScene.astro';
+import StormScene from '@/components/StormScene.astro';
 import type { Locale } from '@/domain/schemas';
 import { content } from '@/lib/content';
 import { localizePath, t } from '@/i18n/ui';
@@ -31,7 +31,7 @@ const sounds = [
 ---
 <BaseLayout lang={lang} title={t(lang, 'nav.story')} description={t(lang, 'story.description')}>
   <section class="title" aria-labelledby="story-title">
-    <SunsetScene class="title__scene" />
+    <StormScene class="title__scene" />
     <div class="wrap title__text">
       <h1 id="story-title"><span class="hand">{t(lang, 'home.kicker')}:</span> {t(lang, 'home.title')}</h1>
       <p class="title__desc">{t(lang, 'story.description')}</p>
