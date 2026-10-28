@@ -1,12 +1,16 @@
 /** Resolves once `work` settles (either way) or after `ms`, whichever comes first. */
-export function settleWithin(work: Promise<unknown>, ms: number): Promise<'done' | 'timeout'> {
+export async function settleWithin(work: Promise<unknown>, ms: number): Promise<'done' | 'timeout'> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<'timeout'>((resolve) => (timer = setTimeout(() => resolve('timeout'), ms)));
   const done = work.then(
     () => 'done' as const,
     () => 'done' as const,
   );
-  return Promise.race([done, timeout]).finally(() => clearTimeout(timer));
+  try {
+    return await Promise.race([done, timeout]);
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 /** Collects the loads a view waits for; `settled` waits for all of them, even ones added meanwhile. */

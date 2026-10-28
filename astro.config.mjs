@@ -10,6 +10,10 @@ export default defineConfig({
     imageService: 'compile',
   }),
   session: false,
+  // No Markdown code blocks here, and Shiki's inline styles would break the strict CSP.
+  markdown: { syntaxHighlight: false },
+  // Story mode's 3D bundle (three.js, about 1.3 MB) loads only after Start, so its size is expected.
+  vite: { build: { chunkSizeWarningLimit: 1500 } },
   // No @astrojs/react: Story mode's React code is imported on demand by a plain
   // script, and Vite compiles its JSX from tsconfig. The integration's Fast
   // Refresh needs a preamble that only island pages get, so Start broke in dev.
