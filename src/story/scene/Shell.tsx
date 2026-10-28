@@ -16,17 +16,17 @@ export function Shell() {
         bake
         shadows={false}
         parts={() => [
-          { geo: new BoxGeometry(5.3, 0.12, 4.3), color: '#8c5c45', at: [0.15, -0.06, 0.15] },
-          { geo: new BoxGeometry(5.3, 2.9, 0.12), color: '#dcc5aa', at: [0.15, 1.45, -2.06] },
-          { geo: new BoxGeometry(0.12, 2.9, 4.3), color: '#cfb59a', at: [-2.56, 1.45, 0.15] },
+          { geo: new BoxGeometry(10, 0.12, 10), color: '#8c5c45', at: [0.15, -0.06, 0.15] },
+          { geo: new BoxGeometry(10, 5, 0.12), color: '#dcc5aa', at: [2.5, 1.45, -2.06] },
+          { geo: new BoxGeometry(0.12, 5, 10), color: '#cfb59a', at: [-2.56, 1.45, 2.9] },
         ]}
       />
       <Merged
         material={base}
         bake
         parts={() => [
-          { geo: new BoxGeometry(5.2, 0.1, 0.02), color: '#efe6d6', at: [0.1, 0.05, -1.99] },
-          { geo: new BoxGeometry(0.02, 0.1, 4.2), color: '#efe6d6', at: [-2.49, 0.05, 0.1] },
+          { geo: new BoxGeometry(10, 0.1, 0.02), color: '#efe6d6', at: [0.1, 0.05, -1.99] },
+          { geo: new BoxGeometry(0.02, 0.1, 10), color: '#efe6d6', at: [-2.49, 0.05, 0.1] },
           { geo: new RoundedBoxGeometry(2.3, 0.015, 1.6, 2, 0.007), color: '#5b4b8a', at: [0.3, 0.008, 0.25] },
           { geo: new RoundedBoxGeometry(2.0, 0.017, 1.3, 2, 0.007), color: '#e8a657', at: [0.3, 0.009, 0.25] },
         ]}
