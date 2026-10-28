@@ -827,10 +827,12 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
     gap: 10px;
     padding: 24px 64px 22px 26px;
     border-radius: 3px;
-    /* A sea chart: parchment with depth contours rippling out from a shoal off the corner. */
+    /* A portolan sea chart: rhumb lines fanning out from the compass rose in its sixteen
+       directions, over a faint latitude and longitude grid, on parchment. */
     background:
-      repeating-radial-gradient(circle at 108% -12%, transparent 0 21px, color-mix(in srgb, var(--link) 20%, transparent) 21px 22px),
-      repeating-radial-gradient(circle at -10% 115%, transparent 0 25px, color-mix(in srgb, var(--link) 12%, transparent) 25px 26px),
+      repeating-conic-gradient(from -0.15deg at calc(100% - 34px) 34px, color-mix(in srgb, var(--link) 32%, transparent) 0 0.3deg, transparent 0.3deg 22.5deg),
+      linear-gradient(90deg, color-mix(in srgb, var(--link) 9%, transparent) 1px, transparent 1px) 0 0 / 56px 56px,
+      linear-gradient(color-mix(in srgb, var(--link) 9%, transparent) 1px, transparent 1px) 0 0 / 56px 56px,
       color-mix(in srgb, var(--golden) 10%, var(--paper-raised));
     color: var(--ink);
     box-shadow:
