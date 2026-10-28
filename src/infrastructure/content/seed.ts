@@ -287,7 +287,6 @@ export const projects: Project[] = [
     links: {
       appStore: 'https://apps.apple.com/tr/app/miki-okuyor/id6756672512',
       googlePlay: 'https://play.google.com/store/apps/details?id=resoftware.reading_app',
-      website: 'https://mikiokuyor.com.tr',
     },
     featured: true,
     order: 5,
