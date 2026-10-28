@@ -204,69 +204,67 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
 
   <section id="contact" class="wrap section contact" aria-labelledby="contact-title">
     <h2 id="contact-title">{t(lang, 'contact.title')}</h2>
-    <div class="postcard">
-      <div class="postcard__message">
-        <p>{t(lang, 'contact.intro')} {profile.availability[lang]}</p>
-        {
-          siteKey && (
-            <form class="contact-form" data-contact novalidate>
-              <h3>{t(lang, 'contact.formTitle')}</h3>
-              <div class="contact-form__row">
+    <div class="phone">
+      <div class="phone__screen">
+        <div class="phone__bar">
+          <Butterfly size={22} />
+          <span>{profile.name}</span>
+        </div>
+        <div class="phone__chat">
+          <p class="phone__bubble">{t(lang, 'contact.intro')} {profile.availability[lang]}</p>
+          {
+            siteKey && (
+              <form class="contact-form" data-contact novalidate>
+                <h3>{t(lang, 'contact.formTitle')}</h3>
+                <div class="contact-form__row">
+                  <label>
+                    <span>{t(lang, 'contact.name')}</span>
+                    <input name="name" autocomplete="name" required maxlength="80" />
+                    <small data-error-for="name" />
+                  </label>
+                  <label>
+                    <span>{t(lang, 'contact.yourEmail')}</span>
+                    <input name="email" type="email" autocomplete="email" required maxlength="120" />
+                    <small data-error-for="email" />
+                  </label>
+                </div>
                 <label>
-                  <span>{t(lang, 'contact.name')}</span>
-                  <input name="name" autocomplete="name" required maxlength="80" />
-                  <small data-error-for="name" />
+                  <span>{t(lang, 'contact.message')}</span>
+                  <textarea name="message" rows="6" required minlength="10" maxlength="4000" />
+                  <small data-error-for="message" />
                 </label>
-                <label>
-                  <span>{t(lang, 'contact.yourEmail')}</span>
-                  <input name="email" type="email" autocomplete="email" required maxlength="120" />
-                  <small data-error-for="email" />
+                <label class="visually-hidden" aria-hidden="true">
+                  Website
+                  <input name="website" tabindex="-1" autocomplete="off" />
                 </label>
-              </div>
-              <label>
-                <span>{t(lang, 'contact.message')}</span>
-                <textarea name="message" rows="6" required minlength="10" maxlength="4000" />
-                <small data-error-for="message" />
-              </label>
-              <label class="visually-hidden" aria-hidden="true">
-                Website
-                <input name="website" tabindex="-1" autocomplete="off" />
-              </label>
-              <input type="hidden" name="lang" value={lang} />
-              <div data-turnstile data-sitekey={siteKey} />
-              <p class="contact-form__note">{t(lang, 'contact.privacy')}</p>
-              <p role="status" aria-live="polite" />
-              <div>
-                <button type="submit" class="button button--primary">{t(lang, 'contact.send')}</button>
-              </div>
-              <template data-messages>
-                <span data-key="sending">{t(lang, 'contact.sending')}</span>
-                <span data-key="sent">{t(lang, 'contact.sent')}</span>
-                <span data-key="human">{t(lang, 'contact.humanWait')}</span>
-                <span data-key="human-failed">{t(lang, 'contact.humanFailed')}</span>
-                <span data-key="failed">{t(lang, 'contact.failed')}</span>
-                <span data-key="field-name">{t(lang, 'contact.errName')}</span>
-                <span data-key="field-email">{t(lang, 'contact.errEmail')}</span>
-                <span data-key="field-message">{t(lang, 'contact.errMessage')}</span>
-              </template>
-            </form>
-          )
-        }
-      </div>
-      <div class="postcard__address">
-          <div class="postcard__stamp" aria-hidden="true">
-            <SunsetScene />
-          </div>
-          <svg class="postcard__postmark" viewBox="0 0 120 120" aria-hidden="true">
-            <circle cx="60" cy="60" r="44" fill="none" stroke="currentColor" stroke-width="2.5" />
-            <circle cx="60" cy="60" r="34" fill="none" stroke="currentColor" stroke-width="1.2" />
-            <text x="60" y="66" text-anchor="middle" font-family="Dudu Calligraphy, cursive" font-size="17" fill="currentColor">{profile.location[lang].split(',')[0]}</text>
-          </svg>
-        <dl>
-          <div><dt>{t(lang, 'contact.email')}</dt><dd><a href={`mailto:${profile.email}`}>{profile.email}</a></dd></div>
-          <div><dt>{t(lang, 'contact.phone')}</dt><dd><a href={`tel:${profile.phone}`}>{phoneDisplay}</a></dd></div>
-          <div><dt>LinkedIn</dt><dd><a href={profile.links.linkedin} rel="me">linkedin.com/in/resulcay</a></dd></div>
-        </dl>
+                <input type="hidden" name="lang" value={lang} />
+                <div data-turnstile data-sitekey={siteKey} />
+                <p class="contact-form__note">{t(lang, 'contact.privacy')}</p>
+                <p role="status" aria-live="polite" />
+                <div>
+                  <button type="submit" class="button button--primary">{t(lang, 'contact.send')}</button>
+                </div>
+                <template data-messages>
+                  <span data-key="sending">{t(lang, 'contact.sending')}</span>
+                  <span data-key="sent">{t(lang, 'contact.sent')}</span>
+                  <span data-key="human">{t(lang, 'contact.humanWait')}</span>
+                  <span data-key="human-failed">{t(lang, 'contact.humanFailed')}</span>
+                  <span data-key="failed">{t(lang, 'contact.failed')}</span>
+                  <span data-key="field-name">{t(lang, 'contact.errName')}</span>
+                  <span data-key="field-email">{t(lang, 'contact.errEmail')}</span>
+                  <span data-key="field-message">{t(lang, 'contact.errMessage')}</span>
+                </template>
+              </form>
+            )
+          }
+        </div>
+        <div class="phone__contacts">
+          <dl>
+            <div><dt>{t(lang, 'contact.email')}</dt><dd><a href={`mailto:${profile.email}`}>{profile.email}</a></dd></div>
+            <div><dt>{t(lang, 'contact.phone')}</dt><dd><a href={`tel:${profile.phone}`}>{phoneDisplay}</a></dd></div>
+            <div><dt>LinkedIn</dt><dd><a href={profile.links.linkedin} rel="me">linkedin.com/in/resulcay</a></dd></div>
+          </dl>
+        </div>
       </div>
     </div>
   </section>
@@ -783,84 +781,125 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
   .contact p {
     max-width: var(--measure);
   }
-  /* Contact as a postcard: an airmail border, the message and form on the
-     left, the addresses on the right under a stamp and a postmark. */
-  .postcard {
-    display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-    margin-top: 16px;
-    padding: clamp(20px, 4vw, 40px);
-    border: 8px solid;
-    border-image: repeating-linear-gradient(135deg, #d9534f 0 10px, var(--paper-raised) 10px 20px, #4fa3d9 20px 30px, var(--paper-raised) 30px 40px) 8;
-    background: var(--paper-raised);
-    box-shadow: 0 16px 32px -16px rgb(0 0 0 / 0.4);
-  }
-  .postcard__message {
-    padding-right: clamp(16px, 3vw, 36px);
-    border-right: 1.5px solid var(--rule);
-  }
-  .postcard__address {
+  /* Contact on a phone turned sideways, drawn in CSS: a messaging app with
+     the intro as an incoming bubble, the form as the composer, and the
+     contact details beside it. It stands upright on narrow screens. */
+  .phone {
     position: relative;
+    margin-top: 16px;
+    padding: 18px 28px;
+    border: 2px solid #3a3542;
+    border-radius: 44px;
+    background: #121015;
+    box-shadow: 0 18px 36px -16px rgb(0 0 0 / 0.5);
+  }
+  /* The camera on the short side, and two buttons along the top edge. */
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 9px;
+    width: 9px;
+    height: 9px;
+    translate: 0 -50%;
+    border-radius: 50%;
+    background: #0d0c10;
+    box-shadow: 0 0 0 2px #3a3542;
+  }
+  .phone::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 18%;
+    width: 56px;
+    height: 4px;
+    border-radius: 2px;
+    background: #3a3542;
+    box-shadow: 70px 0 0 #3a3542;
+  }
+  .phone__screen {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    overflow: hidden;
+    border-radius: 26px;
+    background: var(--paper-raised);
+  }
+  .phone__bar {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: color-mix(in srgb, var(--violet) 80%, black);
+    color: #f4ebdd;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+  }
+  .phone__chat {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    min-height: 260px;
-    padding: 120px 0 0 clamp(16px, 3vw, 36px);
+    gap: 12px;
+    padding: 20px;
+    border-right: 1px solid var(--rule);
   }
-  .postcard__stamp {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 76px;
-    height: 92px;
-    padding: 5px;
-    background: #fbf6ee;
-    border: 3px dotted #cdbfa8;
-    rotate: 3deg;
+  .phone__bubble {
+    align-self: flex-start;
+    max-width: 85%;
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 18px 18px 18px 4px;
+    background: color-mix(in srgb, var(--teal) 22%, var(--paper-raised));
   }
-  .postcard__stamp :global(svg) {
-    display: block;
-    width: 100%;
-    height: 100%;
+  .phone__contacts {
+    padding: 20px;
   }
-  .postcard__postmark {
-    position: absolute;
-    top: 14px;
-    right: 56px;
-    width: 92px;
-    height: 92px;
-    color: color-mix(in srgb, var(--ink) 55%, transparent);
-    rotate: -12deg;
-  }
-  .postcard dl {
+  .phone dl {
     display: flex;
     flex-direction: column;
     gap: 14px;
     margin: 0;
   }
-  .postcard dl > div {
-    padding-bottom: 6px;
-    border-bottom: 1.5px dashed var(--rule);
+  .phone dl > div {
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--rule);
   }
-  .postcard .contact-form {
+  .phone .contact-form {
     max-width: none;
-    margin-top: 12px;
+    margin-top: 0;
     padding: 0;
     border: 0;
     background: none;
     box-shadow: none;
   }
+  .phone .contact-form input,
+  .phone .contact-form textarea {
+    border-radius: 16px;
+  }
   @media (max-width: 760px) {
-    .postcard {
+    .phone {
+      padding: 28px 12px;
+      border-radius: 40px;
+    }
+    .phone::before {
+      top: 10px;
+      left: 50%;
+      translate: -50% 0;
+    }
+    .phone::after {
+      top: 22%;
+      left: auto;
+      right: -5px;
+      width: 4px;
+      height: 48px;
+      box-shadow: 0 62px 0 #3a3542;
+    }
+    .phone__screen {
       grid-template-columns: minmax(0, 1fr);
     }
-    .postcard__message {
-      padding: 0 0 24px;
+    .phone__chat {
       border-right: 0;
-      border-bottom: 1.5px solid var(--rule);
-    }
-    .postcard__address {
-      padding: 120px 0 0;
+      border-bottom: 1px solid var(--rule);
     }
   }
   .contact-form {
