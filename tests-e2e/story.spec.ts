@@ -18,9 +18,9 @@ for (const size of SIZES) {
 
     await page.goto('/story');
     expect(await overflowsX(page)).toBe(false);
-    // Only the tiny title-screen script runs before Start.
+    // Only the small title-screen scripts (Start, the storm, the page's own and the cursor) run before Start.
     const scripts = requested.filter((url) => url.endsWith('.js')).map((url) => new URL(url).pathname.split('/').pop());
-    expect(scripts.filter((name) => !/^(StoryView\.astro_astro_type_script|preload-helper)/.test(name ?? ''))).toEqual([]);
+    expect(scripts.filter((name) => !/^((StoryView|StormScene|BaseLayout)\.astro_astro_type_script|preload-helper|ready\.)/.test(name ?? ''))).toEqual([]);
 
     await page.getByRole('button', { name: 'Start story' }).click();
     const scene = page.locator('[data-canvas]');
@@ -81,7 +81,7 @@ for (const size of SIZES) {
 
     await page.keyboard.press('Escape');
     await expect(page.locator('[data-stage]')).toBeHidden();
-    await expect(page.locator('canvas')).toHaveCount(0);
+    await expect(page.locator('[data-canvas] canvas')).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Start story' })).toBeFocused();
 
     // A reload remembers the answer.

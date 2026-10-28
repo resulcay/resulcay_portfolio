@@ -80,6 +80,9 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : undefined;
     <Footer lang={lang} profile={profile} hasMusic={music.length > 0} />
     <script>
       import { settleWithin } from '@/scripts/ready';
+      import { mountButterflyCursor } from '@/scripts/butterfly-cursor';
+
+      mountButterflyCursor();
 
       // Show the page once its fonts are in, so text never flashes in a fallback face. The veil
       // only appears if that takes longer than 150 ms (see .veil); at most 3 s, then the page shows.

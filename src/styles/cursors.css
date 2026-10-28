@@ -1,13 +1,14 @@
-/* The site's cursors: an acorn, pointing with its tip to the bottom left, and the blue
-   butterfly over anything you can follow. Only for a mouse or trackpad; high-contrast and
-   forced-colour modes keep the system cursors, as do text fields. */
+/* The site's cursors: the blue butterfly. With motion allowed it's a live one that flies
+   after the pointer (see scripts/butterfly-cursor.ts); otherwise a still butterfly.
+   Only for a mouse or trackpad; high-contrast and forced-colour modes keep the system
+   cursors, as do text fields. */
 @media (pointer: fine) and (not (prefers-contrast: more)) and (not (forced-colors: active)) {
   :root {
-    --cursor-acorn: url('/cursors/acorn-down.svg') 3 29, auto;
+    --cursor-default: url('/cursors/butterfly.svg') 16 16, auto;
     --cursor-link: url('/cursors/butterfly.svg') 16 16, pointer;
   }
   html {
-    cursor: var(--cursor-acorn);
+    cursor: var(--cursor-default);
   }
   /* Not on the story page (only it has the stage): the system arrow there,
      and the butterfly over buttons, links and the room's objects. */
@@ -23,4 +24,28 @@
   :is(:disabled, [aria-disabled='true']) {
     cursor: not-allowed;
   }
+  /* The live butterfly is the cursor: hide the system one, except in text fields. */
+  html.butterfly-cursor:not(.butterfly-off, .story-open),
+  html.butterfly-cursor:not(.butterfly-off, .story-open) :not(input, textarea, [contenteditable='true']) {
+    cursor: none !important;
+  }
+}
+
+.bf-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2147483647;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  /* A pale rim, so it shows on dark and light alike. */
+  filter: drop-shadow(0 0 0.6px #fbf6ee) drop-shadow(0 0 0.6px #fbf6ee) drop-shadow(0 2px 3px rgb(30 27 36 / 0.35));
+  will-change: transform;
+}
+.bf-cursor svg {
+  display: block;
+}
+.bf-cursor.is-shown {
+  opacity: 1;
 }
