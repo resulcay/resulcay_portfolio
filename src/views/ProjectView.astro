@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import TagChips from '@/components/TagChips.astro';
+import { BADGES, STORES } from '@/components/store-badges';
 import type { Locale, Project } from '@/domain/schemas';
 import { breadcrumbLd, projectLd } from '@/lib/structured-data';
 import { formatPeriod, localizePath, t, type UiKey } from '@/i18n/ui';
@@ -21,15 +22,10 @@ const groups: { key: UiKey; tags: readonly string[] }[] = [
   { key: 'group.status', tags: [project.status] },
   { key: 'group.category', tags: [project.category] },
 ];
-const linkEntries: [UiKey, string | undefined][] = [
-  ['link.appStore', project.links.appStore],
-  ['link.googlePlay', project.links.googlePlay],
-  ['link.microsoftStore', project.links.microsoftStore],
-  ['link.website', project.links.website],
-  ['link.repository', project.links.repository],
-];
+// The stores' own badges first, then buttons for the website and the source code.
+const stores = STORES.flatMap((store) => (project.links[store] ? [{ store, href: project.links[store]!, badge: BADGES[store] }] : []));
+const buttons = (['website', 'repository'] as const).flatMap((key) => (project.links[key] ? [{ key, href: project.links[key]! }] : []));
 const images = project.images ?? [];
-const links = linkEntries.filter((entry): entry is [UiKey, string] => Boolean(entry[1]));
 ---
 <BaseLayout
   lang={lang}
@@ -84,6 +80,36 @@ const links = linkEntries.filter((entry): entry is [UiKey, string] => Boolean(en
             </ul>
           )
         }
+        {
+          (stores.length > 0 || buttons.length > 0) && (
+            <ul class="get" aria-label={t(lang, 'project.links')}>
+              {stores.map(({ store, href, badge }) => (
+                <li>
+                  <a class={`badge badge--${store}`} href={href} rel="noopener">
+                    <img src={badge.src[lang]} alt={badge.alt[lang]} height={badge.height} width={badge.width[lang]} />
+                  </a>
+                </li>
+              ))}
+              {buttons.map(({ key, href }) => (
+                <li>
+                  <a class="button" href={href} rel="noopener">
+                    {key === 'website' ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3Z" />
+                      </svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M8.5 7 3.5 12l5 5M15.5 7l5 5-5 5M13.5 4.5l-3 15" />
+                      </svg>
+                    )}
+                    {t(lang, key === 'website' ? 'link.website' : 'link.repository')}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
       </div>
       <aside aria-labelledby="details-title">
         <h2 id="details-title" class="eyebrow">{t(lang, 'project.details')}</h2>
@@ -99,20 +125,6 @@ const links = linkEntries.filter((entry): entry is [UiKey, string] => Boolean(en
                   <dd><TagChips tags={g.tags} lang={lang} /></dd>
                 </div>
               ))
-          }
-          {
-            links.length > 0 && (
-              <div>
-                <dt>{t(lang, 'project.links')}</dt>
-                <dd>
-                  <ul class="links">
-                    {links.map(([key, href]) => (
-                      <li><a href={href} rel="noopener">{t(lang, key)}</a></li>
-                    ))}
-                  </ul>
-                </dd>
-              </div>
-            )
           }
         </dl>
       </aside>
@@ -220,17 +232,67 @@ const links = linkEntries.filter((entry): entry is [UiKey, string] => Boolean(en
   dd {
     margin: 0;
   }
-  .links {
-    margin: 0;
-    padding: 0;
-    list-style: none;
+  /* The store badges and the website and source buttons, under the title. */
+  .get {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px 16px;
+    align-items: center;
+    gap: 12px 14px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
   }
-  .links a {
+  /* Flex items, so no text line under each link pushes it off centre. */
+  .get > li {
+    display: flex;
+  }
+  .badge {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
+    border-radius: 8px;
+    transition: translate 0.15s;
+  }
+  .badge:hover {
+    translate: 0 -2px;
+  }
+  /* Every badge's dark plate comes out 44px tall, like the buttons beside it. Sized here: the site's
+     img { height: auto } would otherwise show each at its file's own size. */
+  .badge img {
+    display: block;
+    flex: none;
+    max-width: none;
+    width: auto;
+    height: 44px;
+  }
+  /* Google's PNGs carry a transparent margin (English: rows 41–208 of 250; Turkish: 30–219, full width). */
+  .badge--googlePlay img {
+    height: 65.5px;
+    margin: -10.7px;
+  }
+  /* Microsoft's lettering is small for its plate, so its badge is drawn larger. */
+  .badge--microsoftStore img {
+    height: 54px;
+  }
+  :lang(tr) .badge--googlePlay img {
+    height: 58px;
+    margin: -7px 0;
+  }
+  .get .button {
+    min-height: 44px;
+    height: 44px;
+    padding-block: 0;
+  }
+  .get .button svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .badge {
+      transition: none;
+    }
   }
 </style>

@@ -1,6 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import type { StoryData } from '@/application/story';
 import { BUTTERFLY_ART } from '@/components/butterfly-art';
+import { BADGES, STORES } from '@/components/store-badges';
 import type { Locale } from '@/domain/schemas';
 import { localizePath, t } from '@/i18n/ui';
 import { LINES } from './lines';
@@ -417,7 +418,6 @@ function RecordPlayer({ data, lang }: { data: StoryData; lang: Locale }) {
   );
 }
 
-const LINK_KEYS = ['appStore', 'googlePlay', 'microsoftStore', 'website', 'repository'] as const;
 
 /** One project as a big polaroid over a journal page. */
 function CaseStudy({ project, index, lang, onAll }: { project: Project; index: number; lang: Locale; onAll: () => void }) {
@@ -458,12 +458,34 @@ function CaseStudy({ project, index, lang, onAll }: { project: Project; index: n
       {project.images.slice(1).map((image) => (
         <img key={image.src} src={image.src} alt={image.alt} width={image.width} height={image.height} loading="lazy" />
       ))}
-      <p className="story-links">
-        {LINK_KEYS.flatMap((key) => {
-          const href = project.links[key];
-          return href ? [<a key={key} href={href} target="_blank" rel="noopener noreferrer">{t(lang, `link.${key}`)}</a>] : [];
+      {/* The stores' own badges, then the website and the source code. */}
+      <ul className="story-get">
+        {STORES.flatMap((store) => {
+          const href = project.links[store];
+          const badge = BADGES[store];
+          return href
+            ? [
+                <li key={store}>
+                  <a className={`story-badge-link story-badge-link--${store}`} href={href} target="_blank" rel="noopener noreferrer">
+                    <img src={badge.src[lang]} alt={badge.alt[lang]} height={badge.height} width={badge.width[lang]} />
+                  </a>
+                </li>,
+              ]
+            : [];
         })}
-      </p>
+        {(['website', 'repository'] as const).flatMap((key) => {
+          const href = project.links[key];
+          return href
+            ? [
+                <li key={key}>
+                  <a className="button" href={href} target="_blank" rel="noopener noreferrer">
+                    {t(lang, `link.${key}`)}
+                  </a>
+                </li>,
+              ]
+            : [];
+        })}
+      </ul>
       <div className="story-actions">
         <a className="button button--primary" href={localizePath(`/projects/${project.slug}`, lang)}>
           {ui.readOnJournal}

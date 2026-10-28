@@ -1154,6 +1154,46 @@ const sounds = [
   .story-facts dd {
     margin: 0;
   }
+  .story-get {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+    padding: 0 !important;
+    list-style: none;
+  }
+  .story-get > li {
+    display: flex;
+  }
+  .story-badge-link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+  }
+  .story-badge-link img {
+    display: block;
+    flex: none;
+    max-width: none;
+    width: auto;
+    height: 44px;
+    border-radius: 0 !important;
+  }
+  .story-badge-link--googlePlay img {
+    height: 65.5px;
+    margin: -10.7px;
+  }
+  .story-badge-link--microsoftStore img {
+    height: 54px;
+  }
+  :lang(tr) .story-badge-link--googlePlay img {
+    height: 58px;
+    margin: -7px 0;
+  }
+  .story-get .button {
+    min-height: 44px;
+    height: 44px;
+    padding-block: 0;
+  }
   .story-highlights {
     list-style: none;
     padding-left: 0 !important;
