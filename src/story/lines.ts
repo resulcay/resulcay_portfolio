@@ -167,7 +167,7 @@ export const LINES: Record<Locale, Lines> = {
     },
     window: {
       dawn: 'Hatalardan önce uyandım. Çoğunlukla.',
-      day: 'Güneş ışığı hâlâ en iyi hata ayıklayıcı.',
+      day: 'Güneş ışığı hala en iyi hata ayıklayıcı.',
       golden: 'Bu ışıkta kodum bile güzel görünüyor.',
       night: 'Sessiz saatler. Yayına almak için en iyi, uyumak için en kötü zaman.',
     },
