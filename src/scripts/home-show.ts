@@ -1,7 +1,7 @@
 // The home page as a show, told with three animation libraries, each where it's best:
 //   GSAP (+ ScrollTrigger): the hero's "Episode 1" title card, the experience path
 //     drawn as you scroll, and the lighthouse's lamp flaring when the Writing section arrives.
-//   anime.js: the sunset scene (sun rising, glints, the butterfly flying in), the
+//   anime.js: the sunset scene (sun rising, glints spreading), the
 //     "At a glance" notebook opening with its numbers counting up, and the featured
 //     polaroids pinned one by one inside the cork board's wooden frame.
 //   Motion: springy entrances for headings, the Writing charts, the sticky notes and the phone.
@@ -63,7 +63,6 @@ export async function startHomeShow(): Promise<void> {
 
   // Sunset card, notebook, cork board.
   pose($<SVGElement>('.teaser .sunset__sun'), { opacity: '0' });
-  pose($<SVGElement>('.teaser .sunset__butterfly'), { opacity: '0' });
   pose($('.teaser__text > *'), { opacity: '0' });
   pose($('.spread .page'), { opacity: '0' });
   pose($('.glance li'), { opacity: '0' });
@@ -116,17 +115,6 @@ export async function startHomeShow(): Promise<void> {
   once(document.querySelector('.teaser'), () => {
     anime.animate('.teaser .sunset__sun', { opacity: [0, 1], translateY: [140, 0], duration: 1800, ease: 'outCubic', ...tidy });
     anime.animate('.teaser .sunset__glints', { opacity: [0, 0.6], scaleX: [0.2, 1], duration: 1400, delay: 700, ease: 'outQuad', ...tidy });
-    // The butterfly flutters in from off the left edge and settles by the sun.
-    anime.animate('.teaser .sunset__butterfly', {
-      opacity: [0, 1],
-      translateX: [-1300, -160, 60, 0],
-      translateY: [160, -40, 30, 0],
-      rotate: [20, -10, 6, 0],
-      duration: 2600,
-      delay: 400,
-      ease: 'inOutSine',
-      ...tidy,
-    });
     anime.animate('.teaser__text > *', { opacity: [0, 1], translateY: [24, 0], duration: 800, delay: anime.stagger(120, { start: 500 }), ease: 'outQuart', ...tidy });
   });
 

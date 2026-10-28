@@ -1,12 +1,10 @@
 ---
-import { BUTTERFLY_ART } from './butterfly-art';
-
 interface Props {
   class?: string;
 }
 const { class: className } = Astro.props;
 ---
-{/* The "Rewind" title art: a banded sunset over the sea, a house on the cliff and the blue butterfly. It fills its box, cropping the sides. */}
+{/* The "Rewind" title art: a banded sunset over the sea and a house on the cliff. It fills its box, cropping the sides. */}
 <svg class={className} viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
   <rect width="1440" height="200" fill="#3b3060"></rect>
   <rect y="200" width="1440" height="130" fill="#5b4b8a"></rect>
@@ -21,5 +19,4 @@ const { class: className } = Astro.props;
   <path d="M226 424 284 380 342 424Z" fill="#1e1b24"></path>
   <rect x="262" y="440" width="22" height="22" fill="#e8a657"></rect>
   <rect x="296" y="440" width="22" height="22" fill="#e8a657" opacity="0.6"></rect>
-  <g class="sunset__butterfly"><g transform="translate(1180 250) scale(1.4)" set:html={BUTTERFLY_ART}></g></g>
 </svg>
