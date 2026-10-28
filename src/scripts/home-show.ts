@@ -4,12 +4,14 @@
 //   anime.js: the sunset scene (sun rising, glints spreading), the
 //     "At a glance" notebook opening with its numbers counting up, and the featured
 //     polaroids pinned one by one inside the cork board's wooden frame.
-//   Motion: springy entrances for headings, the Writing charts, the sticky notes and the phone.
+//   Motion: springy entrances for headings, the Writing charts, the sticky notes and the phone,
+//     and the scroll progress that drives the particle backdrop (scripts/particle-backdrop.ts).
 // Nothing runs with reduced motion. Starting poses are set while the page is still
 // hidden behind the font veil (html.loading); if a library fails to load they are
 // cleared again, so the page always ends up fully visible.
 
 import { mountHeroLetters } from './hero-letters';
+import { mountParticleBackdrop } from './particle-backdrop';
 
 const root = document.documentElement;
 const $ = <T extends Element = HTMLElement>(selector: string) => [...document.querySelectorAll<T & Element>(selector)] as T[];
@@ -90,6 +92,8 @@ export async function startHomeShow(): Promise<void> {
   const { gsap, ScrollTrigger, anime, motion } = libs;
   gsap.registerPlugin(ScrollTrigger);
   await shown();
+  // Behind it all, the particles tell the story as the page scrolls (Motion's scroll progress).
+  mountParticleBackdrop((onProgress) => motion.scroll(onProgress));
 
   /** Runs `play` once, the first time `el` scrolls into view. */
   const once = (el: Element | null | undefined, play: () => void, amount = 0.3) => {
