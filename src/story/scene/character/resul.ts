@@ -47,7 +47,7 @@ function withRim(material: MeshToonMaterial): MeshToonMaterial {
 }
 
 /** An inked line, drawn inside out on a smooth hull, whose width grows with distance so it reads the same near and far. */
-function inkOutline(): MeshBasicMaterial {
+export function inkOutline(): MeshBasicMaterial {
   const outline = new MeshBasicMaterial({ color: '#2a1d22', side: BackSide });
   outline.onBeforeCompile = (shader) => {
     shader.uniforms['uThickness'] = { value: 0.0016 };
@@ -60,10 +60,10 @@ function inkOutline(): MeshBasicMaterial {
   return outline;
 }
 
-/** The same surface welded, with smooth normals, so the pushed-out hull has no gaps at hard edges. */
-function hull(geometry: BufferGeometry): BufferGeometry {
+/** The same surface welded, with smooth normals, so the pushed-out hull has no gaps at hard edges or texture seams. */
+export function hull(geometry: BufferGeometry): BufferGeometry {
   const g = geometry.clone();
-  g.deleteAttribute('normal');
+  for (const name of ['normal', 'uv', 'color', 'tangent']) g.deleteAttribute(name);
   const welded = mergeVertices(g, 1e-4);
   welded.computeVertexNormals();
   g.dispose();

@@ -4,19 +4,21 @@ import type { Gate } from '@/scripts/ready';
 import {
   BufferAttribute,
   Color,
+  InstancedMesh,
   Euler,
   Matrix4,
   Mesh,
   MeshBasicMaterial,
   MeshLambertMaterial,
   Quaternion,
+  SkinnedMesh,
   Vector3,
   type BufferGeometry,
   type Material,
-  type MeshStandardMaterial,
 } from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { Atlas, grainTexture } from './atlas';
+import { hull, inkOutline } from './character/resul';
 import type { Phase } from './time';
 
 export type Vec3 = [number, number, number];
@@ -102,18 +104,24 @@ export function Merged({
  * a later camera move will look from (`anchor`, in the same space as `at`).
  * It costs no draw call.
  */
-const glows = new WeakMap<Material, Material>();
-/** A glowing copy of a downloaded model's own material, lit the way the room's lift is. */
-function glowOf(material: Material): Material | undefined {
-  if (!('emissive' in material)) return undefined;
-  let glowing = glows.get(material);
-  if (!glowing) {
-    const copy = material.clone() as MeshStandardMaterial;
-    copy.emissive.set('#e8a657');
-    copy.emissiveIntensity = 0.4;
-    glows.set(material, (glowing = copy));
+/** The character's ink outline, in its highlight gold, shared by every hotspot's object. */
+let outlineMaterial: MeshBasicMaterial | undefined;
+const hulls = new WeakMap<BufferGeometry, BufferGeometry>();
+
+/** An outline hull for a mesh: the same surface pushed out and drawn inside out, skinned if the mesh is. */
+function outlineFor(mesh: Mesh): Mesh {
+  outlineMaterial ??= Object.assign(inkOutline(), { name: 'hotspot-outline' });
+  const material = outlineMaterial;
+  material.color.set('#e8a657');
+  let geometry = hulls.get(mesh.geometry);
+  if (!geometry) hulls.set(mesh.geometry, (geometry = hull(mesh.geometry)));
+  if (mesh instanceof SkinnedMesh) {
+    const skinned = new SkinnedMesh(geometry, material);
+    skinned.bind(mesh.skeleton, mesh.bindMatrix);
+    skinned.frustumCulled = false;
+    return skinned;
   }
-  return glowing;
+  return new Mesh(geometry, material);
 }
 
 export function Hotspot({
@@ -129,27 +137,29 @@ export function Hotspot({
   size: Vec3;
   anchor: Vec3;
   rotY?: number;
-  /** Make the hotspot's sibling meshes glow while it's looked at. */
+  /** Outline the hotspot's sibling meshes, like the character, while it's looked at. */
   highlight?: boolean;
 }) {
   const { hovered, hover, select } = useInteraction();
-  const { lift } = useKit();
   const ref = useRef<Mesh>(null);
   const active = hovered === id;
 
   useEffect(() => {
     const parent = ref.current?.parent;
     if (!active || !highlight || !parent) return;
-    const swapped: [Mesh, Material][] = [];
+    const outlined: Mesh[] = [];
     parent.traverse((o) => {
-      if (!(o instanceof Mesh) || Array.isArray(o.material)) return;
-      const glowing = lift.get(o.material) ?? glowOf(o.material);
-      if (!glowing) return;
-      swapped.push([o, o.material]);
-      o.material = glowing;
+      // Not the hotspot's own invisible box, instanced bulbs or another outline.
+      if (!(o instanceof Mesh) || o === ref.current || o instanceof InstancedMesh || o.material === outlineMaterial || !o.visible) return;
+      outlined.push(o);
     });
-    return () => swapped.forEach(([mesh, material]) => (mesh.material = material));
-  }, [active, highlight, lift]);
+    const outlines = outlined.map((mesh) => {
+      const outline = outlineFor(mesh);
+      mesh.add(outline);
+      return outline;
+    });
+    return () => outlines.forEach((outline) => outline.removeFromParent());
+  }, [active, highlight]);
 
   const pointerType = (event: ThreeEvent<MouseEvent>) => (event.nativeEvent as PointerEvent).pointerType;
   return (
@@ -206,8 +216,6 @@ interface Kit {
   /** Atlas surfaces that glow: screens and the sky. */
   glow: MeshBasicMaterial;
   lens: MeshBasicMaterial;
-  /** Glowing stand-ins for base and lit, used while an object is looked at. */
-  lift: Map<Material, Material>;
 }
 
 const KitContext = createContext<Kit | null>(null);
@@ -229,19 +237,9 @@ export function KitProvider({ phase, children }: { phase: Phase; children: React
     () => new MeshBasicMaterial({ color: '#d8e8ff', transparent: true, opacity: 0.18, depthWrite: false }),
   );
   // Warm, glowing twins of the shared materials, swapped in while an object is looked at.
-  const baseLift = useDisposable(() => new MeshLambertMaterial({ vertexColors: true, emissive: '#e8a657', emissiveIntensity: 0.4 }));
-  const litLift = useDisposable(() => new MeshLambertMaterial({ map: atlas.texture, emissive: '#e8a657', emissiveIntensity: 0.3 }));
-  const lift = useMemo(
-    () =>
-      new Map<Material, Material>([
-        [base, baseLift],
-        [lit, litLift],
-      ]),
-    [base, baseLift, lit, litLift],
-  );
   const kit = useMemo(
-    () => ({ atlas, phase, base, wall, lit, glow, lens, lift }),
-    [atlas, phase, base, wall, lit, glow, lens, lift],
+    () => ({ atlas, phase, base, wall, lit, glow, lens }),
+    [atlas, phase, base, wall, lit, glow, lens],
   );
   return <KitContext.Provider value={kit}>{children}</KitContext.Provider>;
 }
