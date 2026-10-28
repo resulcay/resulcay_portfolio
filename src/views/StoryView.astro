@@ -45,7 +45,12 @@ const sounds = [
         <a class="button" href={profile.cvPath} download>{t(lang, 'nav.cv')}</a>
       </div>
       <p class="hand title__note">{t(lang, 'story.headphones')}</p>
-      <p><button type="button" class="credits-link" data-credits-open>{t(lang, 'story.credits')}</button></p>
+      <p>
+        <button type="button" class="credits-link" data-credits-open>{t(lang, 'story.credits')}</button> ·{' '}
+        <button type="button" class="credits-link" data-storm-sound data-on={t(lang, 'story.stormOn')} data-off={t(lang, 'story.stormOff')} aria-pressed="true">
+          {t(lang, 'story.stormOn')}
+        </button>
+      </p>
       <p class="title__failed" data-failed role="alert" hidden>{t(lang, 'story.failed')}</p>
     </div>
   </section>

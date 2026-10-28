@@ -8,7 +8,10 @@ const { class: className } = Astro.props;
 <canvas class={className} data-storm aria-hidden="true"></canvas>
 
 <script>
-  import { mountStorm } from '@/scripts/storm';
+  import { mountStorm, mountStormSound } from '@/scripts/storm';
+  import roarUrl from '@/assets/tornado.mp3?url';
 
   document.querySelectorAll<HTMLCanvasElement>('canvas[data-storm]').forEach(mountStorm);
+  const toggle = document.querySelector<HTMLButtonElement>('[data-storm-sound]');
+  if (toggle) mountStormSound(roarUrl, toggle);
 </script>

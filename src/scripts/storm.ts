@@ -281,3 +281,50 @@ export function mountStorm(canvas: HTMLCanvasElement): void {
   };
   requestAnimationFrame(frame);
 }
+
+/**
+ * The storm's roar, looping quietly behind the title. Browsers only allow sound
+ * after a gesture, so it starts on the visitor's first tap or key. `button`
+ * turns it on and off (remembered); it pauses while the room is open or the tab is hidden.
+ */
+export function mountStormSound(url: string, button: HTMLButtonElement): void {
+  const audio = new Audio(url);
+  audio.loop = true;
+  audio.volume = 0.35;
+  audio.preload = 'none';
+  let storage: Storage | undefined;
+  try {
+    storage = localStorage;
+  } catch {
+    storage = undefined;
+  }
+  let on = storage?.getItem('storm-sound') !== 'off';
+  let armed = false;
+
+  const sync = () => {
+    button.setAttribute('aria-pressed', String(on));
+    button.textContent = (on ? button.dataset['on'] : button.dataset['off']) ?? '';
+    const play = on && armed && !document.hidden && !document.documentElement.classList.contains('story-open');
+    if (play) audio.play().catch(() => undefined);
+    else audio.pause();
+  };
+  const arm = () => {
+    armed = true;
+    sync();
+  };
+
+  addEventListener('pointerdown', arm, { once: true });
+  addEventListener('keydown', arm, { once: true });
+  button.addEventListener('click', () => {
+    on = !on;
+    try {
+      storage?.setItem('storm-sound', on ? 'on' : 'off');
+    } catch {
+      // Private mode: the choice lasts for this page only.
+    }
+    arm();
+  });
+  document.addEventListener('visibilitychange', sync);
+  new MutationObserver(sync).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  sync();
+}
