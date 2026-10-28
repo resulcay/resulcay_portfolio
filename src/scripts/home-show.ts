@@ -9,6 +9,8 @@
 // hidden behind the font veil (html.loading); if a library fails to load they are
 // cleared again, so the page always ends up fully visible.
 
+import { mountHeroLetters } from './hero-letters';
+
 const root = document.documentElement;
 const $ = <T extends Element = HTMLElement>(selector: string) => [...document.querySelectorAll<T & Element>(selector)] as T[];
 
@@ -105,11 +107,18 @@ export async function startHomeShow(): Promise<void> {
   };
 
   // ── GSAP: the "Episode 1" title card ────────────────────────────────────────
-  gsap
+  // Then the name becomes plain text again (true kerning) and its letters come alive under the pointer.
+  void gsap
     .timeline({ defaults: { ease: 'power3.out' } })
     .to('.hero__kicker', { clipPath: 'inset(0 0% 0 0)', duration: 1.1, ease: 'power2.inOut', clearProps: 'clipPath' })
     .fromTo(letters, { opacity: 0, y: 46, rotate: -8, filter: 'blur(6px)' }, { opacity: 1, y: 0, rotate: 0, filter: 'blur(0px)', duration: 0.9, stagger: 0.06, clearProps: 'opacity,transform,filter' }, '-=0.45')
-    .fromTo(heroBits, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.12, clearProps: 'opacity,transform' }, '-=0.5');
+    .fromTo(heroBits, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.12, clearProps: 'opacity,transform' }, '-=0.5')
+    .then(() => {
+      if (!title) return;
+      title.textContent = title.getAttribute('aria-label');
+      title.removeAttribute('aria-label');
+      mountHeroLetters(title);
+    });
 
   // ── anime.js: the sunset scene ──────────────────────────────────────────────
   once(document.querySelector('.teaser'), () => {
