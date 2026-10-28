@@ -14,6 +14,17 @@ const { lang } = Astro.props;
 const [profile, music] = await Promise.all([content.getProfile(), content.listMusic()]);
 // The phone in the room holds the contact form.
 const siteKey = turnstileSiteKey();
+// The room's downloaded models, credited as their licences ask.
+const models = [
+  { title: 'Crimson Ledger', author: 'mattruszala', license: 'CC BY 4.0', url: 'https://sketchfab.com/3d-models/crimson-ledger-84e9932dd0274af3a2ad91f779b58cf0' },
+  { title: 'An Animated Cat', author: 'Evil_Katz', license: 'CC BY 4.0', url: 'https://sketchfab.com/3d-models/an-animated-cat-aec25699660043a29595f9572149d1e8' },
+  { title: 'Smart Phone (School Project)', author: 'Ole Gunnar Isager', license: 'CC BY 4.0', url: 'https://sketchfab.com/3d-models/smart-phone-school-project-5134059a9eb844c1b106e4cb7eafd88c' },
+  { title: 'Animated Butterfly', author: 'Artistic_side', license: 'CC BY 4.0', url: 'https://sketchfab.com/3d-models/animated-butterfly-d4fbcbaab845402999f30c5aa75851e6' },
+  { title: 'Tree S2', author: 'Snowism', license: 'CC BY 4.0', url: 'https://sketchfab.com/3d-models/tree-s2-8f4ee7cc1b5d449caef67c7a095d8556' },
+  { title: 'Nightstand - PSX/PS1 Style Low Poly', author: 'Potato Head', license: 'CC BY 4.0', url: 'https://sketchfab.com/3d-models/nightstand-psxps1-style-low-poly-0602c6bde1de457a8c247dd9faadf2da' },
+  { title: 'Radio', author: 'oxyuraatheduck', license: 'Royalty Free' },
+  { title: 'Bed', author: 'andrey-ryzhko', license: 'Royalty Free' },
+];
 ---
 <BaseLayout lang={lang} title={t(lang, 'nav.story')} description={t(lang, 'story.description')}>
   <section class="title" aria-labelledby="story-title">
@@ -54,6 +65,22 @@ const siteKey = turnstileSiteKey();
         <p>{t(lang, 'story.noTracks')}</p>
       )
     }
+    <h3>{t(lang, 'story.models')}</h3>
+    <ul>
+      {
+        models.map((model) => (
+          <li>
+            <strong>{model.title}</strong> · {model.author} · {t(lang, 'story.license')}: {model.license}
+            {model.url && (
+              <>
+                {' · '}
+                <a href={model.url} rel="noopener noreferrer" target="_blank">{t(lang, 'story.source')}</a>
+              </>
+            )}
+          </li>
+        ))
+      }
+    </ul>
     <p class="hand">{t(lang, 'footer.inspired')}</p>
     <button type="button" class="button" data-credits-close>{t(lang, 'story.close')}</button>
   </dialog>

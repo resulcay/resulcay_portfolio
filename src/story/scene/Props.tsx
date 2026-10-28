@@ -1,10 +1,12 @@
-import { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { BoxGeometry, CylinderGeometry, SphereGeometry, type Group } from 'three';
+import { BoxGeometry, SphereGeometry } from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { around, Hotspot, Merged, useKit, type Part, type Vec3 } from './kit';
 import { wrapText } from './atlas';
-import { DESK_TOP, LAPTOP_Z, SEAT, SEAT_TURN } from './Furniture';
+import { DESK_TOP, LAPTOP_Z, MATTRESS_TOP, NIGHTSTAND_TOP, SEAT, SEAT_TURN } from './Furniture';
+import { Model } from './Model';
+import journalUrl from './models/journal.glb?url';
+import phoneUrl from './models/phone.glb?url';
+import radioUrl from './models/radio.glb?url';
 
 const rounded = (w: number, h: number, d: number, r = 0.008) => new RoundedBoxGeometry(w, h, d, 2, r);
 
@@ -65,81 +67,27 @@ export function Laptop() {
 }
 
 export function Journal() {
-  const { base } = useKit();
   return (
-    <group position={[-1.75, 0.575, -0.2]} rotation-y={0.35}>
-      <Merged
-        material={base}
-        parts={() => [
-          { geo: rounded(0.22, 0.03, 0.3), color: '#5b4b8a' },
-          { geo: new BoxGeometry(0.205, 0.024, 0.29), color: '#f4ebdd', at: [0.01, 0.002, 0] },
-          { geo: new BoxGeometry(0.012, 0.034, 0.302), color: '#e8a657', at: [0.07, 0, 0] },
-        ]}
-      />
-      <Hotspot id="journal" at={[0, 0.03, 0]} size={[0.3, 0.12, 0.38]} anchor={[0.3, 0.6, 0.6]} />
-    </group>
+    <Model url={journalUrl} position={[-1.75, MATTRESS_TOP + 0.045, -0.2]} rotationY={0.35}>
+      <Hotspot id="journal" at={[0, 0.05, 0]} size={[0.36, 0.14, 0.28]} anchor={[0.3, 0.6, 0.6]} />
+    </Model>
   );
 }
 
 export function Phone() {
-  const { atlas, base, glow } = useKit();
   return (
-    <group position={[-1.12, 0.505, -1.7]} rotation-y={0.4}>
-      <Merged material={base} parts={() => [{ geo: rounded(0.075, 0.01, 0.15, 0.004), color: '#222226' }]} />
-      <Merged
-        material={glow}
-        shadows={false}
-        parts={() => {
-          const cell = atlas.alloc()!;
-          atlas.paint(cell, 65, 135, (ctx) => {
-            const bg = ctx.createLinearGradient(0, 0, 0, 135);
-            bg.addColorStop(0, '#5b4b8a');
-            bg.addColorStop(1, '#e8a657');
-            ctx.fillStyle = bg;
-            ctx.fillRect(0, 0, 65, 135);
-            const now = new Date();
-            ctx.fillStyle = '#f4ebdd';
-            ctx.font = '500 16px "Dudu Calligraphy"';
-            ctx.textAlign = 'center';
-            ctx.fillText(`${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`, 32, 40);
-          });
-          return [{ geo: atlas.quad(cell, 0.066, 0.137), color: '#ffffff', at: [0, 0.0055, 0], rot: [-Math.PI / 2, 0, 0] }];
-        }}
-      />
-      <Hotspot id="phone" at={[0, 0.02, 0]} size={[0.14, 0.08, 0.2]} anchor={[0.2, 0.45, 0.5]} />
-    </group>
+    <Model url={phoneUrl} position={[-1.12, NIGHTSTAND_TOP, -1.7]} rotationY={0.4}>
+      <Hotspot id="phone" at={[0, 0.02, 0]} size={[0.16, 0.08, 0.2]} anchor={[0.2, 0.45, 0.5]} />
+    </Model>
   );
 }
 
-export function RecordPlayer({ spinning }: { spinning: boolean }) {
-  const { base } = useKit();
-  const vinyl = useRef<Group>(null);
-  // About 33⅓ rpm while music plays.
-  useFrame((_, delta) => {
-    if (spinning && vinyl.current) vinyl.current.rotation.y -= delta * 3.5;
-  });
+/** The radio on the dresser, beating gently while music plays. */
+export function RecordPlayer({ spinning, still }: { spinning: boolean; still: boolean }) {
   return (
-    <group position={[-2.24, 0.85, 1.2]} rotation-y={Math.PI / 2}>
-      <Merged
-        material={base}
-        parts={() => [
-          { geo: rounded(0.42, 0.08, 0.34, 0.012), color: '#7a4e33', at: [0, 0.04, 0] },
-          { geo: new CylinderGeometry(0.02, 0.02, 0.03, 10), color: '#c9ccd2', at: [0.15, 0.095, -0.1] },
-          { geo: new BoxGeometry(0.012, 0.01, 0.2), color: '#c9ccd2', at: [0.12, 0.11, -0.01], rot: [0, 0.35, 0] },
-        ]}
-      />
-      <group ref={vinyl} position={[-0.04, 0.086, 0]}>
-        <Merged
-          material={base}
-          parts={() => [
-            { geo: new CylinderGeometry(0.14, 0.14, 0.012, 32), color: '#1b1b1f' },
-            { geo: new CylinderGeometry(0.045, 0.045, 0.014, 20), color: '#e8a657', at: [0, 0.002, 0] },
-            { geo: new BoxGeometry(0.03, 0.016, 0.008), color: '#5b4b8a', at: [0.022, 0.002, 0] },
-          ]}
-        />
-      </group>
-      <Hotspot id="recordPlayer" at={[0, 0.06, 0]} size={[0.46, 0.16, 0.38]} anchor={[0, 0.5, 0.8]} />
-    </group>
+    <Model url={radioUrl} position={[-2.24, 0.85, 1.2]} pulse={spinning} still={still}>
+      <Hotspot id="recordPlayer" at={[0, 0.11, 0]} size={[0.2, 0.26, 0.34]} anchor={[0.8, 0.5, 0]} />
+    </Model>
   );
 }
 

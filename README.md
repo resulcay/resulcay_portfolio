@@ -52,6 +52,21 @@ Story mode's record player plays the tracks listed under **Admin → Music**, in
 
 Only use music you have the right to use. Good places for CC0 and CC BY tracks: the [Free Music Archive](https://freemusicarchive.org), [ccMixter](https://ccmixter.org) and [Pixabay Music](https://pixabay.com/music/). CC BY needs the artist credited, which the credits do; avoid NC (non-commercial) and ND licences unless you've checked they fit. Keep a note of the page you downloaded each track from and paste it as the source.
 
+## Story mode models
+
+The room's downloaded models, credited in Story mode's Credits:
+
+- "Crimson Ledger" by mattruszala, CC BY 4.0: https://sketchfab.com/3d-models/crimson-ledger-84e9932dd0274af3a2ad91f779b58cf0
+- "An Animated Cat" by Evil_Katz, CC BY 4.0: https://sketchfab.com/3d-models/an-animated-cat-aec25699660043a29595f9572149d1e8
+- "Smart Phone (School Project)" by Ole Gunnar Isager, CC BY 4.0: https://sketchfab.com/3d-models/smart-phone-school-project-5134059a9eb844c1b106e4cb7eafd88c
+- "Animated Butterfly" by Artistic_side, CC BY 4.0: https://sketchfab.com/3d-models/animated-butterfly-d4fbcbaab845402999f30c5aa75851e6
+- "Tree S2" by Snowism, CC BY 4.0: https://sketchfab.com/3d-models/tree-s2-8f4ee7cc1b5d449caef67c7a095d8556
+- "Nightstand - PSX/PS1 Style Low Poly" by Potato Head, CC BY 4.0: https://sketchfab.com/3d-models/nightstand-psxps1-style-low-poly-0602c6bde1de457a8c247dd9faadf2da
+- Radio by oxyuraatheduck (Royalty Free)
+- Bed by andrey-ryzhko (Royalty Free)
+
+They were scaled to metres, simplified and given WebP textures with Blender before being added to `src/story/scene/models/`.
+
 With no tracks, Story mode simply has no music; its sound effects and room ambience are made in the browser and need no files.
 
 ### Local development

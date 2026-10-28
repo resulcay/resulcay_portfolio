@@ -1,6 +1,11 @@
-import { BoxGeometry, ConeGeometry, CylinderGeometry, LatheGeometry, SphereGeometry, Vector2 } from 'three';
+import { BoxGeometry, CylinderGeometry } from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { around, Merged, useKit, type Part, type Vec3 } from './kit';
+import { Model } from './Model';
+import bedUrl from './models/bed.glb?url';
+import nightstandUrl from './models/nightstand.glb?url';
+import treeUrl from './models/tree.glb?url';
+import catUrl from './models/cat.glb?url';
 
 /** Where the chair stands and how it's turned; the character sits here. */
 // Square to the desk, the seat's front at the desk's edge: his forearms come straight over it.
@@ -20,14 +25,13 @@ const LIGHT_WOOD = '#a77a55';
 
 const rounded = (w: number, h: number, d: number, r = 0.02) => new RoundedBoxGeometry(w, h, d, 2, r);
 
-function bed(): Part[] {
-  return [
-    { geo: new BoxGeometry(1.05, 0.3, 2.0), color: WOOD, at: [-1.95, 0.15, -0.95] },
-    { geo: new BoxGeometry(1.05, 0.62, 0.06), color: WOOD, at: [-1.95, 0.62, -1.93] },
-    { geo: rounded(1.0, 0.2, 1.95, 0.05), color: '#f1e9dc', at: [-1.95, 0.4, -0.95] },
-    { geo: rounded(1.06, 0.09, 1.3, 0.04), color: '#6d5ba0', at: [-1.95, 0.53, -0.45] },
-    { geo: rounded(0.62, 0.12, 0.34, 0.05), color: '#f8f1e6', at: [-1.95, 0.57, -1.68] },
-  ];
+/** The bed model's mattress top; the blanket and the journal rest on it. */
+export const MATTRESS_TOP = 0.457;
+/** The nightstand model's top, where the phone lies. */
+export const NIGHTSTAND_TOP = 0.5;
+
+function blanket(): Part[] {
+  return [{ geo: rounded(1.0, 0.06, 0.9, 0.03), color: '#6d5ba0', at: [-1.95, MATTRESS_TOP + 0.015, -0.55] }];
 }
 
 function desk(): Part[] {
@@ -58,12 +62,11 @@ function chair(): Part[] {
   ];
 }
 
-function bedsideAndDresser(): Part[] {
+function dresser(): Part[] {
   const drawers = [0.22, 0.48, 0.74].map(
     (y): Part => ({ geo: new BoxGeometry(0.01, 0.015, 0.8), color: '#2d4f50', at: [-2.03, y, 1.2] }),
   );
   return [
-    { geo: rounded(0.45, 0.5, 0.42), color: WOOD, at: [-1.15, 0.25, -1.74] },
     { geo: rounded(0.45, 0.85, 1.0), color: '#4f7f7f', at: [-2.26, 0.425, 1.2] },
     ...drawers,
   ];
@@ -83,32 +86,18 @@ function shelf(): Part[] {
   return [{ geo: new BoxGeometry(0.75, 0.035, 0.22), color: LIGHT_WOOD, at: [2.05, 1.9, -1.89] }, ...books];
 }
 
-function plant(): Part[] {
-  const pot = new LatheGeometry(
-    [new Vector2(0, 0), new Vector2(0.12, 0), new Vector2(0.16, 0.3), new Vector2(0.17, 0.32), new Vector2(0, 0.32)],
-    16,
-  );
-  const leaves = Array.from({ length: 7 }, (_, i): Part => {
-    const a = (i / 7) * Math.PI * 2;
-    return {
-      geo: new SphereGeometry(0.09, 8, 6),
-      color: i % 2 ? '#4f7f4f' : '#6b9a5b',
-      at: [2.15 + Math.cos(a) * 0.12, 0.55 + (i % 3) * 0.1, -1.55 + Math.sin(a) * 0.12],
-      rot: [0.4 * Math.sin(a), a, 0.4 * Math.cos(a)],
-      scale: [0.6, 1.9, 0.35],
-    };
-  });
-  return [
-    { geo: pot, color: '#b8643f', at: [2.15, 0, -1.55] },
-    { geo: new ConeGeometry(0.03, 0.3, 6), color: '#4f6b3f', at: [2.15, 0.45, -1.55] },
-    ...leaves,
-  ];
-}
-
-export function Furniture() {
+export function Furniture({ still }: { still: boolean }) {
   const { base } = useKit();
   return (
-    <Merged material={base} bake parts={() => [...bed(), ...desk(), ...chair(), ...bedsideAndDresser(), ...shelf(), ...plant()]} />
+    <>
+      <Merged material={base} bake parts={() => [...blanket(), ...desk(), ...chair(), ...dresser(), ...shelf()]} />
+      {/* Headboard against the back wall. */}
+      <Model url={bedUrl} position={[-1.95, 0, -0.95]} rotationY={-Math.PI / 2} color="#efe6d8" />
+      <Model url={nightstandUrl} position={[-1.15, 0, -1.74]} />
+      <Model url={treeUrl} position={[2.1, 0, -1.55]} />
+      {/* On the rug, grooming: the cat's one clip is it licking a paw and washing its face. */}
+      <Model url={catUrl} position={[-0.2, 0.017, 0.55]} rotationY={-0.3} clip="Take 001" still={still} />
+    </>
   );
 }
 

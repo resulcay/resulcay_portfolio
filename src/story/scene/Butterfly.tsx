@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { DoubleSide, Vector3, type Group, type Mesh } from 'three';
+import { Vector3, type Group, type Mesh } from 'three';
 import type { StoryObject } from '../lines';
+import { Model } from './Model';
+import butterflyUrl from './models/butterfly.glb?url';
 
 interface Flight {
   from: Vector3;
@@ -16,14 +18,12 @@ const REST = new Vector3(-0.6, 1.7, -0.6);
 /**
  * The blue butterfly. With a target it flies an arc there and hovers with a
  * soft glow; tapping it shows the target's thought. With reduced motion it
- * moves in straight lines and doesn't flap.
+ * moves in straight lines and its wings stay still.
  */
 export function Butterfly({ still, target, onTap }: { still: boolean; target: StoryObject | null; onTap: () => void }) {
   const scene = useThree((s) => s.scene);
   const clock = useThree((s) => s.clock);
   const body = useRef<Group>(null);
-  const left = useRef<Group>(null);
-  const right = useRef<Group>(null);
   const halo = useRef<Mesh>(null);
   const flight = useRef<Flight | null>(null);
   const home = useRef(REST.clone());
@@ -39,7 +39,7 @@ export function Butterfly({ still, target, onTap }: { still: boolean; target: St
   }, [target, scene, clock, still]);
 
   useFrame(({ clock: { elapsedTime: t } }) => {
-    if (!body.current || !left.current || !right.current || !halo.current) return;
+    if (!body.current || !halo.current) return;
     const f = flight.current;
     let arrived = true;
     if (f) {
@@ -60,22 +60,13 @@ export function Butterfly({ still, target, onTap }: { still: boolean; target: St
       home.current.z,
     );
     if (arrived && !still) body.current.rotation.y += 0.004;
-    const flap = still ? 0.5 : Math.sin(t * 14) * 0.9;
-    left.current.rotation.y = flap;
-    right.current.rotation.y = -flap;
     halo.current.visible = arrived && target !== null;
   });
 
   return (
     <group ref={body} position={REST}>
-      {[left, right].map((wing, i) => (
-        <group key={i} ref={wing}>
-          <mesh position={[i === 0 ? -0.05 : 0.05, 0, 0]} scale={[1, 1.3, 1]}>
-            <circleGeometry args={[0.05, 12]} />
-            <meshBasicMaterial color="#4fa3d9" side={DoubleSide} />
-          </mesh>
-        </group>
-      ))}
+      {/* Drawn a little larger than life (about 14 cm), so it reads from across the room. */}
+      <Model url={butterflyUrl} position={[0, -0.03, 0]} scale={1.6} clip="Flying" still={still} />
       <mesh ref={halo} visible={false}>
         <sphereGeometry args={[0.11, 16, 12]} />
         <meshBasicMaterial color="#bfe3ff" transparent opacity={0.28} depthWrite={false} toneMapped={false} />

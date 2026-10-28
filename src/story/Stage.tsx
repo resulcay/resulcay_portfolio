@@ -80,12 +80,12 @@ export function Stage(props: StageProps) {
             <Shell />
             <Window />
             <StringLights />
-            <Furniture />
+            <Furniture still={still} />
             <Posters />
             <Laptop />
             <Journal />
             <Phone />
-            <RecordPlayer spinning={props.spinning} />
+            <RecordPlayer spinning={props.spinning} still={still} />
             <Corkboard certifications={data.profile.certifications} />
             <Polaroids projects={data.projects} />
             <Character still={still} position={SEAT} rotationY={SEAT_TURN} highlighted={hovered === 'resul'} />
