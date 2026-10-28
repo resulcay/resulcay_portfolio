@@ -2,6 +2,7 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PolaroidCard from '@/components/PolaroidCard.astro';
 import Butterfly from '@/components/Butterfly.astro';
+import SunsetScene from '@/components/SunsetScene.astro';
 import type { Locale } from '@/domain/schemas';
 import { featuredProjects, publicProjects } from '@/application/content';
 import { experienceMonths, latestRole, storeApps, topTech } from '@/application/glance';
@@ -52,6 +53,21 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
       <a class="button" href="#contact">{t(lang, 'nav.contact')}</a>
     </div>
     <Butterfly size={44} class="hero__butterfly" />
+  </section>
+
+  <section class="wrap teaser" aria-labelledby="teaser-title">
+    <div class="teaser__card">
+      <SunsetScene class="teaser__scene" />
+      <div class="teaser__text">
+        <p class="hand teaser__kicker">{t(lang, 'home.kicker')} · {t(lang, 'home.title')}</p>
+        <h2 id="teaser-title">{t(lang, 'teaser.title')}</h2>
+        <p>{t(lang, 'teaser.desc')}</p>
+        <a class="button button--primary teaser__cta" href={localizePath('/story', lang)}>
+          <Butterfly size={18} />
+          {t(lang, 'teaser.cta')}
+        </a>
+      </div>
+    </div>
   </section>
 
   <section class="wrap facts" aria-labelledby="facts-title">
@@ -289,6 +305,57 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
     to {
       transform: translate(-18px, 14px) rotate(-8deg);
     }
+  }
+  /* The way into Story mode: its title art as a banner, the text over the darker left. */
+  .teaser {
+    padding-top: 8px;
+  }
+  .teaser__card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 280px;
+    overflow: hidden;
+    border-radius: var(--radius);
+    color: #f4ebdd;
+    box-shadow: 0 14px 30px -14px rgb(0 0 0 / 0.35);
+  }
+  .teaser__card :global(.teaser__scene) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .teaser__card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgb(30 27 36 / 0.7), rgb(30 27 36 / 0.3) 50%, transparent 75%);
+  }
+  .teaser__text {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 30rem;
+    padding: clamp(24px, 5vw, 48px);
+  }
+  .teaser__text h2 {
+    margin: 0;
+    color: #f4ebdd;
+  }
+  .teaser__text p {
+    margin: 0;
+    color: #ede3d2;
+  }
+  .teaser__kicker {
+    font-size: 1.4rem;
+    color: #e8a657 !important;
+  }
+  .teaser__cta {
+    margin-top: 6px;
   }
   .facts {
     padding: 32px 0;

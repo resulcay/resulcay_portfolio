@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Butterfly from '@/components/Butterfly.astro';
+import SunsetScene from '@/components/SunsetScene.astro';
 import type { Locale } from '@/domain/schemas';
 import { content } from '@/lib/content';
 import { localizePath, t } from '@/i18n/ui';
@@ -15,34 +16,9 @@ const [profile, music] = await Promise.all([content.getProfile(), content.listMu
 const siteKey = turnstileSiteKey();
 ---
 <BaseLayout lang={lang} title={t(lang, 'nav.story')} description={t(lang, 'story.description')}>
-  <section class="title wrap" aria-labelledby="story-title">
-    <div class="poster" aria-hidden="true">
-      <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
-        <defs>
-          <linearGradient id="story-sky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#5b4b8a"></stop>
-            <stop offset="0.55" stop-color="#e8a657"></stop>
-            <stop offset="1" stop-color="#f6d3a0"></stop>
-          </linearGradient>
-          <radialGradient id="story-sun">
-            <stop offset="0" stop-color="#fff3d6"></stop>
-            <stop offset="0.45" stop-color="#ffd59a" stop-opacity="0.9"></stop>
-            <stop offset="1" stop-color="#e8a657" stop-opacity="0"></stop>
-          </radialGradient>
-        </defs>
-        <rect width="400" height="300" fill="url(#story-sky)"></rect>
-        <circle cx="282" cy="196" r="90" fill="url(#story-sun)"></circle>
-        <circle cx="282" cy="196" r="28" fill="#fff0cf"></circle>
-        <path d="M0 214 C60 190 110 200 170 186 C230 172 300 196 400 178 L400 300 L0 300Z" fill="#2f6f73"></path>
-        <path d="M0 246 C70 228 140 240 210 226 C280 212 340 236 400 222 L400 300 L0 300Z" fill="#1e1b24"></path>
-        <path d="M54 246 L58 150 M58 150 L46 158 M58 150 L70 158 M120 236 L123 160 M123 160 L112 167 M123 160 L134 167" stroke="#1e1b24" stroke-width="2.5" fill="none"></path>
-        <path d="M58 156 C80 170 100 170 123 165" stroke="#1e1b24" stroke-width="1" fill="none"></path>
-        <path d="M150 90 q6 -6 12 0 q6 -6 12 0 M190 70 q5 -5 10 0 q5 -5 10 0" stroke="#1e1b24" stroke-width="1.6" fill="none"></path>
-      </svg>
-      <Butterfly size={40} class="poster__butterfly" />
-    </div>
-
-    <div class="title__text">
+  <section class="title" aria-labelledby="story-title">
+    <SunsetScene class="title__scene" />
+    <div class="wrap title__text">
       <h1 id="story-title"><span class="hand">{t(lang, 'home.kicker')}:</span> {t(lang, 'home.title')}</h1>
       <p class="title__desc">{t(lang, 'story.description')}</p>
       <p class="title__unfit" data-unfit hidden>{t(lang, 'story.unfit')}</p>
@@ -185,41 +161,46 @@ const siteKey = turnstileSiteKey();
 </script>
 
 <style>
+  /* The title screen: the sunset scene full-bleed, the text over its darker left side. */
   .title {
-    display: grid;
-    gap: clamp(28px, 5vw, 56px);
-    align-items: center;
-    padding-top: clamp(32px, 6vw, 80px);
-  }
-  @media (min-width: 900px) {
-    .title {
-      grid-template-columns: 1.1fr 1fr;
-    }
-  }
-  .poster {
     position: relative;
-    aspect-ratio: 4 / 3;
-    border: 10px solid var(--paper-raised);
-    border-bottom-width: 36px;
-    border-radius: 4px;
-    box-shadow: 0 18px 40px rgb(30 27 36 / 0.25);
-    rotate: -1.5deg;
+    display: flex;
+    align-items: center;
+    min-height: min(calc(100svh - 64px), 900px);
     overflow: hidden;
+    color: #f4ebdd;
   }
-  .poster svg {
-    display: block;
+  .title :global(.title__scene) {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
   }
-  .poster :global(.poster__butterfly) {
+  .title::after {
+    content: '';
     position: absolute;
-    left: 58%;
-    top: 30%;
+    inset: 0;
+    background: linear-gradient(90deg, rgb(30 27 36 / 0.6), rgb(30 27 36 / 0.25) 45%, transparent 70%);
   }
   .title__text {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     gap: 18px;
+    padding-block: clamp(40px, 8vw, 96px);
+  }
+  .title h1 .hand {
+    color: #e8a657;
+  }
+  .title .button:not(.button--primary) {
+    border-color: #f4ebdd;
+    background: rgb(30 27 36 / 0.3);
+    color: #f4ebdd;
+  }
+  .title .title__note,
+  .title .credits-link {
+    color: #ede3d2;
   }
   h1 {
     font-size: clamp(2.75rem, 7vw, 4.5rem);
@@ -230,7 +211,8 @@ const siteKey = turnstileSiteKey();
     color: var(--accent-text);
   }
   .title__desc {
-    max-width: var(--measure);
+    max-width: 32rem;
+    color: #ede3d2;
     font-size: 1.1875rem;
   }
   .title__unfit,
@@ -239,6 +221,7 @@ const siteKey = turnstileSiteKey();
     padding: 12px 16px;
     border-left: 4px solid var(--golden);
     background: var(--paper-raised);
+    color: var(--ink);
   }
   .title__actions {
     display: flex;
