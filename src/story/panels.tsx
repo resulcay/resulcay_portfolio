@@ -1,5 +1,6 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import type { StoryData } from '@/application/story';
+import { BUTTERFLY_ART } from '@/components/butterfly-art';
 import type { Locale } from '@/domain/schemas';
 import { localizePath, t } from '@/i18n/ui';
 import { LINES } from './lines';
@@ -23,7 +24,19 @@ interface PanelsProps {
   onClose: () => void;
 }
 
-/** The paper-page dialog for whichever object is open. */
+/** The sunset palettes of the polaroid photos, as on the home page's cards. */
+const PALETTES = [
+  ['#5b4b8a', '#e8a657', '#2f6f73'],
+  ['#2f6f73', '#f6c47e', '#1e1b24'],
+  ['#d98a62', '#5b4b8a', '#2f6f73'],
+  ['#3b3060', '#e8a657', '#4fa3d9'],
+] as const;
+
+/**
+ * Each object opens its own kind of page: the phone is the home page's contact phone, the
+ * laptop a laptop screen, the photo wall polaroids, the journal a notebook, the cork board
+ * pinned cards, the record player a spinning record, the window its skies.
+ */
 export function Panels({ route, data, lang, siteKey, visitor, phaseChoice, onPhase, onGo, onClose }: PanelsProps) {
   const ui = LINES[lang].ui;
   switch (route.object) {
@@ -36,15 +49,16 @@ export function Panels({ route, data, lang, siteKey, visitor, phaseChoice, onPha
           ? [...data.projects].sort((a, b) => Number(b.paid) - Number(a.paid))
           : data.projects;
       return project ? (
-        <Panel title={project.title} lang={lang} onClose={onClose}>
-          <CaseStudy project={project} lang={lang} onAll={() => onGo({ object: 'polaroids' })} />
+        <Panel variant="case" title={project.title} lang={lang} onClose={onClose}>
+          <CaseStudy project={project} index={data.projects.indexOf(project)} lang={lang} onAll={() => onGo({ object: 'polaroids' })} />
         </Panel>
       ) : (
-        <Panel title={route.paid ? ui.chips.paidWork : t(lang, 'projects.title')} lang={lang} onClose={onClose}>
-          <ul className="story-grid">
+        <Panel variant="wall" title={route.paid ? ui.chips.paidWork : t(lang, 'projects.title')} lang={lang} onClose={onClose}>
+          <ul className="story-wall">
             {shown.map((p) => (
               <li key={p.slug}>
                 <button type="button" onClick={() => onGo({ object: 'polaroids', project: p.slug })}>
+                  <Photo project={p} index={data.projects.indexOf(p)} />
                   <strong>{p.title}</strong>
                   <span>{p.hook}</span>
                 </button>
@@ -56,67 +70,83 @@ export function Panels({ route, data, lang, siteKey, visitor, phaseChoice, onPha
     }
     case 'laptop':
       return (
-        <Panel title={t(lang, 'home.experience')} lang={lang} onClose={onClose}>
-          <ol className="story-timeline">
-            {data.experience.map((e) => (
-              <li key={`${e.organization}-${e.start}`}>
-                <p className="story-meta">{e.period}</p>
-                <h3>{e.title}</h3>
-                <p>
-                  {e.organization} · {e.location}
-                </p>
-                <ul>
-                  {e.points.map((point) => (
-                    <li key={point}>{point}</li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ol>
+        <Panel variant="laptop" title={t(lang, 'home.experience')} lang={lang} onClose={onClose}>
+          <div className="story-laptop">
+            <div className="story-laptop__screen">
+              <p className="story-laptop__bar" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+                <b>experience.md</b>
+              </p>
+              <ol className="story-timeline">
+                {data.experience.map((e) => (
+                  <li key={`${e.organization}-${e.start}`}>
+                    <p className="story-timeline__when">{e.period}</p>
+                    <h3>{e.title}</h3>
+                    <p className="story-meta">
+                      {e.organization} · {e.location}
+                    </p>
+                    <ul>
+                      {e.points.map((point) => (
+                        <li key={point}>{point}</li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
         </Panel>
       );
     case 'journal':
       return (
-        <Panel title={t(lang, 'about.title')} lang={lang} onClose={onClose}>
-          <p>{data.profile.summary}</p>
+        <Panel variant="journal" title={t(lang, 'about.title')} lang={lang} onClose={onClose}>
+          <p className="story-journal__lead">{data.profile.summary}</p>
           <h3>{t(lang, 'about.skills')}</h3>
           <dl className="story-skills">
             {data.profile.skills.map((s) => (
               <div key={s.group}>
                 <dt>{s.group}</dt>
-                <dd>{s.items.join(', ')}</dd>
+                <dd>
+                  {s.items.map((item) => (
+                    <span key={item}>{item}</span>
+                  ))}
+                </dd>
               </div>
             ))}
           </dl>
           <h3>{t(lang, 'about.education')}</h3>
-          <ul>
+          <ul className="story-schools">
             {data.profile.education.map((e) => (
               <li key={e.program}>
-                {e.program}, {e.school}, {e.start}–{e.end}
+                <strong>{e.program}</strong>, {e.school}, {e.start}–{e.end}
                 {e.status && <span className="story-badge">{e.status}</span>}
                 {e.note && <p className="story-meta">{e.note}</p>}
               </li>
             ))}
           </ul>
           <h3>{t(lang, 'home.testimonials')}</h3>
-          {data.testimonials.map((x) => (
-            <blockquote key={x.name} className="story-quote">
-              <p>{x.quote}</p>
-              <footer>{x.name}</footer>
-            </blockquote>
-          ))}
+          <div className="story-notes">
+            {data.testimonials.map((x) => (
+              <blockquote key={x.name} className="story-quote">
+                <p>{x.quote}</p>
+                <footer>{x.name}</footer>
+              </blockquote>
+            ))}
+          </div>
         </Panel>
       );
     case 'phone':
       return (
-        <Panel title={t(lang, 'contact.title')} lang={lang} onClose={onClose}>
+        <Panel variant="phone" title={t(lang, 'contact.title')} lang={lang} onClose={onClose}>
           <Contact data={data} lang={lang} siteKey={siteKey} />
         </Panel>
       );
     case 'corkboard':
       return (
-        <Panel title={t(lang, 'about.certifications')} lang={lang} onClose={onClose}>
-          <ul className="story-cards">
+        <Panel variant="cork" title={t(lang, 'about.certifications')} lang={lang} onClose={onClose}>
+          <ul className="story-pins">
             {data.profile.certifications.map((c) => (
               <li key={c.name}>
                 <strong>{c.name}</strong>
@@ -128,19 +158,19 @@ export function Panels({ route, data, lang, siteKey, visitor, phaseChoice, onPha
       );
     case 'recordPlayer':
       return (
-        <Panel title={ui.music} lang={lang} onClose={onClose}>
+        <Panel variant="record" title={ui.music} lang={lang} onClose={onClose}>
           <RecordPlayer data={data} lang={lang} />
         </Panel>
       );
     case 'window':
       return (
-        <Panel title={ui.timeOfDay} lang={lang} onClose={onClose}>
-          <fieldset className="story-phases">
+        <Panel variant="window" title={ui.timeOfDay} lang={lang} onClose={onClose}>
+          <fieldset className="story-skies">
             <legend className="visually-hidden">{ui.timeOfDay}</legend>
-            {(['auto', 'dawn', 'day', 'golden', 'night'] as const).map((choice) => (
-              <label key={choice}>
+            {(['dawn', 'day', 'golden', 'night', 'auto'] as const).map((choice) => (
+              <label key={choice} className={`story-sky story-sky--${choice}`}>
                 <input type="radio" name="phase" checked={phaseChoice === choice} onChange={() => onPhase(choice)} />
-                {choice === 'auto' ? ui.auto : ui.phases[choice]}
+                <span>{choice === 'auto' ? ui.auto : ui.phases[choice]}</span>
               </label>
             ))}
           </fieldset>
@@ -152,15 +182,15 @@ export function Panels({ route, data, lang, siteKey, visitor, phaseChoice, onPha
 /**
  * A native modal dialog: the browser traps focus, closes on Esc and puts
  * focus back where it was. Esc and backdrop clicks go through onClose so the
- * camera can move back first.
+ * camera can move back first. `variant` gives each object its own page.
  */
-function Panel({ title, lang, onClose, children }: { title: string; lang: Locale; onClose: () => void; children: ReactNode }) {
+function Panel({ variant, title, lang, onClose, children }: { variant: string; title: string; lang: Locale; onClose: () => void; children: ReactNode }) {
   const ref = useModal();
   const titleId = useId();
   return (
     <dialog
       ref={ref}
-      className="story-panel"
+      className={`story-panel story-panel--${variant}`}
       aria-labelledby={titleId}
       onCancel={(event) => {
         event.preventDefault();
@@ -224,7 +254,26 @@ export function Choice({ lang, onChoose }: { lang: Locale; onChoose: (visitor: V
   );
 }
 
-/** Now playing, the controls, the playlist, the three volumes and the credits. */
+/** A polaroid's photo: the project's first image, or a little sunset in its palette. */
+function Photo({ project, index }: { project: Project; index: number }) {
+  const image = project.images[0];
+  const [sky, sun, sea] = PALETTES[index % PALETTES.length] ?? PALETTES[0];
+  return (
+    <span className="story-photo" aria-hidden="true">
+      {image ? (
+        <img src={image.src} alt="" width={image.width} height={image.height} loading="lazy" />
+      ) : (
+        <svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice">
+          <rect width="320" height="200" fill={sky} />
+          <circle cx={110 + ((index * 47) % 110)} cy="128" r="34" fill={sun} />
+          <rect y="132" width="320" height="68" fill={sea} />
+        </svg>
+      )}
+    </span>
+  );
+}
+
+/** Now playing on a record that turns while music plays, the controls, the playlist, the three volumes and the credits. */
 function RecordPlayer({ data, lang }: { data: StoryData; lang: Locale }) {
   const audio = LINES[lang].ui.audio;
   const state = useSyncExternalStore(engine.subscribe, engine.snapshot);
@@ -232,23 +281,36 @@ function RecordPlayer({ data, lang }: { data: StoryData; lang: Locale }) {
   const buses: Bus[] = data.music.length > 0 ? ['music', 'effects', 'ambience'] : ['effects', 'ambience'];
   return (
     <>
-      {data.music.length > 0 && current ? (
+      <div className="story-deck">
+        <div className={state.playing ? 'story-vinyl is-playing' : 'story-vinyl'} aria-hidden="true">
+          <span />
+        </div>
+        <div className="story-deck__now">
+          {data.music.length > 0 && current ? (
+            <>
+              <p className="story-meta">{audio.nowPlaying}</p>
+              <p className="hand story-hook">
+                {current.title} · {current.artist}
+              </p>
+              <div className="story-actions">
+                <button type="button" className="button" onClick={() => engine.prev()}>
+                  {audio.prev}
+                </button>
+                <button type="button" className="button button--primary" onClick={() => engine.toggle()}>
+                  {state.playing ? audio.pause : audio.play}
+                </button>
+                <button type="button" className="button" onClick={() => engine.next()}>
+                  {audio.next}
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className="hand story-soon">{audio.noTracks}</p>
+          )}
+        </div>
+      </div>
+      {data.music.length > 0 && (
         <>
-          <p className="story-meta">{audio.nowPlaying}</p>
-          <p className="hand story-hook">
-            {current.title} · {current.artist}
-          </p>
-          <div className="story-actions">
-            <button type="button" className="button" onClick={() => engine.prev()}>
-              {audio.prev}
-            </button>
-            <button type="button" className="button button--primary" onClick={() => engine.toggle()}>
-              {state.playing ? audio.pause : audio.play}
-            </button>
-            <button type="button" className="button" onClick={() => engine.next()}>
-              {audio.next}
-            </button>
-          </div>
           <h3>{audio.tracks}</h3>
           <ol className="story-tracks">
             {data.music.map((track, i) => (
@@ -260,8 +322,6 @@ function RecordPlayer({ data, lang }: { data: StoryData; lang: Locale }) {
             ))}
           </ol>
         </>
-      ) : (
-        <p className="hand story-soon">{audio.noTracks}</p>
       )}
       <h3>{audio.volume}</h3>
       <div className="story-sliders">
@@ -281,7 +341,7 @@ function RecordPlayer({ data, lang }: { data: StoryData; lang: Locale }) {
       </div>
       <h3>{audio.credits}</h3>
       {data.music.length > 0 && (
-        <ul>
+        <ul className="story-credits">
           {data.music.map((track) => (
             <li key={track.url}>
               {track.title} · {track.artist} · {audio.license}: {track.license} ·{' '}
@@ -300,11 +360,15 @@ function RecordPlayer({ data, lang }: { data: StoryData; lang: Locale }) {
 
 const LINK_KEYS = ['appStore', 'googlePlay', 'website', 'repository'] as const;
 
-function CaseStudy({ project, lang, onAll }: { project: Project; lang: Locale; onAll: () => void }) {
+/** One project as a big polaroid over a journal page. */
+function CaseStudy({ project, index, lang, onAll }: { project: Project; index: number; lang: Locale; onAll: () => void }) {
   const ui = LINES[lang].ui;
   return (
     <article className="story-case">
-      <p className="hand story-hook">{project.hook}</p>
+      <figure className="story-case__polaroid">
+        <Photo project={project} index={index} />
+        <figcaption className="hand">{project.hook}</figcaption>
+      </figure>
       <dl className="story-facts">
         <div>
           <dt>{t(lang, 'project.role')}</dt>
@@ -321,7 +385,7 @@ function CaseStudy({ project, lang, onAll }: { project: Project; lang: Locale; o
         <p key={paragraph}>{paragraph}</p>
       ))}
       {project.highlights.length > 0 && (
-        <ul>
+        <ul className="story-highlights">
           {project.highlights.map((h) => (
             <li key={h}>{h}</li>
           ))}
@@ -332,7 +396,7 @@ function CaseStudy({ project, lang, onAll }: { project: Project; lang: Locale; o
           <li key={tag}>{tag}</li>
         ))}
       </ul>
-      {project.images.map((image) => (
+      {project.images.slice(1).map((image) => (
         <img key={image.src} src={image.src} alt={image.alt} width={image.width} height={image.height} loading="lazy" />
       ))}
       <p className="story-links">
@@ -355,11 +419,22 @@ function CaseStudy({ project, lang, onAll }: { project: Project; lang: Locale; o
 
 const SEEN_KEY = 'story-phone-seen';
 
-/** Contact as a text thread, plus the site's real contact form. */
+/** The visitor's own time, for the phone's status bar. */
+function useClock(lang: Locale) {
+  const time = () => new Date().toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' });
+  const [now, setNow] = useState(time);
+  useEffect(() => {
+    const timer = setInterval(() => setNow(time()), 30_000);
+    return () => clearInterval(timer);
+  }, [lang]);
+  return now;
+}
+
+/** The home page's contact phone (styles/phone.css): the same frame, chat bubble, form and contact list. */
 function Contact({ data, lang, siteKey }: { data: StoryData; lang: Locale; siteKey: string | undefined }) {
-  const chat = LINES[lang].ui.chat;
   const form = useRef<HTMLFormElement>(null);
   const [toast, setToast] = useState(false);
+  const clock = useClock(lang);
 
   useEffect(() => {
     try {
@@ -378,7 +453,7 @@ function Contact({ data, lang, siteKey }: { data: StoryData; lang: Locale; siteK
     return () => clearTimeout(timer);
   }, [toast]);
 
-  // The form logic loads now that the phone is open; Turnstile only on Send.
+  // The same form logic as the home page; Turnstile loads only on Send.
   useEffect(() => {
     const element = form.current;
     if (element) void import('@/scripts/contact-form').then(({ setUpContactForm }) => setUpContactForm(element));
@@ -386,72 +461,112 @@ function Contact({ data, lang, siteKey }: { data: StoryData; lang: Locale; siteK
 
   const phone = data.contact.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/, '+90 $1 $2 $3 $4');
   return (
-    <>
-      {toast && (
-        <p className="story-toast" role="status">
-          {LINES[lang].ui.consequences}
-        </p>
-      )}
-      <ol className="story-thread">
-        <li>{chat.hello}</li>
-        <li>{chat.email}</li>
-        <li>
-          <a href={`mailto:${data.contact.email}`}>{data.contact.email}</a>
-        </li>
-        <li>{chat.phone}</li>
-        <li>
-          <a href={`tel:${data.contact.phone}`}>{phone}</a>
-        </li>
-        <li>{chat.linkedin}</li>
-        <li>
-          <a href={data.profile.links.linkedin} target="_blank" rel="noopener noreferrer">
-            linkedin.com/in/resulcay
-          </a>
-        </li>
-      </ol>
-      {siteKey && (
-        <form ref={form} className="story-form" data-contact noValidate>
-          <h3>{t(lang, 'contact.formTitle')}</h3>
-          <label>
-            <span>{t(lang, 'contact.name')}</span>
-            <input name="name" autoComplete="name" required maxLength={80} />
-            <small data-error-for="name" />
-          </label>
-          <label>
-            <span>{t(lang, 'contact.yourEmail')}</span>
-            <input name="email" type="email" autoComplete="email" required maxLength={120} />
-            <small data-error-for="email" />
-          </label>
-          <label>
-            <span>{t(lang, 'contact.message')}</span>
-            <textarea name="message" rows={5} required minLength={10} maxLength={4000} />
-            <small data-error-for="message" />
-          </label>
-          <label className="visually-hidden" aria-hidden="true">
-            Website
-            <input name="website" tabIndex={-1} autoComplete="off" />
-          </label>
-          <input type="hidden" name="lang" value={lang} />
-          <div data-turnstile data-sitekey={siteKey} />
-          <p className="story-meta">{t(lang, 'contact.privacy')}</p>
-          <p role="status" aria-live="polite" />
-          <div>
-            <button type="submit" className="button button--primary">
-              {t(lang, 'contact.send')}
-            </button>
-          </div>
-          <div data-messages hidden>
-            <span data-key="sending">{t(lang, 'contact.sending')}</span>
-            <span data-key="sent">{t(lang, 'contact.sent')}</span>
-            <span data-key="human">{t(lang, 'contact.humanWait')}</span>
-            <span data-key="human-failed">{t(lang, 'contact.humanFailed')}</span>
-            <span data-key="failed">{t(lang, 'contact.failed')}</span>
-            <span data-key="field-name">{t(lang, 'contact.errName')}</span>
-            <span data-key="field-email">{t(lang, 'contact.errEmail')}</span>
-            <span data-key="field-message">{t(lang, 'contact.errMessage')}</span>
-          </div>
-        </form>
-      )}
-    </>
+    <div className="phone">
+      <div className="phone__screen">
+        <div className="phone__status" aria-hidden="true">
+          <span>{clock}</span>
+          <span className="phone__icons">
+            <svg viewBox="0 0 18 12">
+              <rect x="0" y="8" width="3" height="4" rx="1" />
+              <rect x="5" y="5.5" width="3" height="6.5" rx="1" />
+              <rect x="10" y="3" width="3" height="9" rx="1" />
+              <rect x="15" y="0" width="3" height="12" rx="1" />
+            </svg>
+            <svg viewBox="0 0 16 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <path d="M1 4.5a10 10 0 0 1 14 0M3.6 7.2a6.2 6.2 0 0 1 8.8 0" />
+              <circle cx="8" cy="10" r="1.2" fill="currentColor" stroke="none" />
+            </svg>
+            <svg viewBox="0 0 26 12">
+              <rect x="0.75" y="0.75" width="21.5" height="10.5" rx="3" fill="none" stroke="currentColor" strokeWidth="1.5" />
+              <rect x="3" y="3" width="13" height="6" rx="1.5" />
+              <rect x="23.5" y="4" width="2" height="4" rx="1" />
+            </svg>
+          </span>
+        </div>
+        {toast && (
+          <p className="story-notification" role="status">
+            {LINES[lang].ui.consequences}
+          </p>
+        )}
+        <div className="phone__bar">
+          <svg width="22" height="18" viewBox="-22 -18 44 36" aria-hidden="true" dangerouslySetInnerHTML={{ __html: BUTTERFLY_ART }} />
+          <span>{data.profile.name}</span>
+        </div>
+        <div className="phone__chat">
+          <p className="phone__bubble">
+            {t(lang, 'contact.intro')} {data.profile.availability}
+          </p>
+          {siteKey && (
+            <form ref={form} className="contact-form" data-contact noValidate>
+              <h3>{t(lang, 'contact.formTitle')}</h3>
+              <div className="contact-form__row">
+                <label>
+                  <span>{t(lang, 'contact.name')}</span>
+                  <input name="name" autoComplete="name" required maxLength={80} />
+                  <small data-error-for="name" />
+                </label>
+                <label>
+                  <span>{t(lang, 'contact.yourEmail')}</span>
+                  <input name="email" type="email" autoComplete="email" required maxLength={120} />
+                  <small data-error-for="email" />
+                </label>
+              </div>
+              <label>
+                <span>{t(lang, 'contact.message')}</span>
+                <textarea name="message" rows={2} required minLength={10} maxLength={4000} />
+                <small data-error-for="message" />
+              </label>
+              <label className="visually-hidden" aria-hidden="true">
+                Website
+                <input name="website" tabIndex={-1} autoComplete="off" />
+              </label>
+              <input type="hidden" name="lang" value={lang} />
+              <div data-turnstile data-sitekey={siteKey} />
+              <p className="contact-form__note">{t(lang, 'contact.privacy')}</p>
+              <p role="status" aria-live="polite" />
+              <div>
+                <button type="submit" className="button button--primary">
+                  {t(lang, 'contact.send')}
+                </button>
+              </div>
+              <div data-messages hidden>
+                <span data-key="sending">{t(lang, 'contact.sending')}</span>
+                <span data-key="sent">{t(lang, 'contact.sent')}</span>
+                <span data-key="human">{t(lang, 'contact.humanWait')}</span>
+                <span data-key="human-failed">{t(lang, 'contact.humanFailed')}</span>
+                <span data-key="failed">{t(lang, 'contact.failed')}</span>
+                <span data-key="field-name">{t(lang, 'contact.errName')}</span>
+                <span data-key="field-email">{t(lang, 'contact.errEmail')}</span>
+                <span data-key="field-message">{t(lang, 'contact.errMessage')}</span>
+              </div>
+            </form>
+          )}
+        </div>
+        <div className="phone__contacts">
+          <dl>
+            <div>
+              <dt>{t(lang, 'contact.email')}</dt>
+              <dd>
+                <a href={`mailto:${data.contact.email}`}>{data.contact.email}</a>
+              </dd>
+            </div>
+            <div>
+              <dt>{t(lang, 'contact.phone')}</dt>
+              <dd>
+                <a href={`tel:${data.contact.phone}`}>{phone}</a>
+              </dd>
+            </div>
+            <div>
+              <dt>LinkedIn</dt>
+              <dd>
+                <a href={data.profile.links.linkedin} target="_blank" rel="noopener noreferrer">
+                  linkedin.com/in/resulcay
+                </a>
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </div>
   );
 }

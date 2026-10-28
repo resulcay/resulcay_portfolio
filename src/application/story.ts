@@ -19,6 +19,7 @@ export function storyData(
       title: profile.title[lang],
       location: profile.location[lang],
       summary: profile.summary[lang],
+      availability: profile.availability[lang],
       links: profile.links,
       skills: profile.skills.map((s) => ({ group: s.group[lang], items: s.items })),
       certifications: profile.certifications,

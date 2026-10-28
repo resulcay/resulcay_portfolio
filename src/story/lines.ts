@@ -47,7 +47,6 @@ interface Lines {
     auto: string;
     phases: Record<Phase, string>;
     consequences: string;
-    chat: { hello: string; email: string; phone: string; linkedin: string };
     who: string;
     visitors: Record<Visitor, string>;
     remember: string;
@@ -122,12 +121,6 @@ export const LINES: Record<Locale, Lines> = {
       auto: 'Follow my clock',
       phases: { dawn: 'Dawn', day: 'Day', golden: 'Golden hour', night: 'Night' },
       consequences: 'This action will have consequences.',
-      chat: {
-        hello: 'Hey! Thanks for stopping by.',
-        email: 'Email is the fastest way to reach me:',
-        phone: 'Or call or text me:',
-        linkedin: "I'm on LinkedIn too:",
-      },
       who: "Who's visiting?",
       visitors: { recruiter: 'Recruiter', client: 'Client', explorer: 'Just looking around' },
       remember: 'Resul will remember that.',
@@ -199,12 +192,6 @@ export const LINES: Record<Locale, Lines> = {
       auto: 'Saatime uy',
       phases: { dawn: 'Şafak', day: 'Gündüz', golden: 'Altın saat', night: 'Gece' },
       consequences: 'Bu eylemin sonuçları olacak.',
-      chat: {
-        hello: 'Selam! Uğradığın için teşekkürler.',
-        email: 'Bana en hızlı e-postayla ulaşırsın:',
-        phone: 'Ya da ara veya mesaj at:',
-        linkedin: "LinkedIn'de de varım:",
-      },
       who: 'Kim geliyor?',
       visitors: { recruiter: 'İşe alım', client: 'Müşteri', explorer: 'Sadece bakıyorum' },
       remember: 'Resul bunu hatırlayacak.',

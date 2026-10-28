@@ -6,6 +6,7 @@ import type { Locale } from '@/domain/schemas';
 import { content } from '@/lib/content';
 import { localizePath, t } from '@/i18n/ui';
 import { turnstileSiteKey } from '@/lib/auth';
+import '@/styles/phone.css';
 
 interface Props {
   lang: Locale;
@@ -676,34 +677,6 @@ const sounds = [
     background: #4a4350;
     color: #f4ebdd;
   }
-  .story-tracks button {
-    padding: 4px 0;
-    border: 0;
-    background: none;
-    color: var(--ink);
-    font: inherit;
-    text-align: left;
-    cursor: var(--cursor-link, pointer);
-  }
-  .story-tracks button[aria-current='true'] {
-    font-weight: 700;
-    color: var(--accent-text);
-  }
-  .story-sliders {
-    display: grid;
-    gap: 12px;
-  }
-  .story-sliders label {
-    display: grid;
-    grid-template-columns: 9rem 1fr;
-    align-items: center;
-    gap: 12px;
-    font-weight: 700;
-  }
-  .story-sliders input {
-    accent-color: #e8a657;
-    min-height: 44px;
-  }
   .story-rewind {
     position: absolute;
     top: 20px;
@@ -728,9 +701,10 @@ const sounds = [
     width: min(520px, calc(100% - 24px));
   }
 
+  /* ── Story mode's pages: one dialog, a look per object (src/story/panels.tsx) ── */
   .story-panel {
-    width: min(720px, calc(100% - 24px));
-    max-height: min(86vh, 900px);
+    width: min(760px, calc(100% - 24px));
+    max-height: min(88vh, 940px);
     padding: 0;
     border: 0;
     border-radius: 6px;
@@ -738,16 +712,25 @@ const sounds = [
     color: var(--ink);
     box-shadow: 0 24px 60px rgb(30 27 36 / 0.45);
   }
+  .story-panel[open] {
+    animation: story-page-in 0.35s cubic-bezier(0.2, 0.8, 0.3, 1.15);
+  }
+  @keyframes story-page-in {
+    from {
+      opacity: 0;
+      translate: 0 18px;
+      scale: 0.97;
+    }
+  }
   .story-panel::backdrop {
-    background: rgb(30 27 36 / 0.45);
+    background: rgb(30 27 36 / 0.5);
+    backdrop-filter: blur(2px);
   }
   .story-panel__page {
     display: flex;
     flex-direction: column;
     gap: 14px;
     padding: clamp(18px, 4vw, 36px);
-    /* Faint ruled lines, like a journal page. */
-    background: repeating-linear-gradient(to bottom, transparent 0 31px, color-mix(in srgb, var(--rule) 45%, transparent) 31px 32px);
   }
   .story-panel__head {
     display: flex;
@@ -777,44 +760,27 @@ const sounds = [
     min-height: 44px;
     padding: 8px 16px;
   }
+  .story-choice {
+    width: min(520px, calc(100% - 24px));
+  }
   .story-meta {
+    margin: 0;
     color: var(--ink-quiet);
     font-size: 0.9375rem;
   }
   .story-hook {
+    margin: 0;
     font-size: 1.5rem;
     color: var(--accent-text);
   }
-  .story-facts,
-  .story-skills {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 10px 24px;
-    margin: 0;
-  }
-  .story-facts dt,
-  .story-skills dt {
-    font-weight: 700;
-  }
-  .story-facts dd,
-  .story-skills dd {
-    margin: 0;
-  }
-  .story-panel .story-chips,
-  .story-panel .story-cards,
-  .story-panel .story-grid,
-  .story-panel .story-thread,
-  .story-panel .story-timeline {
-    padding: 0;
-    list-style: none;
-  }
-  .story-panel .story-chips {
+  .story-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 12px;
   }
-  .story-chips li,
-  .story-badge {
+  .story-badge,
+  .story-panel .story-chips li {
+    display: inline-block;
     padding: 2px 10px;
     border: 1px solid var(--rule);
     border-radius: 999px;
@@ -822,159 +788,713 @@ const sounds = [
   }
   .story-badge {
     margin-left: 8px;
+    border-color: var(--golden);
+  }
+  .story-panel .story-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0;
+    list-style: none;
   }
   .story-links {
     display: flex;
     flex-wrap: wrap;
     gap: 4px 18px;
+    margin: 0;
     font-weight: 700;
   }
-  .story-actions {
+
+  /* Devices (the phone and the laptop): no paper page, the device is the page. */
+  .story-panel--phone,
+  .story-panel--laptop {
+    width: min(980px, calc(100% - 24px));
+    background: none;
+    box-shadow: none;
+    color: #f4ebdd;
+  }
+  /* The light heading is for the room behind; the screens keep the page's ink. */
+  .story-panel--phone .phone__screen {
+    color: var(--ink);
+  }
+  .story-panel--phone .story-panel__page,
+  .story-panel--laptop .story-panel__page {
+    padding: 8px 4px 16px;
+  }
+  .story-panel--phone h2,
+  .story-panel--laptop h2 {
+    color: #f4ebdd;
+    text-shadow: 0 2px 10px rgb(0 0 0 / 0.5);
+  }
+  .story-panel--phone .story-panel__close,
+  .story-panel--laptop .story-panel__close {
+    border-color: #f4ebdd;
+    background: rgb(30 27 36 / 0.55);
+    color: #f4ebdd;
+  }
+  .story-panel--phone .phone {
+    margin-top: 0;
+  }
+  /* The phone's notification: the story's little joke drops in under the status bar. */
+  .story-notification {
+    grid-column: 1 / -1;
+    margin: 8px 12px 0;
+    padding: 10px 16px;
+    border-radius: 16px;
+    background: #1e1b24;
+    color: #f4ebdd;
+    font-family: var(--font-hand);
+    font-size: 1.25rem;
+    text-align: center;
+    box-shadow: 0 8px 18px -8px rgb(0 0 0 / 0.5);
+    animation: story-notification 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  }
+  @keyframes story-notification {
+    from {
+      opacity: 0;
+      translate: 0 -24px;
+    }
+  }
+
+  /* The laptop: a dark bezel, an app window with its title bar, and the keyboard deck below. */
+  .story-laptop {
+    position: relative;
+    padding: 18px 18px 22px;
+    border: 2px solid #3a3542;
+    border-radius: 18px 18px 6px 6px;
+    background: #121015;
+  }
+  .story-laptop::after {
+    content: '';
+    position: absolute;
+    left: -6%;
+    right: -6%;
+    bottom: -16px;
+    height: 16px;
+    border-radius: 0 0 18px 18px;
+    background: linear-gradient(#3a3542, #24212b);
+    clip-path: polygon(0 0, 100% 0, 97% 100%, 3% 100%);
+  }
+  .story-laptop__screen {
+    max-height: min(64vh, 640px);
+    overflow: auto;
+    border-radius: 6px;
+    background: var(--paper-raised);
+    color: var(--ink);
+  }
+  .story-laptop__bar {
+    position: sticky;
+    top: 0;
+    z-index: 1;
     display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    padding: 9px 14px;
+    background: color-mix(in srgb, var(--violet) 80%, black);
+    color: #f4ebdd;
+    font-size: 0.8125rem;
   }
-  .story-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px;
+  .story-laptop__bar span {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #d9534f;
   }
-  .story-grid button {
+  .story-laptop__bar span:nth-child(2) {
+    background: #e8a657;
+  }
+  .story-laptop__bar span:nth-child(3) {
+    background: #2f6f73;
+  }
+  .story-laptop__bar b {
+    margin-left: 8px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  /* The experience as the home page's path: a dashed line with a butterfly at each role. */
+  .story-panel .story-timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding: 20px 22px 24px 54px;
+    list-style: none;
+  }
+  .story-timeline::before {
+    content: '';
+    position: absolute;
+    top: 30px;
+    bottom: 30px;
+    left: 30px;
+    border-left: 2px dashed var(--rule);
+  }
+  .story-timeline > li {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 4px;
-    width: 100%;
-    height: 100%;
-    padding: 14px;
-    border: 1px solid var(--rule);
-    border-radius: 4px;
-    background: var(--paper);
-    color: var(--ink);
-    font: inherit;
-    text-align: left;
-    cursor: var(--cursor-link, pointer);
-    rotate: -0.6deg;
   }
-  .story-grid li:nth-child(even) button {
-    rotate: 0.6deg;
+  .story-timeline > li::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -38px;
+    width: 26px;
+    height: 26px;
+    background: url('/cursors/butterfly.svg') center / contain no-repeat;
   }
-  .story-grid button:hover,
-  .story-grid button:focus-visible {
-    border-color: var(--golden);
-  }
-  .story-grid strong {
+  .story-timeline__when {
+    margin: 0;
     font-family: var(--font-display);
-    font-size: 1.125rem;
+    font-size: 1.2rem;
+    color: var(--accent-text);
   }
-  .story-grid span {
-    color: var(--ink-quiet);
-    font-size: 0.9375rem;
-  }
-  .story-timeline {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    border-left: 2px solid var(--golden);
-    padding-left: 18px !important;
+  .story-timeline h3 {
+    margin: 0;
   }
   .story-timeline ul {
     margin-top: 6px;
   }
-  .story-quote {
-    margin: 0;
-    padding-left: 14px;
-    border-left: 3px solid var(--violet);
+
+  /* The photo wall: polaroids with a strip of tape, tilted, straightening when picked up. */
+  .story-panel--wall,
+  .story-panel--case {
+    background:
+      radial-gradient(rgb(90 60 30 / 0.3) 1px, transparent 1.6px) 0 0 / 9px 9px,
+      #b98a5a;
+    border: 10px solid #6b4a2f;
+    border-radius: 12px;
   }
-  .story-quote footer {
-    margin-top: 4px;
-    font-weight: 700;
+  .story-panel--wall h2,
+  .story-panel--case h2 {
+    color: #1e1b24;
   }
-  .story-cards {
+  .story-panel--wall .story-panel__close,
+  .story-panel--case .story-panel__close {
+    border-color: #1e1b24;
+    background: rgb(251 246 238 / 0.85);
+    color: #1e1b24;
+  }
+  .story-wall {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 26px 20px;
+    padding: 10px 4px 4px !important;
+    list-style: none;
   }
-  .story-cards li {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 14px;
-    border-top: 6px solid var(--golden);
-    background: var(--paper);
-  }
-  .story-cards span {
-    color: var(--ink-quiet);
-  }
-  .story-soon {
-    font-size: 1.75rem;
-  }
-  .story-phases {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin: 0;
-    padding: 0;
-    border: 0;
-  }
-  .story-phases label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 44px;
-    font-weight: 700;
-  }
-  .story-thread {
+  .story-wall button {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 6px;
+    width: 100%;
+    height: 100%;
+    padding: 10px 10px 16px;
+    border: 0;
+    border-radius: 3px;
+    background: #fbf6ee;
+    color: #1e1b24;
+    font: inherit;
+    text-align: left;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 0.18), 0 10px 20px -10px rgb(0 0 0 / 0.45);
+    rotate: -2deg;
+    transition:
+      rotate 0.25s,
+      translate 0.25s,
+      box-shadow 0.25s;
+    cursor: var(--cursor-link, pointer);
   }
-  .story-thread li {
-    width: fit-content;
-    max-width: 85%;
-    padding: 8px 14px;
-    border-radius: 18px 18px 18px 4px;
-    background: var(--paper);
-    border: 1px solid var(--rule);
+  .story-wall li:nth-child(3n + 2) button {
+    rotate: 1.6deg;
   }
-  .story-thread a {
-    font-weight: 700;
-    overflow-wrap: anywhere;
+  .story-wall li:nth-child(3n + 3) button {
+    rotate: -0.8deg;
   }
-  .story-form {
+  /* A strip of washi tape holding each one up. */
+  .story-wall button::before {
+    content: '';
+    position: absolute;
+    top: -9px;
+    left: 50%;
+    width: 64px;
+    height: 18px;
+    translate: -50% 0;
+    rotate: -3deg;
+    background:
+      repeating-linear-gradient(135deg, rgb(255 255 255 / 0.3) 0 4px, transparent 4px 9px),
+      rgb(232 166 87 / 0.8);
+  }
+  .story-wall button:hover,
+  .story-wall button:focus-visible {
+    rotate: 0deg;
+    translate: 0 -4px;
+    box-shadow: 0 4px 8px rgb(0 0 0 / 0.2), 0 18px 30px -12px rgb(0 0 0 / 0.5);
+  }
+  .story-wall strong {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  .story-wall span:not(.story-photo) {
+    color: #4a4350;
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+  .story-photo {
+    display: block;
+    aspect-ratio: 8 / 5;
+    overflow: hidden;
+    background: #1e1b24;
+  }
+  .story-photo svg,
+  .story-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0 !important;
+  }
+  /* One project: a big polaroid pinned above a journal page. */
+  .story-case {
     display: flex;
     flex-direction: column;
+    gap: 14px;
+    padding: 22px clamp(16px, 3vw, 28px) 24px;
+    border-radius: 4px;
+    background: var(--paper-raised);
+    box-shadow: 0 10px 24px -12px rgb(0 0 0 / 0.5);
+  }
+  .story-case p {
+    margin: 0;
+  }
+  .story-case__polaroid {
+    position: relative;
+    width: min(100%, 420px);
+    margin: -6px auto 6px;
+    padding: 12px 12px 14px;
+    background: #fbf6ee;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 0.2), 0 14px 28px -12px rgb(0 0 0 / 0.5);
+    rotate: -1.5deg;
+  }
+  .story-case__polaroid::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    width: 18px;
+    height: 18px;
+    translate: -50% 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ff9a8a, #d9534f 55%, #8c2a26);
+    box-shadow: 0 3px 3px rgb(0 0 0 / 0.3);
+  }
+  .story-case__polaroid figcaption {
+    margin-top: 10px;
+    color: #3b3060;
+    font-size: 1.3rem;
+    line-height: 1.25;
+    text-align: center;
+  }
+  .story-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px 24px;
+    margin: 0;
+    padding: 12px 0;
+    border-block: 1.5px dashed var(--rule);
+  }
+  .story-facts dt {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--accent-text);
+  }
+  .story-facts dd {
+    margin: 0;
+  }
+  .story-highlights {
+    list-style: none;
+    padding-left: 0 !important;
+  }
+  .story-highlights li {
+    position: relative;
+    padding-left: 26px;
+  }
+  .story-highlights li::before {
+    content: '✦';
+    position: absolute;
+    left: 4px;
+    color: var(--golden);
+  }
+
+  /* The journal: a notebook page with ring holes, ruled lines and a red margin. */
+  .story-panel--journal .story-panel__page {
+    position: relative;
+    padding-left: clamp(56px, 9vw, 84px);
+    background:
+      linear-gradient(90deg, transparent calc(clamp(56px, 9vw, 84px) - 14px), rgb(217 83 79 / 0.55) calc(clamp(56px, 9vw, 84px) - 14px) calc(clamp(56px, 9vw, 84px) - 12px), transparent 0),
+      repeating-linear-gradient(to bottom, transparent 0 31px, color-mix(in srgb, var(--link) 22%, transparent) 31px 32px),
+      var(--paper-raised);
+  }
+  .story-panel--journal .story-panel__page::before {
+    content: '';
+    position: absolute;
+    top: 24px;
+    bottom: 24px;
+    left: 14px;
+    width: 18px;
+    background: radial-gradient(circle, var(--paper) 5px, color-mix(in srgb, var(--ink) 25%, transparent) 6px, transparent 7px) 0 0 / 18px 54px repeat-y;
+  }
+  .story-panel--journal h3 {
+    font-weight: 600;
+    color: var(--accent-text);
+  }
+  .story-journal__lead {
+    margin: 0;
+    font-size: 1.0625rem;
+  }
+  .story-skills {
+    display: grid;
     gap: 12px;
+    margin: 0;
   }
-  .story-form label {
+  .story-skills dt {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+  }
+  .story-skills dd {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 4px 0 0;
+  }
+  /* Each skill on a scrap of washi tape. */
+  .story-skills dd span {
+    padding: 1px 10px;
+    background:
+      repeating-linear-gradient(135deg, rgb(255 255 255 / 0.25) 0 4px, transparent 4px 9px),
+      color-mix(in srgb, var(--golden) 40%, transparent);
+    font-size: 0.875rem;
     font-weight: 700;
   }
-  .story-form input,
-  .story-form textarea {
-    padding: 10px 12px;
-    border: 1.5px solid var(--rule);
-    border-radius: 8px;
-    background: var(--paper);
+  .story-skills dd span:nth-child(3n + 2) {
+    background-color: color-mix(in srgb, var(--butterfly) 32%, transparent);
+  }
+  .story-skills dd span:nth-child(3n + 3) {
+    background-color: color-mix(in srgb, var(--violet) 26%, transparent);
+  }
+  .story-schools {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .story-notes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+    padding-top: 8px;
+  }
+  /* Testimonials as notes taped into the journal. */
+  .story-quote {
+    position: relative;
+    margin: 0;
+    padding: 20px 16px 14px;
+    background: color-mix(in srgb, var(--golden) 22%, var(--paper-raised));
+    box-shadow: 0 8px 16px -10px rgb(0 0 0 / 0.4);
+    rotate: -1deg;
+  }
+  .story-quote:nth-child(2) {
+    background: color-mix(in srgb, var(--teal) 18%, var(--paper-raised));
+    rotate: 1.2deg;
+  }
+  .story-quote:nth-child(3) {
+    background: color-mix(in srgb, var(--violet) 16%, var(--paper-raised));
+    rotate: -0.5deg;
+  }
+  .story-quote::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    width: 56px;
+    height: 16px;
+    translate: -50% 0;
+    rotate: 2deg;
+    background: rgb(244 235 221 / 0.75);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+  }
+  .story-quote p {
+    margin: 0;
+    font-size: 0.9375rem;
+  }
+  .story-quote footer {
+    margin-top: 8px;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    text-align: right;
+  }
+  .story-quote footer::before {
+    content: '— ';
+  }
+
+  /* The cork board: the home page's board in its wooden frame, with pinned index cards. */
+  .story-panel--cork {
+    border: 12px solid #6b4a2f;
+    border-radius: 14px;
+    background:
+      radial-gradient(rgb(90 60 30 / 0.35) 1px, transparent 1.6px) 0 0 / 9px 9px,
+      #b98a5a;
+  }
+  .story-panel--cork h2 {
+    color: #1e1b24;
+  }
+  .story-panel--cork .story-panel__close {
+    border-color: #1e1b24;
+    background: rgb(251 246 238 / 0.85);
+    color: #1e1b24;
+  }
+  .story-pins {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 26px 20px;
+    padding: 10px 4px 6px !important;
+    list-style: none;
+  }
+  .story-pins li {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 22px 16px 16px;
+    background: repeating-linear-gradient(to bottom, #fbf6ee 0 23px, rgb(79 163 217 / 0.25) 23px 24px) 0 34px / 100% 100% no-repeat, #fbf6ee;
+    color: #1e1b24;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 0.18), 0 10px 20px -10px rgb(0 0 0 / 0.45);
+    rotate: -1.4deg;
+  }
+  .story-pins li:nth-child(even) {
+    rotate: 1.2deg;
+  }
+  .story-pins li::before {
+    content: '';
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    translate: -50% 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ff9a8a, #d9534f 55%, #8c2a26);
+    box-shadow: 0 3px 3px rgb(0 0 0 / 0.3);
+  }
+  .story-pins li:nth-child(3n + 2)::before {
+    background: radial-gradient(circle at 35% 35%, #9fd6f2, #4fa3d9 55%, #2a5f86);
+  }
+  .story-pins li:nth-child(3n + 3)::before {
+    background: radial-gradient(circle at 35% 35%, #ffd9a0, #e8a657 55%, #9a6a2f);
+  }
+  .story-pins strong {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .story-pins span {
+    color: #4a4350;
+    font-size: 0.875rem;
+  }
+
+  /* The record player: a record that turns while music plays, beside what's on. */
+  .story-panel--record .story-panel__page {
+    background:
+      radial-gradient(circle at 85% -10%, color-mix(in srgb, var(--golden) 22%, transparent), transparent 55%),
+      var(--paper-raised);
+  }
+  .story-deck {
+    display: flex;
+    align-items: center;
+    gap: clamp(16px, 4vw, 32px);
+  }
+  .story-deck__now {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  .story-vinyl {
+    position: relative;
+    flex: none;
+    width: clamp(110px, 22vw, 150px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+      repeating-radial-gradient(circle, #1e1b24 0 2px, #2a2532 2px 4px),
+      #1e1b24;
+    box-shadow: 0 10px 24px -10px rgb(0 0 0 / 0.6), inset 0 0 0 3px #121015;
+  }
+  .story-vinyl::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(from 30deg, transparent 0 20%, rgb(255 255 255 / 0.12) 25%, transparent 32% 70%, rgb(255 255 255 / 0.08) 75%, transparent 82%);
+  }
+  .story-vinyl span {
+    position: absolute;
+    inset: 34%;
+    border-radius: 50%;
+    background: radial-gradient(circle, #1e1b24 0 7%, #e8a657 8% 100%);
+    box-shadow: inset 0 0 0 4px #5b4b8a;
+  }
+  .story-vinyl.is-playing {
+    animation: story-spin 1.8s linear infinite;
+  }
+  @keyframes story-spin {
+    to {
+      rotate: 1turn;
+    }
+  }
+  .story-soon {
+    margin: 0;
+    font-size: 1.6rem;
+  }
+  .story-tracks {
+    display: flex;
+    flex-direction: column;
+    padding: 0 !important;
+    list-style: none;
+    counter-reset: track;
+  }
+  .story-tracks li {
+    border-bottom: 1px dashed var(--rule);
+    counter-increment: track;
+  }
+  .story-tracks button {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    min-height: 44px;
+    align-items: center;
+    padding: 6px 4px;
+    border: 0;
+    background: none;
     color: var(--ink);
     font: inherit;
-    font-weight: 400;
+    text-align: left;
+    cursor: var(--cursor-link, pointer);
   }
-  .story-form small {
-    color: #b3402a;
-    font-weight: 400;
+  .story-tracks button::before {
+    content: counter(track, decimal-leading-zero);
+    font-family: var(--font-display);
+    color: var(--ink-quiet);
   }
-  .story-toast {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    padding: 10px 16px;
+  .story-tracks button[aria-current='true'] {
+    font-weight: 700;
+    color: var(--accent-text);
+  }
+  .story-tracks button[aria-current='true']::before {
+    content: '♪';
+    color: var(--golden);
+  }
+  .story-sliders {
+    display: grid;
+    gap: 6px;
+  }
+  .story-sliders label {
+    display: grid;
+    grid-template-columns: 9rem 1fr;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+  }
+  .story-sliders input {
+    accent-color: #e8a657;
+    min-height: 44px;
+  }
+  .story-credits {
+    font-size: 0.9375rem;
+  }
+
+  /* The window: one pane per time of day, each showing its sky. */
+  .story-skies {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding: 12px;
+    border: 0;
     border-radius: 8px;
-    background: #1e1b24;
+    background: #6b4a2f;
+    box-shadow: inset 0 0 0 4px #5a3d26;
+  }
+  .story-sky {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-height: 120px;
+    padding: 12px;
+    border-radius: 4px;
     color: #f4ebdd;
-    font-family: var(--font-hand);
-    font-size: 1.375rem;
-    text-align: center;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    text-shadow: 0 1px 4px rgb(0 0 0 / 0.5);
+    cursor: var(--cursor-link, pointer);
+    box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.15);
+    transition: box-shadow 0.2s;
+  }
+  .story-sky input {
+    position: absolute;
+    opacity: 0;
+  }
+  .story-sky:has(input:checked) {
+    box-shadow: inset 0 0 0 4px #e8a657, 0 0 18px rgb(232 166 87 / 0.5);
+  }
+  .story-sky:has(input:focus-visible) {
+    outline: 3px solid #f4ebdd;
+    outline-offset: 2px;
+  }
+  .story-sky--dawn {
+    background: linear-gradient(#5b4b8a, #d98a62 70%, #f6c47e);
+  }
+  .story-sky--day {
+    background: linear-gradient(#4fa3d9, #a9dcf7);
+    color: #1e1b24;
+    text-shadow: none;
+  }
+  .story-sky--golden {
+    background: linear-gradient(#9a6a86, #e8a657 75%);
+  }
+  .story-sky--night {
+    background:
+      radial-gradient(circle at 70% 30%, #f4ebdd 0 1.5px, transparent 2px),
+      radial-gradient(circle at 25% 55%, #f4ebdd 0 1px, transparent 1.5px),
+      radial-gradient(circle at 80% 70%, #f4ebdd 0 1px, transparent 1.5px),
+      linear-gradient(#1e1b24, #3b3060);
+  }
+  .story-sky--auto {
+    grid-column: 1 / -1;
+    min-height: 56px;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(90deg, #5b4b8a, #4fa3d9, #e8a657, #1e1b24);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .story-panel[open],
+    .story-notification,
+    .story-vinyl.is-playing {
+      animation: none;
+    }
+    .story-wall button {
+      transition: none;
+    }
+  }
+  @media (max-width: 560px) {
+    .story-deck {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .story-sliders label {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
   }
 </style>

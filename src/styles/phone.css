@@ -1,0 +1,226 @@
+/* The contact phone, shared by the home page's Contact section and Story mode's phone
+   (src/story/panels.tsx): the same frame, screen, chat and form. */
+/* Contact on a phone turned sideways, drawn in CSS: a messaging app with
+   the intro as an incoming bubble, the form as the composer, and the
+   contact details beside it. It stands upright on narrow screens. */
+.phone {
+  position: relative;
+  margin-top: 16px;
+  padding: 18px 28px;
+  border: 2px solid #3a3542;
+  border-radius: 44px;
+  background: #121015;
+  box-shadow: 0 18px 36px -16px rgb(0 0 0 / 0.5);
+}
+/* The camera on the short side, and two buttons along the top edge. */
+.phone::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 9px;
+  width: 9px;
+  height: 9px;
+  translate: 0 -50%;
+  border-radius: 50%;
+  background: #0d0c10;
+  box-shadow: 0 0 0 2px #3a3542;
+}
+.phone::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 18%;
+  width: 56px;
+  height: 4px;
+  border-radius: 2px;
+  background: #3a3542;
+  box-shadow: 70px 0 0 #3a3542;
+}
+.phone__screen {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  grid-template-rows: auto auto 1fr;
+  padding-bottom: 18px;
+  overflow: hidden;
+  border-radius: 26px;
+  background: var(--paper-raised);
+}
+/* The phone's status bar: the visitor's time, then signal, Wi-Fi and battery. */
+.phone__status {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 22px 4px;
+  background: color-mix(in srgb, var(--violet) 80%, black);
+  color: #f4ebdd;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.phone__icons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.phone__icons svg {
+  height: 11px;
+  width: auto;
+  fill: currentColor;
+}
+.phone__bar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: color-mix(in srgb, var(--violet) 80%, black);
+  color: #f4ebdd;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+}
+/* A faint glare across the glass, and the home indicator at the bottom. */
+.phone__screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(125deg, rgb(255 255 255 / 0.07), transparent 38%);
+  pointer-events: none;
+}
+.phone__screen::after {
+  content: '';
+  position: absolute;
+  bottom: 7px;
+  left: 50%;
+  width: min(30%, 140px);
+  height: 4px;
+  translate: -50% 0;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--ink) 45%, transparent);
+}
+.phone__chat {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border-right: 1px solid var(--rule);
+}
+.phone__bubble {
+  align-self: flex-start;
+  max-width: 85%;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 18px 18px 18px 4px;
+  background: color-mix(in srgb, var(--teal) 22%, var(--paper-raised));
+}
+.phone__contacts {
+  padding: 20px;
+}
+.phone dl {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+}
+.phone dl > div {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+.phone .contact-form {
+  max-width: none;
+  margin-top: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+.phone .contact-form input,
+.phone .contact-form textarea {
+  border-radius: 16px;
+}
+@media (max-width: 760px) {
+  .phone {
+    padding: 28px 12px;
+    border-radius: 40px;
+  }
+  .phone::before {
+    top: 10px;
+    left: 50%;
+    translate: -50% 0;
+  }
+  .phone::after {
+    top: 22%;
+    left: auto;
+    right: -5px;
+    width: 4px;
+    height: 48px;
+    box-shadow: 0 62px 0 #3a3542;
+  }
+  .phone__screen {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .phone__chat {
+    border-right: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+}
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 720px;
+  margin-top: 16px;
+  padding: clamp(20px, 4vw, 32px);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+}
+.contact-form h3 {
+  font-size: 1.5rem;
+}
+.contact-form__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+.contact-form label:not(.visually-hidden) {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 700;
+}
+.contact-form input,
+.contact-form textarea {
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--rule);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+}
+.contact-form textarea {
+  resize: vertical;
+}
+.contact-form [aria-invalid='true'] {
+  border-color: #b3261e;
+}
+.contact-form small {
+  color: var(--accent-text);
+  font-weight: 400;
+}
+.contact-form small:empty,
+.contact-form [role='status']:empty {
+  display: none;
+}
+.contact-form__note {
+  color: var(--ink-quiet);
+  font-size: 0.9375rem;
+}
+.phone dt {
+  font-weight: 700;
+}
+.phone dd {
+  margin: 0;
+}

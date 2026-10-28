@@ -18,9 +18,9 @@ for (const size of SIZES) {
 
     await page.goto('/story');
     expect(await overflowsX(page)).toBe(false);
-    // Only the small title-screen scripts (Start, the storm, the page's own and the cursor) run before Start.
+    // Only the small title-screen scripts (Start, the storm, the page's own and the cursor with its butterfly) run before Start.
     const scripts = requested.filter((url) => url.endsWith('.js')).map((url) => new URL(url).pathname.split('/').pop());
-    expect(scripts.filter((name) => !/^((StoryView|StormScene|BaseLayout)\.astro_astro_type_script|preload-helper|ready\.)/.test(name ?? ''))).toEqual([]);
+    expect(scripts.filter((name) => !/^((StoryView|StormScene|BaseLayout)\.astro_astro_type_script|preload-helper|ready\.|butterfly-art\.)/.test(name ?? ''))).toEqual([]);
 
     await page.getByRole('button', { name: 'Start story' }).click();
     const scene = page.locator('[data-canvas]');

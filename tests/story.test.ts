@@ -17,6 +17,7 @@ const storyDataSchema = z.strictObject({
     title: str,
     location: str,
     summary: str,
+    availability: str,
     links: z.record(z.string(), z.url()),
     skills: z.array(z.strictObject({ group: str, items: z.array(str) })),
     certifications: z.array(z.strictObject({ name: str, issuer: str })),
