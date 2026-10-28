@@ -13,11 +13,13 @@ const { class: className } = Astro.props;
 
   const canvas = document.querySelector<HTMLCanvasElement>('canvas[data-storm]');
   const cv = document.querySelector<HTMLAnchorElement>('[data-cv-hit]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-storm-sound]');
+  let strikeCv = () => {};
   if (canvas) {
     const hit = mountStorm(canvas);
     let struck = false;
-    // With the first tap or key, as the roar starts, the storm swells and lightning breaks Download CV.
-    const strikeCv = () => {
+    // As the roar starts (or, with it off, on the first tap or key) the storm swells and lightning breaks Download CV.
+    strikeCv = () => {
       if (struck || !cv || document.documentElement.classList.contains('story-open')) return;
       struck = true;
       cv.classList.add('is-bracing');
@@ -36,8 +38,8 @@ const { class: className } = Astro.props;
         shatter(cv.getBoundingClientRect());
       });
     };
-    addEventListener('pointerdown', strikeCv, { once: true });
-    addEventListener('keydown', strikeCv, { once: true });
+    addEventListener('pointerdown', () => strikeCv(), { once: true });
+    addEventListener('keydown', () => strikeCv(), { once: true });
   }
 
   /** Throws fragments off the broken button. */
@@ -58,6 +60,5 @@ const { class: className } = Astro.props;
       document.body.appendChild(shard);
     }
   }
-  const toggle = document.querySelector<HTMLButtonElement>('[data-storm-sound]');
-  if (toggle) mountStormSound(roarUrl, toggle);
+  if (toggle) mountStormSound(roarUrl, toggle, () => strikeCv());
 </script>

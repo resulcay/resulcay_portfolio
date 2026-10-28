@@ -316,11 +316,13 @@ export function mountStorm(canvas: HTMLCanvasElement): Hit {
 }
 
 /**
- * The storm's roar, looping quietly behind the title. Browsers only allow sound
- * after a gesture, so it starts on the visitor's first tap or key. `button`
- * turns it on and off (remembered); it pauses while the room is open or the tab is hidden.
+ * The storm's roar, looping quietly behind the title. It tries to start at once
+ * (Chrome allows that after a click on another page of the site); if the browser
+ * refuses, it starts on the visitor's first tap or key. `onStart` runs the first
+ * time it's heard. `button` turns it on and off (remembered); it pauses while
+ * the room is open or the tab is hidden.
  */
-export function mountStormSound(url: string, button: HTMLButtonElement): void {
+export function mountStormSound(url: string, button: HTMLButtonElement, onStart: () => void): void {
   const audio = new Audio(url);
   audio.loop = true;
   audio.volume = 0.35;
@@ -333,13 +335,18 @@ export function mountStormSound(url: string, button: HTMLButtonElement): void {
     storage = undefined;
   }
   let on = storage?.getItem('storm-sound') !== 'off';
-  let armed = false;
+  let armed = true;
+  audio.addEventListener('playing', onStart, { once: true });
 
   const sync = () => {
     button.setAttribute('aria-pressed', String(on));
     button.textContent = (on ? button.dataset['on'] : button.dataset['off']) ?? '';
     const play = on && armed && !document.hidden && !document.documentElement.classList.contains('story-open');
-    if (play) audio.play().catch(() => undefined);
+    if (play)
+      audio.play().catch((error: unknown) => {
+        // Not allowed yet: wait for a gesture.
+        if (error instanceof DOMException && error.name === 'NotAllowedError') armed = false;
+      });
     else audio.pause();
   };
   const arm = () => {
