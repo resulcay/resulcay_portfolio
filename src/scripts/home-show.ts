@@ -95,17 +95,21 @@ export async function startHomeShow(): Promise<void> {
     if (el) motion.inView(el, () => void play(), { amount });
   };
 
+  // Once an animation ends, its inline styles go, so the page's own CSS (tilts, hover lifts,
+  // the cork board's frame) takes over again exactly as before.
+  const tidy = { onComplete: (done: Parameters<typeof anime.cleanInlineStyles>[0]) => void anime.cleanInlineStyles(done) };
+
   // ── GSAP: the "Episode 1" title card ────────────────────────────────────────
   gsap
     .timeline({ defaults: { ease: 'power3.out' } })
-    .to('.hero__kicker', { clipPath: 'inset(0 0% 0 0)', duration: 1.1, ease: 'power2.inOut' })
-    .fromTo(letters, { opacity: 0, y: 46, rotate: -8, filter: 'blur(6px)' }, { opacity: 1, y: 0, rotate: 0, filter: 'blur(0px)', duration: 0.9, stagger: 0.06 }, '-=0.45')
-    .fromTo(heroBits, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.12 }, '-=0.5');
+    .to('.hero__kicker', { clipPath: 'inset(0 0% 0 0)', duration: 1.1, ease: 'power2.inOut', clearProps: 'clipPath' })
+    .fromTo(letters, { opacity: 0, y: 46, rotate: -8, filter: 'blur(6px)' }, { opacity: 1, y: 0, rotate: 0, filter: 'blur(0px)', duration: 0.9, stagger: 0.06, clearProps: 'opacity,transform,filter' }, '-=0.45')
+    .fromTo(heroBits, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.12, clearProps: 'opacity,transform' }, '-=0.5');
 
   // ── anime.js: the sunset scene ──────────────────────────────────────────────
   once(document.querySelector('.teaser'), () => {
-    anime.animate('.teaser .sunset__sun', { opacity: [0, 1], translateY: [140, 0], duration: 1800, ease: 'outCubic' });
-    anime.animate('.teaser .sunset__glints', { opacity: [0, 0.6], scaleX: [0.2, 1], duration: 1400, delay: 700, ease: 'outQuad' });
+    anime.animate('.teaser .sunset__sun', { opacity: [0, 1], translateY: [140, 0], duration: 1800, ease: 'outCubic', ...tidy });
+    anime.animate('.teaser .sunset__glints', { opacity: [0, 0.6], scaleX: [0.2, 1], duration: 1400, delay: 700, ease: 'outQuad', ...tidy });
     // The butterfly flutters in from off the left edge and settles by the sun.
     anime.animate('.teaser .sunset__butterfly', {
       opacity: [0, 1],
@@ -115,15 +119,16 @@ export async function startHomeShow(): Promise<void> {
       duration: 2600,
       delay: 400,
       ease: 'inOutSine',
+      ...tidy,
     });
-    anime.animate('.teaser__text > *', { opacity: [0, 1], translateY: [24, 0], duration: 800, delay: anime.stagger(120, { start: 500 }), ease: 'outQuart' });
+    anime.animate('.teaser__text > *', { opacity: [0, 1], translateY: [24, 0], duration: 800, delay: anime.stagger(120, { start: 500 }), ease: 'outQuart', ...tidy });
   });
 
   // ── anime.js: the notebook opens, its numbers count up ──────────────────────
   once(document.querySelector('.spread'), () => {
-    anime.animate('.spread .page--left', { opacity: [0, 1], rotateY: [-70, 0], transformOrigin: ['100% 50%', '100% 50%'], duration: 1100, ease: 'outBack(1.2)' });
-    anime.animate('.spread .page--right', { opacity: [0, 1], rotateY: [70, 0], transformOrigin: ['0% 50%', '0% 50%'], duration: 1100, delay: 150, ease: 'outBack(1.2)' });
-    anime.animate('.glance li', { opacity: [0, 1], translateY: [-30, 0], rotate: [-6, 0], duration: 900, delay: anime.stagger(140, { start: 600 }), ease: 'outElastic(1, 0.6)' });
+    anime.animate('.spread .page--left', { opacity: [0, 1], rotateY: [-70, 0], transformOrigin: ['100% 50%', '100% 50%'], duration: 1100, ease: 'outBack(1.2)', ...tidy });
+    anime.animate('.spread .page--right', { opacity: [0, 1], rotateY: [70, 0], transformOrigin: ['0% 50%', '0% 50%'], duration: 1100, delay: 150, ease: 'outBack(1.2)', ...tidy });
+    anime.animate('.glance li', { opacity: [0, 1], translateY: [-30, 0], rotate: [-6, 0], duration: 900, delay: anime.stagger(140, { start: 600 }), ease: 'outElastic(1, 0.6)', ...tidy });
     for (const value of $('.glance__value')) {
       const [, digits = '', rest = ''] = value.textContent?.match(/^(\d+)(.*)$/) ?? [];
       if (!digits) continue;
@@ -141,14 +146,17 @@ export async function startHomeShow(): Promise<void> {
   // ── anime.js: the cork board's frame opens, then the polaroids are pinned ────
   // Watched by its section: the board itself starts clipped to nothing, so it never counts as seen.
   once(document.querySelector('.corkboard')?.closest('section'), () => {
-    anime.animate('.corkboard', { clipPath: ['inset(0 50% 0 50% round 14px)', 'inset(0 0% 0 0% round 14px)'], duration: 1000, ease: 'inOutQuart' });
+    anime.animate('.corkboard', { clipPath: ['inset(0 50% 0 50% round 14px)', 'inset(0 0% 0 0% round 14px)'], duration: 1000, ease: 'inOutQuart', ...tidy });
+    // Each card lands on its own tilt (its --tilt), so nothing jumps when the inline styles go.
     anime.animate('.corkboard .polaroid', {
       opacity: [0, 1],
       translateY: [-90, 0],
       scale: [1.15, 1],
+      rotate: (card?: unknown) => [-10, parseFloat(getComputedStyle(card as HTMLElement).getPropertyValue('--tilt')) || 0],
       duration: 900,
       delay: anime.stagger(160, { start: 650 }),
       ease: 'outBounce',
+      ...tidy,
     });
   }, 0.2);
 
@@ -157,7 +165,7 @@ export async function startHomeShow(): Promise<void> {
   if (timeline) {
     gsap.fromTo(timeline, { '--draw': 0 }, { '--draw': 1, ease: 'none', scrollTrigger: { trigger: timeline, start: 'top 80%', end: 'bottom 60%', scrub: 0.6 } });
     for (const entry of $('.timeline > li')) {
-      gsap.fromTo(entry, { opacity: 0, x: -36 }, { opacity: 1, x: 0, duration: 0.8, ease: 'power2.out', scrollTrigger: { trigger: entry, start: 'top 85%' } });
+      gsap.fromTo(entry, { opacity: 0, x: -36 }, { opacity: 1, x: 0, duration: 0.8, ease: 'power2.out', clearProps: 'opacity,transform', scrollTrigger: { trigger: entry, start: 'top 85%' } });
     }
   }
 
