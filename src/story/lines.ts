@@ -147,7 +147,7 @@ export const LINES: Record<Locale, Lines> = {
     thoughts: {
       polaroids: 'Her biri bana bir şey öğretti. Bazıları iki kez.',
       laptop: 'İş geçmişim, kahveler hariç.',
-      journal: 'Benim dürüst hâlim. El yazısı dahil değil.',
+      journal: 'Benim dürüst halim. El yazısı dahil değil.',
       phone: 'Hadi, bana bir mesaj at.',
       recordPlayer: 'Müzik düşünmeme yardım ediyor. Ya da oyalanmama.',
       corkboard: 'Bir şeyleri bitirdiğimin kanıtı. Bazen.',
@@ -157,7 +157,7 @@ export const LINES: Record<Locale, Lines> = {
     },
     window: {
       dawn: 'Hatalardan önce uyandım. Çoğunlukla.',
-      day: 'Güneş ışığı hâlâ en iyi hata ayıklayıcı.',
+      day: 'Güneş ışığı hala en iyi hata ayıklayıcı.',
       golden: 'Bu ışıkta kodum bile güzel görünüyor.',
       night: 'Sessiz saatler. Yayına almak için en iyi, uyumak için en kötü zaman.',
     },
@@ -188,7 +188,7 @@ export const LINES: Record<Locale, Lines> = {
         credits: 'Künye',
         license: 'Lisans',
         source: 'Kaynak',
-        inspired: 'Hikâye odaklı macera oyunlarından ilham alındı.',
+        inspired: 'Hikaye odaklı macera oyunlarından ilham alındı.',
       },
       timeOfDay: 'Günün saati',
       auto: 'Saatime uy',
