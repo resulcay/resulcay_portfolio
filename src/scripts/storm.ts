@@ -241,8 +241,8 @@ export function mountStorm(canvas: HTMLCanvasElement): void {
       ctx.lineWidth = 1;
       ctx.beginPath();
       for (const drop of drops) {
-        const y = ((drop.y + t * drop.speed * 3.5) % 1.1) * height - 20;
-        const x = ((((drop.x - t * drop.speed) % 1) + 1) % 1) * width;
+        const y = ((drop.y + t * drop.speed * 5.8) % 1.1) * height - 20;
+        const x = ((((drop.x - t * drop.speed * 1.7) % 1) + 1) % 1) * width;
         ctx.moveTo(x + ox, y + oy);
         ctx.lineTo(x + ox - drop.length * 0.35, y + oy + drop.length);
       }
@@ -270,7 +270,7 @@ export function mountStorm(canvas: HTMLCanvasElement): void {
     // Nothing to see while Story mode's room covers the title.
     if (document.documentElement.classList.contains('story-open')) return;
     // The storm turns slowly; rain is sped back up where it's drawn.
-    t += dt * 0.3;
+    t += dt * 0.18;
     nextBolt -= dt;
     if (nextBolt <= 0) {
       strike();
