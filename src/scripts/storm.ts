@@ -35,7 +35,7 @@ function puff(rgb: string): HTMLCanvasElement {
   return sprite;
 }
 
-/** Sends the storm at a point on its canvas (CSS pixels); `onImpact` runs as it strikes. */
+/** Swells the storm and strikes a point on its canvas (CSS pixels) with lightning; `onImpact` runs as it strikes. */
 export type Hit = (x: number, y: number, onImpact: () => void) => void;
 
 export function mountStorm(canvas: HTMLCanvasElement): Hit {
@@ -72,8 +72,9 @@ export function mountStorm(canvas: HTMLCanvasElement): Hit {
   let flash = 0;
   let nextBolt = 2.5;
   let bolt: [number, number][] = [];
-  // A hit in progress: how far the storm has reached for its target (0 to 1, eased), and since when.
+  // A hit in progress: how far the storm has swelled (0 to 1, eased), and since when.
   let reach = 0;
+  let flashAt: [number, number] = [0, 0];
   let hitAt = -1;
   let target: [number, number] = [0, 0];
   let impact: (() => void) | undefined;
@@ -89,18 +90,23 @@ export function mountStorm(canvas: HTMLCanvasElement): Hit {
   };
 
   /** The funnel's radius at a height from 0 (cloud base) to 1 (ground): wide on top, narrowing. */
-  // Reaching for a hit, the storm swells up top while its tip stays narrow.
-  const radius = (h: number) => Math.min(width, height * 1.6) * (0.34 - 0.2 * h ** 0.8) * (1 + 0.6 * reach * (1 - h));
+  // Building to a hit, the storm swells, most of all up top.
+  const radius = (h: number) => Math.min(width, height * 1.6) * (0.34 - 0.2 * h ** 0.8) * (1 + reach * (1 - 0.5 * h));
 
   /** A jagged bolt, by default in the far sky to the right of the funnel. */
-  const strike = (x = width * rand(0.82, 0.95), end = height * 0.85) => {
+  const strike = (aim?: [number, number]) => {
+    const [goal, end] = aim ?? [width * rand(0.82, 0.95), height * 0.85];
+    let x = aim ? width * 0.62 : goal;
     let y = height * 0.15;
     bolt = [[x, y]];
+    flashAt = [goal, end];
     while (y < end) {
-      x += rand(-28, 28);
+      // An aimed bolt closes in on its target as it falls.
+      x += (aim ? (goal - x) * 0.3 : 0) + rand(-28, 28);
       y += rand(18, 42);
       bolt.push([x, y]);
     }
+    if (aim) bolt.push(aim);
     flash = 1;
   };
 
@@ -110,12 +116,10 @@ export function mountStorm(canvas: HTMLCanvasElement): Hit {
     const shift = (depth: number): [number, number] => [-easedX * depth * 24, -easedY * depth * 14];
     const cx = width * 0.7;
     const top = height * 0.08;
-    const ground = height * 1.02 + (target[1] - height * 1.02) * reach;
-    /** The funnel's bent, slowly snaking centre line at a height from 0 to 1; a hit drags its tip to the target. */
-    const axis = (h: number) => {
-      const idle = cx - width * (0.1 * Math.sin(h * 2.4 - t * 0.5) * h + 0.05 * Math.sin(t * 0.23) * h * h + 0.08 * h * h);
-      return idle + (target[0] - idle) * reach * h ** 1.6;
-    };
+    const ground = height * 1.02;
+    /** The funnel's bent, slowly snaking centre line at a height from 0 to 1. */
+    const axis = (h: number) =>
+      cx - width * (0.1 * Math.sin(h * 2.4 - t * 0.5) * h + 0.05 * Math.sin(t * 0.23) * h * h + 0.08 * h * h);
     // Lightning flickers while it's bright.
     const lit = flash > 0.5 && Math.sin(t * 140) < -0.3 ? flash * 0.35 : flash;
 
@@ -131,7 +135,7 @@ export function mountStorm(canvas: HTMLCanvasElement): Hit {
 
     // Lightning, behind everything but the sky.
     if (lit > 0) {
-      const glow = ctx.createRadialGradient(width * 0.9, height * 0.55, 0, width * 0.9, height * 0.55, width * 0.6);
+      const glow = ctx.createRadialGradient(flashAt[0], flashAt[1], 0, flashAt[0], flashAt[1], width * 0.6);
       glow.addColorStop(0, `rgb(205 215 235 / ${0.8 * lit})`);
       glow.addColorStop(1, 'rgb(205 215 235 / 0)');
       ctx.fillStyle = glow;
@@ -280,18 +284,18 @@ export function mountStorm(canvas: HTMLCanvasElement): Hit {
     // Nothing to see while Story mode's room covers the title.
     if (document.documentElement.classList.contains('story-open')) return;
     if (hitAt >= 0) {
-      // Lunge for 1.3 s, strike, hold, then draw back over 1.6 s.
+      // Swell for 1.3 s, strike, hold, then calm over 1.6 s.
       const e = (now - hitAt) / 1000;
       const ease = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x));
       reach = e < 1.3 ? ease(e / 1.3) : 1 - ease((e - 1.9) / 1.6);
       if (e >= 1.3 && impact) {
-        strike(target[0], target[1]);
+        strike(target);
         impact();
         impact = undefined;
       }
       if (e > 3.5) hitAt = -1;
     }
-    // The storm turns slowly, faster as it reaches; rain is sped back up where it's drawn.
+    // The storm turns slowly, faster as it swells; rain is sped back up where it's drawn.
     t += dt * (0.18 + 0.7 * reach);
     nextBolt -= dt;
     if (nextBolt <= 0) {
@@ -320,7 +324,8 @@ export function mountStormSound(url: string, button: HTMLButtonElement): void {
   const audio = new Audio(url);
   audio.loop = true;
   audio.volume = 0.35;
-  audio.preload = 'none';
+  // Fetched with the page, so the roar starts the moment it's allowed to.
+  audio.preload = 'auto';
   let storage: Storage | undefined;
   try {
     storage = localStorage;

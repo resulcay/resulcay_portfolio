@@ -244,38 +244,16 @@ const sounds = [
     background: rgb(30 27 36 / 0.3);
     color: #f4ebdd;
   }
-  /* The storm hits Download CV: it trembles as the storm comes, then cracks, chips and drops (see StormScene). */
+  /* The storm hits Download CV: it trembles as the storm swells, then splits in two (see StormScene). */
   .title .button.is-bracing {
     animation: cv-tremble 0.11s linear infinite;
   }
-  .title .button.is-broken {
+  .title .button.is-broken,
+  .title .button.is-broken:hover {
     position: relative;
-    rotate: -6deg;
-    translate: 0 8px;
-    clip-path: polygon(0 0, 80% 0, 74% 38%, 100% 30%, 100% 100%, 0 100%);
-    animation: cv-jolt 0.5s ease-out;
-  }
-  .title .button.is-broken::before,
-  .title .button.is-broken::after {
-    content: '';
-    position: absolute;
-    width: 2px;
-    background: #f4ebdd;
-    pointer-events: none;
-  }
-  .title .button.is-broken::before {
-    left: 62%;
-    top: 0;
-    height: 55%;
-    rotate: 24deg;
-    transform-origin: top;
-  }
-  .title .button.is-broken::after {
-    left: 56%;
-    top: 48%;
-    height: 52%;
-    rotate: -18deg;
-    transform-origin: top;
+    border-color: transparent;
+    background: transparent;
+    color: transparent;
   }
   @keyframes cv-tremble {
     25% {
@@ -285,20 +263,8 @@ const sounds = [
       translate: 2px -1px;
     }
   }
-  @keyframes cv-jolt {
-    from {
-      rotate: 4deg;
-      translate: 0 -6px;
-      scale: 1.08;
-    }
-    40% {
-      rotate: -9deg;
-      translate: 0 10px;
-    }
-  }
   @media (prefers-reduced-motion: reduce) {
-    .title .button.is-bracing,
-    .title .button.is-broken {
+    .title .button.is-bracing {
       animation: none;
     }
   }
@@ -463,6 +429,47 @@ const sounds = [
 
 <!-- Story mode's React UI renders outside this component's scope, so its styles are global and prefixed. -->
 <style is:global>
+  /* The two halves of Download CV after the storm breaks it, drawn over the still-working link. */
+  .cv-half {
+    position: absolute;
+    inset: -1.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid #f4ebdd;
+    border-radius: inherit;
+    background: rgb(30 27 36 / 0.55);
+    color: #f4ebdd;
+    pointer-events: none;
+    animation: 0.7s cubic-bezier(0.2, 0.8, 0.3, 1.3) forwards;
+  }
+  .cv-half--left {
+    clip-path: polygon(0 0, 56% 0, 48% 30%, 60% 56%, 50% 100%, 0 100%);
+    transform-origin: 0 100%;
+    animation-name: cv-half-left;
+  }
+  .cv-half--right {
+    clip-path: polygon(56% 0, 86% 0, 82% 24%, 100% 32%, 100% 100%, 50% 100%, 60% 56%, 48% 30%);
+    transform-origin: 100% 100%;
+    animation-name: cv-half-right;
+  }
+  @keyframes cv-half-left {
+    to {
+      translate: -8px 6px;
+      rotate: -8deg;
+    }
+  }
+  @keyframes cv-half-right {
+    to {
+      translate: 14px 18px;
+      rotate: 15deg;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cv-half {
+      animation-duration: 1ms;
+    }
+  }
   /* Fragments knocked off Download CV by the storm. */
   .cv-shard {
     position: fixed;

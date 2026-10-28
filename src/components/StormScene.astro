@@ -15,32 +15,39 @@ const { class: className } = Astro.props;
   const cv = document.querySelector<HTMLAnchorElement>('[data-cv-hit]');
   if (canvas) {
     const hit = mountStorm(canvas);
-    let hitting = false;
-    // The first click on Download CV sends the storm at it; the CV downloads once it's broken.
-    cv?.addEventListener('click', (event) => {
-      if (cv.classList.contains('is-broken')) return;
-      event.preventDefault();
-      if (hitting) return;
-      hitting = true;
+    let struck = false;
+    // With the first tap or key, as the roar starts, the storm swells and lightning breaks Download CV.
+    const strikeCv = () => {
+      if (struck || !cv || document.documentElement.classList.contains('story-open')) return;
+      struck = true;
       cv.classList.add('is-bracing');
       const box = canvas.getBoundingClientRect();
       const at = cv.getBoundingClientRect();
       hit(at.left + at.width / 2 - box.left, at.top + at.height / 2 - box.top, () => {
         cv.classList.replace('is-bracing', 'is-broken');
+        // Two jagged halves drawn over the link, which stays whole underneath and still downloads.
+        for (const side of ['left', 'right']) {
+          const half = document.createElement('span');
+          half.className = `cv-half cv-half--${side}`;
+          half.setAttribute('aria-hidden', 'true');
+          half.textContent = cv.textContent;
+          cv.appendChild(half);
+        }
         shatter(cv.getBoundingClientRect());
-        setTimeout(() => cv.click(), 700);
       });
-    });
+    };
+    addEventListener('pointerdown', strikeCv, { once: true });
+    addEventListener('keydown', strikeCv, { once: true });
   }
 
-  /** Throws a handful of fragments off the broken button. */
+  /** Throws fragments off the broken button. */
   function shatter(at: DOMRect) {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 20; i++) {
       const shard = document.createElement('span');
       const size = 5 + Math.random() * 12;
       shard.className = 'cv-shard';
-      shard.style.left = `${at.left + at.width * (0.55 + Math.random() * 0.4)}px`;
+      shard.style.left = `${at.left + at.width * (0.35 + Math.random() * 0.6)}px`;
       shard.style.top = `${at.top + Math.random() * at.height}px`;
       shard.style.width = `${size}px`;
       shard.style.height = `${size * (0.4 + Math.random() * 0.6)}px`;
