@@ -191,7 +191,15 @@ const links = linkEntries.filter((entry): entry is [UiKey, string] => Boolean(en
     gap: 4px;
   }
   .highlights li {
+    padding-left: 1.1em;
+    text-indent: -1.1em;
     font-size: 1.75rem;
+  }
+  .highlights li::before {
+    content: '-';
+    display: inline-block;
+    width: 1.1em;
+    text-indent: 0;
   }
   aside {
     flex: 1 1 280px;
