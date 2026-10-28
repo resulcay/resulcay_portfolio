@@ -2,7 +2,8 @@
 // wings beating, turning to face where it's going. When the pointer rests it
 // lands where it is; over something clickable for a couple of seconds, it settles in the
 // middle of it. Landed, it slowly opens and closes its wings; a click makes it
-// flutter. Only for a mouse or pen without reduced motion or high contrast;
+// flutter. A dashed line follows its flight and erases itself from the far
+// end, like the path on the experience timeline. Only for a mouse or pen without reduced motion or high contrast;
 // elsewhere cursors.css keeps a still butterfly. Text fields, open dialogs and
 // Story mode's room get the system cursors back.
 import { BODY, WING } from '@/components/butterfly-art';
@@ -14,6 +15,9 @@ const WIDTH = 34;
 const HEIGHT = 28;
 /** How long the pointer stays on something clickable before the butterfly goes to it. */
 const NOTICE_MS = 2200;
+/** The flight path stays this long, and fades this soon once the butterfly rests. */
+const TRAIL_PX = 260;
+const TRAIL_MS = 1500;
 
 export function mountButterflyCursor(): void {
   if (!matchMedia(FITS).matches) return;
@@ -22,8 +26,27 @@ export function mountButterflyCursor(): void {
   el.className = 'bf-cursor';
   el.setAttribute('aria-hidden', 'true');
   el.innerHTML = `<svg width="${WIDTH}" height="${HEIGHT}" viewBox="-22 -18 44 36"><g transform="scale(0.88)"><g data-wing>${WING}</g><g transform="scale(-1 1)"><g data-wing>${WING}</g></g>${BODY}</g></svg>`;
+  const trail = document.createElement('canvas');
+  trail.className = 'bf-trail';
+  trail.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(trail);
   document.body.appendChild(el);
   const wings = [...el.querySelectorAll('[data-wing]')];
+  const pen = trail.getContext('2d');
+  const blue = getComputedStyle(root).getPropertyValue('--butterfly').trim() || '#4fa3d9';
+  const fitTrail = () => {
+    const ratio = Math.min(devicePixelRatio || 1, 2);
+    trail.width = Math.round(innerWidth * ratio);
+    trail.height = Math.round(innerHeight * ratio);
+    pen?.setTransform(ratio, 0, 0, ratio, 0, 0);
+  };
+  fitTrail();
+  addEventListener('resize', fitTrail);
+  // Points along the flight, oldest first, and how much path has been erased so far,
+  // so the dashes stay put instead of crawling along the line.
+  let points: { x: number; y: number; at: number }[] = [];
+  let length = 0;
+  let erased = 0;
 
   let pointerX = 0;
   let pointerY = 0;
@@ -79,7 +102,14 @@ export function mountButterflyCursor(): void {
     last = now;
     const shown = seen && !away && !root.classList.contains('butterfly-off') && !root.classList.contains('story-open');
     el.classList.toggle('is-shown', shown);
-    if (!shown) return;
+    if (!shown) {
+      if (points.length) {
+        points = [];
+        length = 0;
+        pen?.clearRect(0, 0, innerWidth, innerHeight);
+      }
+      return;
+    }
 
     // Where to be: on the pointer, or in the middle of what it has been over for a while.
     const perch = over && now - overSince > NOTICE_MS ? over : null;
@@ -112,6 +142,44 @@ export function mountButterflyCursor(): void {
     const open = 0.55 - 0.2 * rest + (0.45 - 0.15 * rest) * Math.sin(phase);
     for (const wing of wings) wing.setAttribute('transform', `scale(${open.toFixed(3)} 1)`);
     el.style.transform = `translate3d(${x - WIDTH / 2}px, ${y - HEIGHT / 2}px, 0) rotate(${angle}rad)`;
+    drawTrail(now);
+  };
+
+  const drawTrail = (now: number) => {
+    if (!pen) return;
+    const head = points[points.length - 1];
+    const step = head ? Math.hypot(x - head.x, y - head.y) : 0;
+    if (!head || step > 3) {
+      points.push({ x, y, at: now });
+      length += step;
+    }
+    // Erase from the far end: past the length, or once the butterfly has rested a while.
+    while (points.length > 1 && (length > TRAIL_PX || now - points[0]!.at > TRAIL_MS)) {
+      const [a, b] = [points[0]!, points[1]!];
+      const gone = Math.hypot(b.x - a.x, b.y - a.y);
+      length -= gone;
+      erased += gone;
+      points.shift();
+    }
+    pen.clearRect(0, 0, innerWidth, innerHeight);
+    if (points.length < 2) return;
+    pen.strokeStyle = blue;
+    pen.lineWidth = 1.5;
+    pen.lineCap = 'round';
+    pen.setLineDash([6, 7]);
+    let along = erased;
+    for (let i = 1; i < points.length; i++) {
+      const [a, b] = [points[i - 1]!, points[i]!];
+      // Faint at the tail, stronger near the butterfly.
+      pen.globalAlpha = 0.75 * (i / points.length);
+      pen.lineDashOffset = along;
+      pen.beginPath();
+      pen.moveTo(a.x, a.y);
+      pen.lineTo(b.x, b.y);
+      pen.stroke();
+      along += Math.hypot(b.x - a.x, b.y - a.y);
+    }
+    pen.globalAlpha = 1;
   };
   requestAnimationFrame(frame);
 }
