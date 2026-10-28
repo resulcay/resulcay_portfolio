@@ -817,9 +817,16 @@ const sounds = [
   .story-panel--phone .phone__screen {
     color: var(--ink);
   }
-  .story-panel--phone .story-panel__page,
-  .story-panel--laptop .story-panel__page {
+  .story-panel--phone,
+  .story-panel--laptop {
+    overflow-x: hidden;
+  }
+  .story-panel--phone .story-panel__page {
     padding: 8px 4px 16px;
+  }
+  /* Room at the sides and below for the laptop's keyboard deck. */
+  .story-panel--laptop .story-panel__page {
+    padding: 8px clamp(10px, 4%, 36px) 28px;
   }
   .story-panel--phone h2,
   .story-panel--laptop h2 {
@@ -859,7 +866,7 @@ const sounds = [
   /* The laptop: a dark bezel, an app window with its title bar, and the keyboard deck below. */
   .story-laptop {
     position: relative;
-    padding: 18px 18px 22px;
+    padding: clamp(8px, 2vw, 18px) clamp(8px, 2vw, 18px) clamp(12px, 2.4vw, 22px);
     border: 2px solid #3a3542;
     border-radius: 18px 18px 6px 6px;
     background: #121015;
@@ -867,8 +874,8 @@ const sounds = [
   .story-laptop::after {
     content: '';
     position: absolute;
-    left: -6%;
-    right: -6%;
+    left: max(-36px, -4%);
+    right: max(-36px, -4%);
     bottom: -16px;
     height: 16px;
     border-radius: 0 0 18px 18px;
@@ -876,7 +883,8 @@ const sounds = [
     clip-path: polygon(0 0, 100% 0, 97% 100%, 3% 100%);
   }
   .story-laptop__screen {
-    max-height: min(64vh, 640px);
+    /* The whole laptop fits the dialog (88% of the window): its title, bezel and deck take about 210px. */
+    max-height: min(calc(88dvh - 210px), 680px);
     overflow: auto;
     border-radius: 6px;
     background: var(--paper-raised);
