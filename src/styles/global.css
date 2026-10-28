@@ -63,6 +63,48 @@ html {
   text-size-adjust: 100%;
 }
 
+/* Scrollbars as a page of the journal: a strip of striped golden washi tape on the
+   paper, over a faint dashed margin line. It turns butterfly blue under the pointer
+   and violet while dragged. Forced colours keep the system's. */
+@media not (forced-colors: active) {
+  ::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+  }
+  ::-webkit-scrollbar-track {
+    background:
+      repeating-linear-gradient(180deg, var(--rule) 0 6px, transparent 6px 12px) center / 1px 100% no-repeat,
+      var(--paper);
+  }
+  ::-webkit-scrollbar-track:horizontal {
+    background:
+      repeating-linear-gradient(90deg, var(--rule) 0 6px, transparent 6px 12px) center / 100% 1px no-repeat,
+      var(--paper);
+  }
+  ::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 3px;
+    background:
+      repeating-linear-gradient(135deg, rgb(255 255 255 / 0.28) 0 4px, transparent 4px 9px) padding-box,
+      color-mix(in srgb, var(--golden) 88%, transparent) padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--butterfly);
+  }
+  ::-webkit-scrollbar-thumb:active {
+    background-color: var(--violet);
+  }
+  ::-webkit-scrollbar-corner {
+    background: var(--paper);
+  }
+  /* Firefox only takes colours (and Chrome ignores the rules above once it's set). */
+  @supports not selector(::-webkit-scrollbar) {
+    html {
+      scrollbar-color: var(--golden) var(--paper);
+    }
+  }
+}
+
 body {
   margin: 0;
   background: var(--paper);
