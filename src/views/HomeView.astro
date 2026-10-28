@@ -315,6 +315,10 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
 </BaseLayout>
 
 <script>
+  import { startHomeShow } from '@/scripts/home-show';
+
+  void startHomeShow();
+
   // The contact phone's clock shows the visitor's own time, set after load so the server's never shows.
   const clock = document.querySelector<HTMLElement>('[data-phone-clock]');
   const tick = () => {
@@ -710,6 +714,9 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
     bottom: 10px;
     left: 13px;
     border-left: 2px dashed var(--rule);
+    /* The home show draws the path down as you scroll (scripts/home-show.ts). */
+    transform-origin: top;
+    scale: 1 var(--draw, 1);
   }
   .timeline > li {
     position: relative;

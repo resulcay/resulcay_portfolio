@@ -13,13 +13,13 @@ const { class: className } = Astro.props;
   <rect y="330" width="1440" height="110" fill="#9a6a86"></rect>
   <rect y="440" width="1440" height="90" fill="#d98a62"></rect>
   <rect y="530" width="1440" height="50" fill="#e8a657"></rect>
-  <circle cx="1040" cy="560" r="96" fill="#f6c47e"></circle>
+  <circle class="sunset__sun" cx="1040" cy="560" r="96" fill="#f6c47e"></circle>
   <rect y="580" width="1440" height="320" fill="#2f6f73"></rect>
-  <path d="M900 600H1180M940 624H1140M980 648H1100M1000 676H1080" stroke="#f6c47e" stroke-width="4" stroke-linecap="round" opacity="0.6"></path>
+  <path d="M900 600H1180M940 624H1140M980 648H1100M1000 676H1080" stroke="#f6c47e" stroke-width="4" stroke-linecap="round" opacity="0.6" class="sunset__glints"></path>
   <path d="M0 520C120 500 220 470 320 480 420 490 470 540 560 560 620 574 660 600 700 640V900H0Z" fill="#1e1b24"></path>
   <rect x="236" y="420" width="96" height="70" fill="#1e1b24"></rect>
   <path d="M226 424 284 380 342 424Z" fill="#1e1b24"></path>
   <rect x="262" y="440" width="22" height="22" fill="#e8a657"></rect>
   <rect x="296" y="440" width="22" height="22" fill="#e8a657" opacity="0.6"></rect>
-  <g transform="translate(1180 250) scale(1.4)" set:html={BUTTERFLY_ART}></g>
+  <g class="sunset__butterfly"><g transform="translate(1180 250) scale(1.4)" set:html={BUTTERFLY_ART}></g></g>
 </svg>
