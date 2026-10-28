@@ -166,10 +166,20 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
               <p class="timeline__org">{job.organization} · {job.location}</p>
               {job.points.length > 0 && (
                 <ul>
-                  {job.points.map((point) => (
+                  {job.points.slice(0, 3).map((point) => (
                     <li>{point[lang]}</li>
                   ))}
                 </ul>
+              )}
+              {job.points.length > 3 && (
+                <details>
+                  <summary>{t(lang, 'experience.more')}</summary>
+                  <ul>
+                    {job.points.slice(3).map((point) => (
+                      <li>{point[lang]}</li>
+                    ))}
+                  </ul>
+                </details>
               )}
             </div>
           </li>
@@ -618,27 +628,62 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
     rotate: -4deg;
   }
+  /* Experience as diary entries: a dashed path down the side, a butterfly at
+     each date, and each job written on its own page. */
   .timeline {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 28px;
     margin: 0;
-    padding: 0;
+    padding: 0 0 0 40px;
     list-style: none;
   }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    left: 13px;
+    border-left: 2px dashed var(--rule);
+  }
   .timeline > li {
+    position: relative;
     display: grid;
     grid-template-columns: minmax(0, 180px) minmax(0, 1fr);
     gap: 8px 32px;
   }
+  .timeline > li::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: -42px;
+    width: 30px;
+    height: 30px;
+    background: url('/cursors/butterfly.svg') center / contain no-repeat;
+  }
   .timeline__when {
-    font-weight: 700;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    line-height: 1.3;
     color: var(--accent-text);
   }
   .timeline__body {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    padding: 18px 22px;
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 18px -12px rgb(0 0 0 / 0.3);
+  }
+  .timeline details summary {
+    width: fit-content;
+    margin-top: 4px;
+    color: var(--link);
+    font-weight: 700;
+    cursor: var(--cursor-link, pointer);
   }
   .timeline h3 {
     font-size: 1.5rem;
