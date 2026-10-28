@@ -70,15 +70,20 @@ export function Panels({ route, data, lang, siteKey, visitor, phaseChoice, onPha
     }
     case 'laptop':
       return (
-        <Panel variant="laptop" title={t(lang, 'home.experience')} lang={lang} onClose={onClose}>
+        <Panel variant="laptop" title={t(lang, 'home.experience')} lang={lang} onClose={onClose} closeButton={false}>
           <div className="story-laptop">
             <div className="story-laptop__screen">
-              <p className="story-laptop__bar" aria-hidden="true">
-                <span />
-                <span />
-                <span />
-                <b>experience.md</b>
-              </p>
+              {/* The window's red button is this page's Close. */}
+              <div className="story-laptop__bar">
+                <button type="button" className="story-laptop__close" aria-label={ui.close} title={ui.close} onClick={onClose}>
+                  <svg viewBox="0 0 12 12" aria-hidden="true">
+                    <path d="M3.5 3.5l5 5M8.5 3.5l-5 5" />
+                  </svg>
+                </button>
+                <span aria-hidden="true" />
+                <span aria-hidden="true" />
+                <b aria-hidden="true">experience.md</b>
+              </div>
               <ol className="story-timeline">
                 {data.experience.map((e) => (
                   <li key={`${e.organization}-${e.start}`}>
@@ -184,7 +189,22 @@ export function Panels({ route, data, lang, siteKey, visitor, phaseChoice, onPha
  * focus back where it was. Esc and backdrop clicks go through onClose so the
  * camera can move back first. `variant` gives each object its own page.
  */
-function Panel({ variant, title, lang, onClose, children }: { variant: string; title: string; lang: Locale; onClose: () => void; children: ReactNode }) {
+function Panel({
+  variant,
+  title,
+  lang,
+  onClose,
+  closeButton = true,
+  children,
+}: {
+  variant: string;
+  title: string;
+  lang: Locale;
+  onClose: () => void;
+  /** False when the page brings its own Close (the laptop's window button). */
+  closeButton?: boolean;
+  children: ReactNode;
+}) {
   const ref = useModal();
   const titleId = useId();
   return (
@@ -203,9 +223,11 @@ function Panel({ variant, title, lang, onClose, children }: { variant: string; t
       <div className="story-panel__page">
         <header className="story-panel__head">
           <h2 id={titleId}>{title}</h2>
-          <button type="button" className="button story-panel__close" onClick={onClose}>
-            {LINES[lang].ui.close}
-          </button>
+          {closeButton && (
+            <button type="button" className="button story-panel__close" onClick={onClose}>
+              {LINES[lang].ui.close}
+            </button>
+          )}
         </header>
         {children}
       </div>

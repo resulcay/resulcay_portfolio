@@ -896,24 +896,58 @@ const sounds = [
     z-index: 1;
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 10px;
     margin: 0;
-    padding: 9px 14px;
+    padding: 12px 16px;
     background: color-mix(in srgb, var(--violet) 80%, black);
     color: #f4ebdd;
     font-size: 0.8125rem;
   }
-  .story-laptop__bar span {
-    width: 11px;
-    height: 11px;
+  /* The window's buttons, big enough to hit; the red one closes the page. */
+  .story-laptop__bar span,
+  .story-laptop__close {
+    flex: none;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    background: #d9534f;
-  }
-  .story-laptop__bar span:nth-child(2) {
     background: #e8a657;
   }
-  .story-laptop__bar span:nth-child(3) {
+  .story-laptop__bar span:last-of-type {
     background: #2f6f73;
+  }
+  .story-laptop__close {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    background: #d9534f;
+    color: #5a1a17;
+    cursor: var(--cursor-link, pointer);
+  }
+  /* A larger hit area than the dot itself. */
+  .story-laptop__close::before {
+    content: '';
+    position: absolute;
+    inset: -12px;
+  }
+  .story-laptop__close svg {
+    width: 11px;
+    height: 11px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .story-laptop__close:hover svg,
+  .story-laptop__close:focus-visible svg {
+    opacity: 1;
+  }
+  .story-laptop__close:focus-visible {
+    outline: 2px solid #f4ebdd;
+    outline-offset: 3px;
   }
   .story-laptop__bar b {
     margin-left: 8px;
