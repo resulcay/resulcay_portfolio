@@ -42,7 +42,7 @@ const sounds = [
           <span data-start-label>{t(lang, 'story.start')}</span>
         </button>
         <a class="button" href={localizePath('/', lang)}>{t(lang, 'story.journal')}</a>
-        <a class="button" href={profile.cvPath} download>{t(lang, 'nav.cv')}</a>
+        <a class="button" href={profile.cvPath} download data-cv-hit>{t(lang, 'nav.cv')}</a>
       </div>
       <p class="hand title__note">{t(lang, 'story.headphones')}</p>
       <p>
@@ -244,6 +244,64 @@ const sounds = [
     background: rgb(30 27 36 / 0.3);
     color: #f4ebdd;
   }
+  /* The storm hits Download CV: it trembles as the storm comes, then cracks, chips and drops (see StormScene). */
+  .title .button.is-bracing {
+    animation: cv-tremble 0.11s linear infinite;
+  }
+  .title .button.is-broken {
+    position: relative;
+    rotate: -6deg;
+    translate: 0 8px;
+    clip-path: polygon(0 0, 80% 0, 74% 38%, 100% 30%, 100% 100%, 0 100%);
+    animation: cv-jolt 0.5s ease-out;
+  }
+  .title .button.is-broken::before,
+  .title .button.is-broken::after {
+    content: '';
+    position: absolute;
+    width: 2px;
+    background: #f4ebdd;
+    pointer-events: none;
+  }
+  .title .button.is-broken::before {
+    left: 62%;
+    top: 0;
+    height: 55%;
+    rotate: 24deg;
+    transform-origin: top;
+  }
+  .title .button.is-broken::after {
+    left: 56%;
+    top: 48%;
+    height: 52%;
+    rotate: -18deg;
+    transform-origin: top;
+  }
+  @keyframes cv-tremble {
+    25% {
+      translate: -2px 1px;
+    }
+    75% {
+      translate: 2px -1px;
+    }
+  }
+  @keyframes cv-jolt {
+    from {
+      rotate: 4deg;
+      translate: 0 -6px;
+      scale: 1.08;
+    }
+    40% {
+      rotate: -9deg;
+      translate: 0 10px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .title .button.is-bracing,
+    .title .button.is-broken {
+      animation: none;
+    }
+  }
   .title .title__note,
   .title .credits-link {
     color: #ede3d2;
@@ -405,6 +463,21 @@ const sounds = [
 
 <!-- Story mode's React UI renders outside this component's scope, so its styles are global and prefixed. -->
 <style is:global>
+  /* Fragments knocked off Download CV by the storm. */
+  .cv-shard {
+    position: fixed;
+    z-index: 5;
+    background: #f4ebdd;
+    pointer-events: none;
+    animation: cv-shard 0.9s cubic-bezier(0.2, 0.7, 0.4, 1) forwards;
+  }
+  @keyframes cv-shard {
+    to {
+      translate: var(--dx) var(--dy);
+      rotate: var(--r);
+      opacity: 0;
+    }
+  }
   .story-objects {
     margin: 0;
     padding: 0;
