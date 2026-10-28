@@ -206,6 +206,15 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
     <h2 id="contact-title">{t(lang, 'contact.title')}</h2>
     <div class="phone">
       <div class="phone__screen">
+        <div class="phone__status" aria-hidden="true">
+          <span data-phone-clock></span>
+          <span class="phone__icons">
+            <Butterfly size={12} />
+            <svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" /><rect x="5" y="5.5" width="3" height="6.5" rx="1" /><rect x="10" y="3" width="3" height="9" rx="1" /><rect x="15" y="0" width="3" height="12" rx="1" /></svg>
+            <svg viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1 4.5a10 10 0 0 1 14 0M3.6 7.2a6.2 6.2 0 0 1 8.8 0" /><circle cx="8" cy="10" r="1.2" fill="currentColor" stroke="none" /></svg>
+            <svg viewBox="0 0 26 12"><rect x="0.75" y="0.75" width="21.5" height="10.5" rx="3" fill="none" stroke="currentColor" stroke-width="1.5" /><rect x="3" y="3" width="13" height="6" rx="1.5" /><rect x="23.5" y="4" width="2" height="4" rx="1" /></svg>
+          </span>
+        </div>
         <div class="phone__bar">
           <Butterfly size={22} />
           <span>{profile.name}</span>
@@ -230,7 +239,7 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
                 </div>
                 <label>
                   <span>{t(lang, 'contact.message')}</span>
-                  <textarea name="message" rows="6" required minlength="10" maxlength="4000" />
+                  <textarea name="message" rows="2" required minlength="10" maxlength="4000" />
                   <small data-error-for="message" />
                 </label>
                 <label class="visually-hidden" aria-hidden="true">
@@ -271,6 +280,14 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
 </BaseLayout>
 
 <script>
+  // The contact phone's clock shows the visitor's own time, set after load so the server's never shows.
+  const clock = document.querySelector<HTMLElement>('[data-phone-clock]');
+  const tick = () => {
+    if (clock) clock.textContent = new Date().toLocaleTimeString(document.documentElement.lang, { hour: '2-digit', minute: '2-digit' });
+  };
+  tick();
+  setInterval(tick, 30_000);
+
   const form = document.querySelector<HTMLFormElement>('[data-contact]');
   if (form) {
     // Validation loads the first time someone starts typing, and the human
@@ -818,12 +835,37 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
     box-shadow: 70px 0 0 #3a3542;
   }
   .phone__screen {
+    position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto auto 1fr;
+    padding-bottom: 18px;
     overflow: hidden;
     border-radius: 26px;
     background: var(--paper-raised);
+  }
+  /* The phone's status bar: the visitor's time, then signal, Wi-Fi and battery. */
+  .phone__status {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 22px 4px;
+    background: color-mix(in srgb, var(--violet) 80%, black);
+    color: #f4ebdd;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .phone__icons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .phone__icons svg {
+    height: 11px;
+    width: auto;
+    fill: currentColor;
   }
   .phone__bar {
     grid-column: 1 / -1;
@@ -835,6 +877,25 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
     color: #f4ebdd;
     font-family: var(--font-display);
     font-size: 1.3rem;
+  }
+  /* A faint glare across the glass, and the home indicator at the bottom. */
+  .phone__screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(125deg, rgb(255 255 255 / 0.07), transparent 38%);
+    pointer-events: none;
+  }
+  .phone__screen::after {
+    content: '';
+    position: absolute;
+    bottom: 7px;
+    left: 50%;
+    width: min(30%, 140px);
+    height: 4px;
+    translate: -50% 0;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--ink) 45%, transparent);
   }
   .phone__chat {
     display: flex;
