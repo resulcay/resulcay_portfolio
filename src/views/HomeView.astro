@@ -701,25 +701,70 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
       grid-template-columns: minmax(0, 1fr);
     }
   }
+  /* Kind words as notes pinned to the page: muted sticky-note colours, a
+     slight tilt, a handwritten quote mark and the name signed below. */
   .quotes {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 24px;
+    gap: 32px 28px;
+    padding-top: 12px;
   }
   figure {
+    position: relative;
     margin: 0;
-    padding: 24px;
-    border-radius: var(--radius);
-    background: var(--paper-raised);
+    padding: 28px 24px 22px;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--golden) 20%, var(--paper-raised));
     display: flex;
     flex-direction: column;
     gap: 12px;
+    rotate: -1.2deg;
+    box-shadow:
+      0 1px 1px rgb(0 0 0 / 0.08),
+      0 10px 18px -10px rgb(0 0 0 / 0.3);
+  }
+  figure:nth-child(3n + 2) {
+    background: color-mix(in srgb, var(--teal) 16%, var(--paper-raised));
+    rotate: 1deg;
+  }
+  figure:nth-child(3n + 3) {
+    background: color-mix(in srgb, var(--violet) 14%, var(--paper-raised));
+    rotate: -0.6deg;
+  }
+  /* A pushpin at the top of each note. */
+  figure::after {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    translate: -50% 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ff9a8a, #d9534f 55%, #8c2a26);
+    box-shadow: 0 3px 3px rgb(0 0 0 / 0.3);
   }
   blockquote {
+    position: relative;
     margin: 0;
   }
+  blockquote::before {
+    content: '“';
+    display: block;
+    height: 0.6em;
+    margin-bottom: 4px;
+    font-family: var(--font-display);
+    font-size: 5rem;
+    line-height: 1;
+    color: var(--accent-text);
+  }
   figcaption {
-    font-size: 1.5rem;
+    align-self: flex-end;
+    font-size: 1.6rem;
+    color: var(--ink);
+  }
+  figcaption::before {
+    content: '— ';
   }
   .contact p {
     max-width: var(--measure);
