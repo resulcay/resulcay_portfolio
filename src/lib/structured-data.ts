@@ -18,7 +18,7 @@ export function personLd(profile: Profile, lang: Locale) {
       email: `mailto:${profile.email}`,
       telephone: profile.phone,
       url: SITE,
-      address: { '@type': 'PostalAddress', addressLocality: 'Istanbul', addressCountry: 'TR' },
+      address: { '@type': 'PostalAddress', addressLocality: 'Antalya', addressCountry: 'TR' },
       knowsAbout: profile.skills.flatMap((s) => s.items),
       // Attended, not graduated: alumniOf is the closest schema.org term, and the
       // description says plainly that the degree was not completed.

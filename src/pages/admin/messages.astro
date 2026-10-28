@@ -4,7 +4,7 @@ import { content } from '@/lib/content';
 
 const messages = await content.listMessages();
 const when = (iso: string) =>
-  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Istanbul' }).format(new Date(iso));
+  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Antalya' }).format(new Date(iso));
 ---
 <AdminLayout title="Messages">
   {messages.length === 0 && <p>No messages yet. They arrive here from the contact form.</p>}

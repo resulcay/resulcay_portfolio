@@ -6,10 +6,10 @@ import type { Experience, MusicTrack, Profile, Project, Testimonial } from '@/do
 export const profile: Profile = {
   name: 'Resul Çay',
   title: { en: 'Software Developer', tr: 'Yazılım Geliştirici' },
-  location: { en: 'Istanbul, Türkiye', tr: 'İstanbul, Türkiye' },
+  location: { en: 'Antalya, Türkiye', tr: 'Antalya, Türkiye' },
   summary: {
-    en: "I'm a software developer in Istanbul with more than two years of experience. I build mobile apps with Flutter, backends with .NET and ASP.NET Core, and real-time features with SignalR and Google Cloud. I work test-first where it matters, keep to clean architecture and SOLID principles, and do my best work in teams that talk to each other.",
-    tr: "İstanbul'da yaşayan, iki yılı aşkın deneyime sahip bir yazılım geliştiricisiyim. Flutter ile mobil uygulamalar, .NET ve ASP.NET Core ile backend'ler, SignalR ve Google Cloud ile gerçek zamanlı özellikler geliştiriyorum. Gereken yerde test güdümlü çalışır, temiz mimariye ve SOLID ilkelerine bağlı kalırım; en iyi işimi birbiriyle konuşan ekiplerde çıkarırım.",
+    en: "I'm a software developer in Antalya with more than two years of experience. I build mobile apps with Flutter, backends with .NET and ASP.NET Core, and real-time features with SignalR and Google Cloud. I work test-first where it matters, keep to clean architecture and SOLID principles, and do my best work in teams that talk to each other.",
+    tr: "Antalya'da yaşayan, iki yılı aşkın deneyime sahip bir yazılım geliştiricisiyim. Flutter ile mobil uygulamalar, .NET ve ASP.NET Core ile backend'ler, SignalR ve Google Cloud ile gerçek zamanlı özellikler geliştiriyorum. Gereken yerde test güdümlü çalışır, temiz mimariye ve SOLID ilkelerine bağlı kalırım; en iyi işimi birbiriyle konuşan ekiplerde çıkarırım.",
   },
   email: 'resulcayop@gmail.com',
   phone: '+905422207170',
@@ -76,7 +76,7 @@ export const experience: Experience[] = [
     title: { en: 'Full Stack Software Developer', tr: 'Full Stack Yazılım Geliştirici' },
     start: '2024-06',
     end: '2025-04',
-    location: 'Istanbul, Türkiye',
+    location: 'Antalya, Türkiye',
     points: [
       {
         en: 'Shipped major updates to MacYap, an app with more than 22k users.',
@@ -128,7 +128,7 @@ export const experience: Experience[] = [
     title: { en: 'Flutter Intern', tr: 'Flutter Stajyeri' },
     start: '2022-06',
     end: '2022-08',
-    location: 'Istanbul, Türkiye',
+    location: 'Antalya, Türkiye',
     points: [],
   },
 ];
