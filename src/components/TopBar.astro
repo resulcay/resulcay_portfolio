@@ -11,26 +11,81 @@ interface Props {
 const { lang, path, cvPath } = Astro.props;
 const other: Locale = lang === 'en' ? 'tr' : 'en';
 const home = localizePath('/', lang);
+const here = Astro.url.pathname.replace(/\/$/, '') || '/';
+const pages = [
+  { href: localizePath('/projects', lang), label: t(lang, 'nav.projects') },
+  { href: localizePath('/about', lang), label: t(lang, 'nav.about') },
+  { href: `${home}#contact`, label: t(lang, 'nav.contact') },
+  { href: localizePath('/story', lang), label: t(lang, 'nav.story') },
+];
 ---
 <a class="skip" href="#main">{t(lang, 'nav.skip')}</a>
-<header class="topbar">
+<header class="topbar" data-topbar>
   <nav class="wrap topbar__inner" aria-label={lang === 'en' ? 'Main' : 'Ana menü'}>
     <a class="brand" href={home}>
       <LogoMark />
       <span>Resul Çay</span>
     </a>
-    <ul class="links">
-      <li><a href={localizePath('/projects', lang)}>{t(lang, 'nav.projects')}</a></li>
-      <li><a href={localizePath('/about', lang)}>{t(lang, 'nav.about')}</a></li>
-      <li><a href={`${home}#contact`}>{t(lang, 'nav.contact')}</a></li>
-      <li><a href={localizePath('/story', lang)}>{t(lang, 'nav.story')}</a></li>
-      <li><a class="cv" href={cvPath} download>{t(lang, 'nav.cv')}</a></li>
-      <li>
-        <a class="lang" href={localizePath(path, other)} hreflang={other} lang={other}>{t(lang, 'nav.switchLang')}</a>
-      </li>
-    </ul>
+    <button class="toggle" type="button" aria-expanded="false" aria-controls="topbar-links" hidden data-menu-toggle>
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+        <path class="toggle__line toggle__line--top" d="M4 7h16"></path>
+        <path class="toggle__line toggle__line--mid" d="M4 12h16"></path>
+        <path class="toggle__line toggle__line--bottom" d="M4 17h16"></path>
+      </svg>
+      <span>{t(lang, 'nav.menu')}</span>
+    </button>
+    <div class="drawer">
+      <ul class="links" id="topbar-links">
+        {
+          pages.map((page) => (
+            <li>
+              <a href={page.href} aria-current={page.href === here ? 'page' : undefined}>
+                {page.label}
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <a class="cv" href={cvPath} download>
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            {t(lang, 'nav.cv')}
+          </a>
+        </li>
+        <li>
+          <a class="lang" href={localizePath(path, other)} hreflang={other} lang={other}>{t(lang, 'nav.switchLang')}</a>
+        </li>
+      </ul>
+    </div>
   </nav>
 </header>
+
+<script>
+  // On narrow screens the links fold into a drawer behind the Menu button. Without
+  // this script the button stays hidden and the links simply wrap, as before.
+  const bar = document.querySelector<HTMLElement>('[data-topbar]');
+  const toggle = bar?.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  if (bar && toggle) {
+    const set = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      bar.dataset['menu'] = open ? 'open' : 'closed';
+    };
+    set(false);
+    toggle.hidden = false;
+    toggle.addEventListener('click', () => set(toggle.getAttribute('aria-expanded') !== 'true'));
+    bar.addEventListener('click', (event) => {
+      if (event.target instanceof Element && event.target.closest('.links a')) set(false);
+    });
+    addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && bar.dataset['menu'] === 'open') {
+        set(false);
+        toggle.focus();
+      }
+    });
+    matchMedia('(min-width: 761px)').addEventListener('change', () => set(false));
+  }
+</script>
 
 <style>
   .skip {
@@ -47,8 +102,9 @@ const home = localizePath('/', lang);
   .skip:focus {
     top: 12px;
   }
+  /* A page of the journal: a dashed rule under the bar, and washi tape behind the links. */
   .topbar {
-    border-bottom: 1px solid var(--rule);
+    border-bottom: 1.5px dashed var(--rule);
   }
   .topbar__inner {
     display: flex;
@@ -69,10 +125,21 @@ const home = localizePath('/', lang);
     text-decoration: none;
     min-height: 44px;
   }
+  .brand :global(svg) {
+    rotate: -4deg;
+    transition: rotate 0.3s;
+  }
+  .brand:hover :global(svg) {
+    rotate: 3deg;
+  }
+  .drawer {
+    display: contents;
+  }
   .links {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px 20px;
+    align-items: center;
+    gap: 4px 22px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -80,14 +147,36 @@ const home = localizePath('/', lang);
     font-size: 0.9375rem;
   }
   .links a {
+    position: relative;
+    isolation: isolate;
     display: inline-flex;
     align-items: center;
+    gap: 6px;
     min-height: 44px;
     color: var(--ink);
     text-decoration: none;
   }
-  .links a:hover {
-    text-decoration: underline;
+  /* A strip of striped golden tape, laid behind the link on hover and on the current page. */
+  .links a:not(.lang)::before {
+    content: '';
+    position: absolute;
+    inset: 50% -7px auto;
+    z-index: -1;
+    height: 1.15em;
+    translate: 0 -45%;
+    rotate: -1.5deg;
+    border-radius: 2px;
+    background:
+      repeating-linear-gradient(135deg, rgb(255 255 255 / 0.25) 0 4px, transparent 4px 9px),
+      color-mix(in srgb, var(--golden) 50%, transparent);
+    scale: 0 1;
+    transform-origin: left;
+    transition: scale 0.25s ease-out;
+  }
+  .links a:not(.lang):hover::before,
+  .links a:not(.lang):focus-visible::before,
+  .links a[aria-current='page']::before {
+    scale: 1 1;
   }
   .lang {
     padding-inline: 12px;
@@ -95,5 +184,91 @@ const home = localizePath('/', lang);
     border-radius: 999px;
     min-height: 36px !important;
     margin-block: 4px;
+  }
+  .lang:hover {
+    background: color-mix(in srgb, var(--ink) 8%, transparent);
+  }
+  .toggle {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 14px 0 10px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-weight: 700;
+    font-size: 0.9375rem;
+  }
+  .toggle__line {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    transform-origin: 12px 12px;
+    transition:
+      translate 0.25s,
+      rotate 0.25s,
+      opacity 0.2s;
+  }
+  [aria-expanded='true'] .toggle__line--top {
+    translate: 0 5px;
+    rotate: 45deg;
+  }
+  [aria-expanded='true'] .toggle__line--mid {
+    opacity: 0;
+  }
+  [aria-expanded='true'] .toggle__line--bottom {
+    translate: 0 -5px;
+    rotate: -45deg;
+  }
+
+  /* Narrow screens: the links fold into a drawer that slides open under the bar. */
+  @media (max-width: 760px) {
+    .topbar[data-menu] .toggle:not([hidden]) {
+      display: inline-flex;
+    }
+    .topbar[data-menu] .drawer {
+      display: grid;
+      flex-basis: 100%;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.3s ease;
+    }
+    .topbar[data-menu='open'] .drawer {
+      grid-template-rows: 1fr;
+    }
+    .topbar[data-menu] .links {
+      flex-direction: column;
+      align-items: stretch;
+      flex-wrap: nowrap;
+      gap: 0;
+      min-height: 0;
+      overflow: hidden;
+      font-size: 1.05rem;
+    }
+    .topbar[data-menu='closed'] .links {
+      visibility: hidden;
+      transition: visibility 0s 0.3s;
+    }
+    .topbar[data-menu] .links li {
+      border-top: 1.5px dashed var(--rule);
+    }
+    .topbar[data-menu] .links a {
+      width: fit-content;
+      min-height: 52px;
+    }
+    .topbar[data-menu] .links li:last-child {
+      padding-block: 10px 6px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .links a::before,
+    .toggle__line,
+    .drawer,
+    .brand :global(svg) {
+      transition: none !important;
+    }
   }
 </style>
