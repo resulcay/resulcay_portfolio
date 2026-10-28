@@ -1,0 +1,24 @@
+// The blue butterfly, drawn after the room's butterfly.glb: wings deep blue at
+// the body, bright in the middle, with thick near-black edges and pale veins.
+// Inner SVG markup centred on the body, for a -22 -18 44 36 viewBox. The bright
+// blue is var(--butterfly), so it follows the theme where the page sets it.
+
+const EDGE = '#16141c';
+const DEEP = '#1a55a3';
+
+const WING = `
+<path fill="${EDGE}" d="M0.6 -0.6C3 -7 9 -15.5 19.5 -17C21.6 -12.5 20.6 -6.2 17.4 -2.4C12.8 0.8 6.4 1.2 0.6 0.6Z"/>
+<path fill="${DEEP}" d="M1.6 -0.9C4.2 -7 9.6 -14.3 18.3 -15.4C19.6 -11.8 18.8 -6.6 16.2 -3.4C12 -0.6 6.6 -0.2 1.6 -0.2Z"/>
+<path fill="var(--butterfly, #4fa3d9)" d="M4.2 -2.6C6.6 -7.4 10.4 -12.2 16.6 -13.4C17.4 -10.4 16.6 -6.8 14.4 -4.4C11.2 -2.4 7.4 -2 4.2 -2.6Z"/>
+<path fill="#a9dcf7" opacity="0.5" d="M7.4 -4.6C9.4 -7.8 12 -10.2 15.2 -11.2C15.2 -8.8 14 -6.6 12.2 -5.2C10.6 -4.4 9 -4.2 7.4 -4.6Z"/>
+<path fill="${EDGE}" d="M0.6 0.6C6.4 0.8 13.6 2 15 7.2C16 11.4 12.2 15 7.8 14.2C3.8 13.4 1.6 7.8 0.6 0.6Z"/>
+<path fill="${DEEP}" d="M1.6 1.4C6.4 1.8 12.6 2.8 13.6 7C14.4 10.4 11.4 13 8 12.4C4.8 11.8 2.6 7.4 1.6 1.4Z"/>
+<path fill="var(--butterfly, #4fa3d9)" d="M4 3C7.4 3.4 11.4 4.4 12 7.4C12.4 9.6 10.4 11.2 8.2 10.8C5.8 10.2 4.6 6.8 4 3Z"/>
+<path fill="none" stroke="#d8f0fb" stroke-width="0.35" stroke-linecap="round" opacity="0.5" d="M2 -1L15 -12.6M2.4 -0.6L16.2 -7.4M2.6 -0.2L13.8 -3.8M2 1.4L12.4 6.6M2 1.8L8.6 11.2"/>`;
+
+const BODY = `
+<path fill="none" stroke="${EDGE}" stroke-width="0.6" stroke-linecap="round" d="M-0.6 -5.6C-1.6 -9.4 -3.4 -12 -5.6 -13.6M0.6 -5.6C1.6 -9.4 3.4 -12 5.6 -13.6"/>
+<ellipse fill="${EDGE}" cx="0" cy="1.4" rx="1.3" ry="6.4"/>
+<circle fill="${EDGE}" cx="0" cy="-5.2" r="1.5"/>`;
+
+export const BUTTERFLY_ART = `<g transform="rotate(-12) scale(0.88)"><g>${WING}</g><g transform="scale(-1 1)">${WING}</g>${BODY}</g>`;

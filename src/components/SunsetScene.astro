@@ -1,4 +1,6 @@
 ---
+import { BUTTERFLY_ART } from './butterfly-art';
+
 interface Props {
   class?: string;
 }
@@ -19,10 +21,5 @@ const { class: className } = Astro.props;
   <path d="M226 424 284 380 342 424Z" fill="#1e1b24"></path>
   <rect x="262" y="440" width="22" height="22" fill="#e8a657"></rect>
   <rect x="296" y="440" width="22" height="22" fill="#e8a657" opacity="0.6"></rect>
-  <g transform="translate(1180 250) rotate(-12) scale(1.4)" fill="#4fa3d9">
-    <path d="M0 0C-8-15-23-14-20-3-18 4-8 5 0 0Z"></path>
-    <path d="M0 0C8-15 23-14 20-3 18 4 8 5 0 0Z"></path>
-    <path d="M0 0C-5 9-15 13-13 5-12 1-5 0 0 0Z"></path>
-    <path d="M0 0C5 9 15 13 13 5 12 1 5 0 0 0Z"></path>
-  </g>
+  <g transform="translate(1180 250) scale(1.4)" set:html={BUTTERFLY_ART}></g>
 </svg>
