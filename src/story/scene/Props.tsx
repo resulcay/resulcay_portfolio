@@ -2,7 +2,8 @@ import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { BoxGeometry, CanvasTexture, CircleGeometry, CylinderGeometry, SphereGeometry, SpriteMaterial, TorusGeometry, type Sprite } from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
-import { around, Hotspot, Merged, useDisposable, useKit, type Part, type Vec3 } from './kit';
+import { around, Hotspot, Merged, mergeParts, useDisposable, useKit, type Part, type Vec3 } from './kit';
+import { hull, inkOutline } from './character/resul';
 import { wrapText } from './atlas';
 import { DESK_TOP, LAPTOP_Z, MATTRESS_TOP, NIGHTSTAND_TOP, SEAT, SEAT_TURN } from './Furniture';
 import { Model } from './Model';
@@ -70,62 +71,77 @@ export function Laptop() {
 
 /** On the desk to the right of the laptop, clear of the typing hands. */
 const MUG: Vec3 = [1.1, DESK_TOP, -1.34];
-const MUG_HEIGHT = 0.1;
+const MUG_HEIGHT = 0.11;
+const MUG_RADIUS = 0.045;
 
-/** A coffee mug: cream, with a violet band, a handle and coffee just below the rim; steam rises off it. */
+/**
+ * A cartoon coffee mug: a straight cream cup with a red rim, a cream lip round dark coffee and a
+ * big D handle, inked with the character's outline. Curls of steam rise off it.
+ */
 export function Mug({ still }: { still: boolean }) {
   const { base } = useKit();
+  const geometry = useDisposable(() =>
+    mergeParts([
+      { geo: new CylinderGeometry(MUG_RADIUS, MUG_RADIUS, MUG_HEIGHT, 28), color: '#efe0c4', at: [0, MUG_HEIGHT / 2, 0] },
+      { geo: new TorusGeometry(MUG_RADIUS - 0.002, 0.005, 8, 32), color: '#c4553b', at: [0, MUG_HEIGHT, 0], rot: [Math.PI / 2, 0, 0] },
+      { geo: new CircleGeometry(MUG_RADIUS - 0.009, 28), color: '#3b2418', at: [0, MUG_HEIGHT + 0.0015, 0], rot: [-Math.PI / 2, 0, 0] },
+      { geo: new TorusGeometry(0.032, 0.01, 10, 20, Math.PI), color: '#efe0c4', at: [MUG_RADIUS, MUG_HEIGHT * 0.5, 0], rot: [0, 0, -Math.PI / 2] },
+    ]),
+  );
+  const outline = useDisposable(() => hull(geometry));
+  const ink = useDisposable(inkOutline);
   return (
     <group position={MUG} rotation-y={-0.5}>
-      <Merged
-        material={base}
-        parts={() => [
-          { geo: new CylinderGeometry(0.042, 0.038, MUG_HEIGHT, 24), color: '#f4ebdd', at: [0, MUG_HEIGHT / 2, 0] },
-          { geo: new CylinderGeometry(0.0425, 0.0415, 0.022, 24), color: '#5b4b8a', at: [0, MUG_HEIGHT * 0.62, 0] },
-          { geo: new TorusGeometry(0.026, 0.0075, 8, 18, Math.PI), color: '#f4ebdd', at: [0.042, MUG_HEIGHT / 2, 0], rot: [0, 0, -Math.PI / 2] },
-          { geo: new CircleGeometry(0.037, 24), color: '#3b2418', at: [0, MUG_HEIGHT - 0.008, 0], rot: [-Math.PI / 2, 0, 0] },
-        ]}
-      />
+      <mesh geometry={geometry} material={base} castShadow receiveShadow />
+      <mesh geometry={outline} material={ink} />
       {!still && <Steam />}
     </group>
   );
 }
 
-const PUFFS = 5;
-const RISE_S = 3.2;
+const WISPS = 3;
+const RISE_S = 3.4;
 
-/** A soft round puff, drawn once for every wisp. */
-function puffTexture() {
+/** A thin S-curl of steam, thick and clear at its foot, fading to nothing at its tip. */
+function wispTexture() {
   const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 64;
+  canvas.width = 64;
+  canvas.height = 192;
   const ctx = canvas.getContext('2d')!;
-  const glow = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-  glow.addColorStop(0, 'rgb(255 255 255 / 0.9)');
-  glow.addColorStop(0.45, 'rgb(255 255 255 / 0.35)');
-  glow.addColorStop(1, 'rgb(255 255 255 / 0)');
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, 64, 64);
+  const fade = ctx.createLinearGradient(0, 192, 0, 0);
+  fade.addColorStop(0, 'rgb(255 255 255 / 0)');
+  fade.addColorStop(0.2, 'rgb(255 255 255 / 0.85)');
+  fade.addColorStop(1, 'rgb(255 255 255 / 0)');
+  ctx.strokeStyle = fade;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = 9;
+  ctx.filter = 'blur(1.5px)';
+  ctx.beginPath();
+  ctx.moveTo(32, 186);
+  ctx.bezierCurveTo(6, 150, 58, 118, 32, 86);
+  ctx.bezierCurveTo(10, 58, 50, 30, 30, 6);
+  ctx.stroke();
   return new CanvasTexture(canvas);
 }
 
-/** Soft heat rising off the coffee: wisps that drift up, sway, spread and fade, each on its own beat. */
+/** Curls of steam rising off the coffee: each drifts up, sways and stretches, fading in and out on its own beat. */
 function Steam() {
-  const texture = useDisposable(puffTexture);
+  const texture = useDisposable(wispTexture);
   const materials = useDisposable(() => {
-    const list = Array.from({ length: PUFFS }, () => new SpriteMaterial({ map: texture, transparent: true, depthWrite: false, opacity: 0 }));
+    const list = Array.from({ length: WISPS }, () => new SpriteMaterial({ map: texture, transparent: true, depthWrite: false, opacity: 0 }));
     return Object.assign(list, { dispose: () => list.forEach((m) => m.dispose()) });
   });
   const sprites = useRef<(Sprite | null)[]>([]);
   useFrame(({ clock: { elapsedTime: t } }) => {
     sprites.current.forEach((sprite, i) => {
       if (!sprite) return;
-      const life = ((t / RISE_S + i / PUFFS) % 1 + 1) % 1;
-      const sway = Math.sin(t * 1.3 + i * 2.1) * 0.012 * life;
-      sprite.position.set(sway, MUG_HEIGHT + 0.01 + life * 0.24, Math.cos(t * 0.9 + i) * 0.006 * life);
-      const size = 0.035 + life * 0.09;
-      sprite.scale.set(size, size * 1.25, 1);
-      // Fades in off the coffee, out as it rises.
-      materials[i]!.opacity = Math.sin(Math.PI * life) ** 1.5 * 0.32;
+      const life = ((t / RISE_S + i / WISPS) % 1 + 1) % 1;
+      const side = (i - (WISPS - 1) / 2) * 0.022;
+      sprite.position.set(side + Math.sin(t * 1.1 + i * 2) * 0.008, MUG_HEIGHT + 0.07 + life * 0.08, 0);
+      sprite.scale.set(0.045, 0.11 + life * 0.05, 1);
+      // A gentle sway, mirrored on alternate curls.
+      materials[i]!.rotation = Math.sin(t * 0.9 + i * 1.7) * 0.18 * (i % 2 ? -1 : 1);
+      materials[i]!.opacity = Math.sin(Math.PI * life) ** 1.3 * 0.55;
     });
   });
   return (
