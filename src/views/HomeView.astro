@@ -147,8 +147,10 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
       <h2 id="featured-title">{t(lang, 'home.featured')}</h2>
       <a href={localizePath('/projects', lang)}>{t(lang, 'home.allProjects')}</a>
     </div>
-    <div class="grid">
-      {featured.map((project, i) => <PolaroidCard project={project} lang={lang} index={i} />)}
+    <div class="corkboard">
+      <div class="grid">
+        {featured.map((project, i) => <PolaroidCard project={project} lang={lang} index={i} />)}
+      </div>
     </div>
   </section>
 
@@ -574,6 +576,47 @@ const phoneDisplay = profile.phone.replace(/^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/,
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 40px 32px;
+  }
+  /* The featured projects pinned to a cork board in a wooden frame, held by
+     pushpins and strips of tape in turn. */
+  .corkboard {
+    padding: clamp(28px, 4vw, 48px) clamp(18px, 3vw, 40px);
+    border: 12px solid #6b4a2f;
+    border-radius: 14px;
+    background-color: #b98a5a;
+    background-image:
+      radial-gradient(rgb(90 60 30 / 0.35) 1px, transparent 1.6px),
+      radial-gradient(rgb(255 230 190 / 0.25) 1px, transparent 1.6px);
+    background-size: 9px 9px, 13px 13px;
+    background-position: 0 0, 4px 6px;
+    box-shadow:
+      inset 0 2px 10px rgb(0 0 0 / 0.35),
+      0 14px 30px -14px rgb(0 0 0 / 0.4);
+  }
+  .corkboard :global(.polaroid)::before {
+    content: '';
+    position: absolute;
+    z-index: 2;
+    top: -9px;
+    left: 50%;
+    width: 18px;
+    height: 18px;
+    translate: -50% 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ff9a8a, #d9534f 55%, #8c2a26);
+    box-shadow: 0 3px 3px rgb(0 0 0 / 0.35);
+  }
+  .corkboard :global(.polaroid:nth-child(4n + 3))::before {
+    background: radial-gradient(circle at 35% 35%, #9fe0e3, #2f6f73 55%, #1b4447);
+  }
+  .corkboard :global(.polaroid:nth-child(even))::before {
+    top: -11px;
+    width: 84px;
+    height: 22px;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--golden) 55%, transparent);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+    rotate: -4deg;
   }
   .timeline {
     display: flex;
