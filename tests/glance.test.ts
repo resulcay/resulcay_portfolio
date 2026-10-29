@@ -31,6 +31,11 @@ describe('project facts', () => {
     expect(storeApps([p([], { googlePlay: 'https://play.google.com/x' }), p([], { website: 'https://x.dev' }), p([], { appStore: 'https://apps.apple.com/x' }, 'private')])).toBe(1);
   });
 
+  it('counts each public store listing', () => {
+    expect(storeApps([p([], { appStore: 'https://apps.apple.com/x', googlePlay: 'https://play.google.com/x' })])).toBe(2);
+    expect(storeApps(seedProjects)).toBe(11);
+  });
+
   it('picks the most recent role', () => {
     expect(latestRole([job('2022-06', '2022-08'), job('2024-06', '2025-04')])?.start).toBe('2024-06');
   });

@@ -76,7 +76,7 @@ export const experience: Experience[] = [
     title: { en: 'Full Stack Software Developer', tr: 'Full Stack Yazılım Geliştirici' },
     start: '2024-06',
     end: '2025-04',
-    location: 'Antalya, Türkiye',
+    location: 'İstanbul, Türkiye',
     points: [
       {
         en: 'Shipped major updates to MacYap, an app with more than 22k users.',
@@ -160,7 +160,7 @@ export const projects: Project[] = [
       { en: 'Timeline editor plus 20+ FFmpeg tools', tr: 'Zaman çizelgeli düzenleyici ve 20’den fazla FFmpeg aracı' },
       { en: 'Export queue with progress, compare and share', tr: 'İlerlemesi görünen dışa aktarma kuyruğu, karşılaştırma ve paylaşım' },
     ],
-    links: { googlePlay: 'https://play.google.com/store/apps/details?id=resoftware.clip_forge' },
+    links: { appStore: 'https://apps.apple.com/app/clipforge/id6823347963', googlePlay: 'https://play.google.com/store/apps/details?id=resoftware.clip_forge' },
     featured: true,
     order: 1,
     visibility: 'public',
