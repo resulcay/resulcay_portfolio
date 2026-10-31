@@ -26,6 +26,7 @@ const groups: { key: UiKey; tags: readonly string[] }[] = [
 const stores = STORES.flatMap((store) => (project.links[store] ? [{ store, href: project.links[store]!, badge: BADGES[store] }] : []));
 const buttons = (['website', 'repository'] as const).flatMap((key) => (project.links[key] ? [{ key, href: project.links[key]! }] : []));
 const images = project.images ?? [];
+const [logo, ...galleryImages] = images;
 ---
 <BaseLayout
   lang={lang}
@@ -44,27 +45,45 @@ const images = project.images ?? [];
 >
   <article class="wrap project">
     <a class="back" href={localizePath('/projects', lang)}>← {t(lang, 'project.back')}</a>
-    <header>
-      <h1>{project.title}</h1>
-      <p class="hook">{project.hook[lang]}</p>
-      <TagChips tags={[...project.appTypes, ...project.platforms]} lang={lang} tone="strong" />
+    <header class="project-header">
+      <div class="project-header__copy">
+        <h1>{project.title}</h1>
+        <p class="hook">{project.hook[lang]}</p>
+        <TagChips tags={[...project.appTypes, ...project.platforms]} lang={lang} tone="strong" />
+      </div>
+      {
+        logo && (
+          <figure class="project-logo">
+            <img src={`/media/${logo.key}`} alt={logo.alt[lang]} width={logo.width} height={logo.height} loading="eager" fetchpriority="high" decoding="async" />
+          </figure>
+        )
+      }
     </header>
     {
-      images.length > 0 && (
-        <div class="gallery">
-          {images.map((img, i) => (
-            <figure>
-              <img
-                src={`/media/${img.key}`}
-                alt={img.alt[lang]}
-                width={img.width}
-                height={img.height}
-                loading={i === 0 ? 'eager' : 'lazy'}
-                fetchpriority={i === 0 ? 'high' : undefined}
-                decoding="async"
-              />
-            </figure>
-          ))}
+      galleryImages.length > 0 && (
+        <div class="gallery swiper" data-project-gallery aria-label={t(lang, 'project.gallery')}>
+          <div class="swiper-wrapper">
+            {galleryImages.map((img, i) => (
+              <figure class="gallery__slide swiper-slide" role="group" aria-roledescription="slide" aria-label={`${t(lang, 'project.image')} ${i + 1} / ${galleryImages.length}`}>
+                <img
+                  src={`/media/${img.key}`}
+                  alt={img.alt[lang]}
+                  width={img.width}
+                  height={img.height}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  fetchpriority={i === 0 ? 'high' : undefined}
+                  decoding="async"
+                />
+              </figure>
+            ))}
+          </div>
+          {galleryImages.length > 1 && (
+            <>
+              <button type="button" class="gallery__arrow gallery__arrow--prev swiper-button-prev" aria-label={t(lang, 'project.previousImage')} />
+              <button type="button" class="gallery__arrow gallery__arrow--next swiper-button-next" aria-label={t(lang, 'project.nextImage')} />
+              <div class="gallery__pagination swiper-pagination" />
+            </>
+          )}
         </div>
       )
     }
@@ -145,10 +164,35 @@ const images = project.images ?? [];
     min-height: 44px;
     font-weight: 700;
   }
-  header {
+  .project-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 32px;
+  }
+  .project-header__copy {
     display: flex;
     flex-direction: column;
     gap: 14px;
+    min-width: 0;
+  }
+  .project-logo {
+    flex: 0 0 clamp(120px, 18vw, 220px);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    margin: -20px 0 0;
+    padding: clamp(14px, 2vw, 24px);
+    border: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+    border-radius: 14px;
+    background: var(--paper-raised);
+    box-shadow: 0 10px 24px rgb(30 27 36 / 0.1);
+  }
+  .project-logo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
   h1 {
     font-size: clamp(2.75rem, 7vw, 4.5rem);
@@ -159,25 +203,60 @@ const images = project.images ?? [];
     max-width: var(--measure);
   }
   .gallery {
-    display: flex;
-    gap: 16px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    padding-bottom: 8px;
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    padding: 0 52px 36px;
+    --swiper-navigation-size: 22px;
+    --swiper-theme-color: var(--ink);
+    border-radius: 10px;
+    background: var(--paper-raised);
   }
-  .gallery figure {
-    flex: 0 0 auto;
+  .gallery__slide {
+    display: grid;
+    place-items: center;
     margin: 0;
-    scroll-snap-align: start;
+    min-width: 0;
   }
-  .gallery img {
+  .gallery__slide img {
     display: block;
     width: auto;
-    max-width: min(86vw, 720px);
+    max-width: 100%;
     height: auto;
     max-height: 60vh;
-    border-radius: 6px;
-    background: var(--paper-raised);
+    object-fit: contain;
+    border-radius: 10px;
+    background: var(--paper);
+  }
+  @media (max-width: 640px) {
+    .project-header {
+      gap: 18px;
+    }
+    .project-logo {
+      flex-basis: clamp(88px, 24vw, 140px);
+      margin-top: -8px;
+    }
+    .gallery {
+      padding-inline: 38px;
+    }
+  }
+  .gallery__arrow,
+  .gallery__pagination {
+    color: var(--ink);
+  }
+  .gallery__arrow {
+    width: 42px;
+    height: 42px;
+    border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
+    border-radius: 50%;
+    background: var(--paper);
+    cursor: pointer;
+  }
+  .gallery__arrow:hover {
+    background: color-mix(in srgb, var(--ink) 8%, transparent);
+  }
+  .gallery :global(.swiper-pagination-bullet-active) {
+    background: var(--golden);
   }
   .layout {
     display: flex;
@@ -296,3 +375,30 @@ const images = project.images ?? [];
     }
   }
 </style>
+
+<script>
+  import Swiper from 'swiper';
+  import { A11y, Navigation, Pagination } from 'swiper/modules';
+  import 'swiper/css';
+  import 'swiper/css/navigation';
+  import 'swiper/css/pagination';
+
+  const gallery = document.querySelector<HTMLElement>('[data-project-gallery]');
+  if (gallery) {
+    new Swiper(gallery, {
+      a11y: {
+        containerMessage: gallery.getAttribute('aria-label') ?? null,
+      },
+      modules: [A11y, Navigation, Pagination],
+      navigation: {
+        nextEl: gallery.querySelector('.swiper-button-next'),
+        prevEl: gallery.querySelector('.swiper-button-prev'),
+      },
+      pagination: {
+        clickable: true,
+        el: gallery.querySelector('.swiper-pagination'),
+      },
+      speed: 500,
+    });
+  }
+</script>
