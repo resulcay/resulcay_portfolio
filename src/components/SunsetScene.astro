@@ -80,9 +80,9 @@ const { class: className } = Astro.props;
         <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="3" seed="6" result="noise"></feTurbulence>
         <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
       </filter>
-      <path id="diorama-brush" d="M-260 10L1700 110L-260 230L1700 340L-260 450L1700 560L-260 670L1700 780L-260 900" fill="none" stroke="#fff" stroke-width="250" stroke-linecap="round" stroke-linejoin="round"></path>
       <mask id="diorama-reveal" maskUnits="userSpaceOnUse" x="-200" y="-200" width="1840" height="1300">
-        <use href="#diorama-brush" filter="url(#diorama-ragged)"></use>
+        <!-- Drawn here, not through <use>: WebKit doesn't repaint a <use> copy while its source animates. -->
+        <path id="diorama-brush" d="M-260 10L1700 110L-260 230L1700 340L-260 450L1700 560L-260 670L1700 780L-260 900" fill="none" stroke="#fff" stroke-width="250" stroke-linecap="round" stroke-linejoin="round" filter="url(#diorama-ragged)"></path>
       </mask>
     </defs>
     <!-- The parchment margin, torn along its inner edge. -->
