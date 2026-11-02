@@ -15,6 +15,31 @@ const { class: className } = Astro.props;
 */}
 <div class:list={['diorama', className]} data-diorama aria-hidden="true">
   <svg class="diorama__layer" data-depth="0.3" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <!-- Watercolour: edges bled by noise, and the paper's grain showing through the paint. -->
+      <filter id="diorama-wash" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.011" numOctaves="3" seed="4" result="noise"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="22" xChannelSelector="R" yChannelSelector="G" result="bled"></feDisplacementMap>
+        <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="9" result="grain"></feTurbulence>
+        <feColorMatrix in="grain" type="matrix" values="0.22 0 0 0 0.78  0.22 0 0 0 0.78  0.22 0 0 0 0.78  0 0 0 0 1" result="paper"></feColorMatrix>
+        <feBlend in="bled" in2="paper" mode="multiply" result="painted"></feBlend>
+        <feComposite in="painted" in2="bled" operator="in"></feComposite>
+      </filter>
+      <!-- A hand-drawn wobble for the pencil lines. -->
+      <filter id="diorama-pencil">
+        <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="2" result="noise"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      </filter>
+      <!-- The paper's torn edge. -->
+      <filter id="diorama-torn" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="3" seed="6" result="noise"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      </filter>
+      <mask id="diorama-reveal" maskUnits="userSpaceOnUse" x="-200" y="-200" width="1840" height="1300">
+        <!-- Kept plain (no <use>, no filter) and ahead of every reference: iOS WebKit drew this mask empty otherwise. -->
+        <path id="diorama-brush" d="M-260 10L1700 110L-260 230L1700 340L-260 450L1700 560L-260 670L1700 780L-260 900" fill="none" stroke="#fff" stroke-width="250" stroke-linecap="round" stroke-linejoin="round"></path>
+      </mask>
+    </defs>
     <rect x="-100" y="-100" width="1640" height="1100" fill="#efe3cc"></rect>
     <g class="diorama__sketch">
       <path d="M-20 200H1460M-20 330H1460M-20 440H1460M-20 530H1460" />
@@ -56,35 +81,6 @@ const { class: className } = Astro.props;
     </g>
   </svg>
   <svg class="diorama__frame" viewBox="0 0 1440 900" preserveAspectRatio="none">
-    <defs>
-      <!-- Watercolour: edges bled by noise, and the paper's grain showing through the paint. -->
-      <filter id="diorama-wash" x="-5%" y="-5%" width="110%" height="110%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.011" numOctaves="3" seed="4" result="noise"></feTurbulence>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="22" xChannelSelector="R" yChannelSelector="G" result="bled"></feDisplacementMap>
-        <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="9" result="grain"></feTurbulence>
-        <feColorMatrix in="grain" type="matrix" values="0.22 0 0 0 0.78  0.22 0 0 0 0.78  0.22 0 0 0 0.78  0 0 0 0 1" result="paper"></feColorMatrix>
-        <feBlend in="bled" in2="paper" mode="multiply" result="painted"></feBlend>
-        <feComposite in="painted" in2="bled" operator="in"></feComposite>
-      </filter>
-      <!-- A hand-drawn wobble for the pencil lines, and a ragged edge for the brush and the torn paper. -->
-      <filter id="diorama-pencil">
-        <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="2" result="noise"></feTurbulence>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
-      </filter>
-      <filter id="diorama-ragged" x="-10%" y="-10%" width="120%" height="120%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="6" result="noise"></feTurbulence>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="70" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
-      </filter>
-      <!-- The paper's torn edge: finer and shallower than the brush's. -->
-      <filter id="diorama-torn" x="-5%" y="-5%" width="110%" height="110%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="3" seed="6" result="noise"></feTurbulence>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
-      </filter>
-      <mask id="diorama-reveal" maskUnits="userSpaceOnUse" x="-200" y="-200" width="1840" height="1300">
-        <!-- Drawn here, not through <use>: WebKit doesn't repaint a <use> copy while its source animates. -->
-        <path id="diorama-brush" d="M-260 10L1700 110L-260 230L1700 340L-260 450L1700 560L-260 670L1700 780L-260 900" fill="none" stroke="#fff" stroke-width="250" stroke-linecap="round" stroke-linejoin="round" filter="url(#diorama-ragged)"></path>
-      </mask>
-    </defs>
     <!-- The parchment margin, torn along its inner edge. -->
     <path fill="#efe3cc" fill-rule="evenodd" filter="url(#diorama-torn)" d="M-120-120H1560V1020H-120ZM14 22H1426V878H14Z"></path>
   </svg>

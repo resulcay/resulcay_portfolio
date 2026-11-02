@@ -134,7 +134,7 @@ export async function startHomeShow(): Promise<void> {
     // anime.js writes the style every frame; WebKit doesn't repaint a mask while a Web Animation (Motion) runs inside it.
     if (brush) anime.animate(brush, { strokeDashoffset: [stroke, 0], duration: 3200, delay: 200, ease: 'inOutSine', ...tidy });
     anime.animate('.teaser__text > *', { opacity: [0, 1], translateY: [24, 0], duration: 800, delay: anime.stagger(120, { start: 2300 }), ease: 'outQuart', ...tidy });
-  }, 0.6);
+  }, 0.25);
   // Its three layers shift with the pointer, each by its depth, on springs.
   const card = document.querySelector<HTMLElement>('.teaser__card');
   const layers = $<SVGSVGElement>('.diorama__layer');
